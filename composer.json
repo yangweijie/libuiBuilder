@@ -1,0 +1,35 @@
+{
+  "name": "yangweijie/libui-builder",
+  "description": "Builder 方式开发 kingbes/libui gui 应用",
+  "type": "library",
+  "require": {
+    "ext/ffi": "*",
+    "kingbes/libui": "*"
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Kingbes\\Libui\\View\\": "src/",
+      "Tests\\": "tests/"
+    },
+    "files": [
+      "src/helper.php"
+    ]
+  },
+  "authors": [
+    {
+      "name": "yangweijie",
+      "email": "917647288@qq.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require-dev": {
+    "pestphp/pest": "*",
+    "phpunit/phpunit": "*"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}
