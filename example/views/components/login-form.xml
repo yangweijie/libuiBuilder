@@ -1,0 +1,59 @@
+<!-- app/views/components/login-form.xml -->
+<center>
+    <vbox width="400" border="true" padding="true">
+        <!-- 登录头部 -->
+        <center>
+            <label style="logo">🔐</label>
+            <label style="title">{{$app_name ?? 'LibUI App'}}</label>
+            <label style="subtitle">用户登录</label>
+        </center>
+
+        <separator/>
+
+        <!-- 登录表单 -->
+        <form layout="grid">
+            <field label="用户名">
+                <entry id="loginUsername" bind="login.username" placeholder="请输入用户名" focus="true"/>
+            </field>
+            <field label="密码">
+                <entry type="password" id="loginPassword" bind="login.password" placeholder="请输入密码"/>
+            </field>
+            <field label="">
+                <checkbox id="rememberMe" text="记住我" bind="login.remember"/>
+            </field>
+            <field label="">
+                <vbox>
+                    <button onclick="doLogin" primary="true" stretchy="true">登录</button>
+                    <hbox>
+                        <link onclick="showRegister">注册新账户</link>
+                        <spacer/>
+                        <link onclick="forgotPassword">忘记密码?</link>
+                    </hbox>
+                </vbox>
+            </field>
+        </form>
+
+        <!-- 错误信息 -->
+        @if($login_error ?? false)
+        <vbox background="red" padding="true">
+            <label color="white">❌ {{$login_error}}</label>
+        </vbox>
+        @endif
+
+        <!-- 第三方登录 -->
+        <separator/>
+        <center>
+            <label style="small">其他登录方式</label>
+            <hbox>
+                <button onclick="loginWithGoogle" style="outline">Google</button>
+                <button onclick="loginWithGithub" style="outline">GitHub</button>
+            </hbox>
+        </center>
+
+        <!-- 底部信息 -->
+        <separator/>
+        <center>
+            <label style="small">版本 {{$app_version ?? '1.0.0'}}</label>
+        </center>
+    </vbox>
+</center>

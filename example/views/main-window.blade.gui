@@ -1,0 +1,29 @@
+{{-- app/views/main-window.blade.gui (更新版) --}}
+<window title="{{$app_name}} v{{$version}}" size="1200,800">
+    <vbox>
+        <!-- 主内容 -->
+        <hbox stretchy="true">
+            @include('components.sidebar', [
+                'user' => $user,
+                'app_version' => $version,
+                'online_count' => count($online_users ?? [])
+            ])
+
+            <separator orientation="vertical"/>
+
+            @include('components.content-area', [
+                'content_type' => $current_page ?? 'dashboard',
+                'current_page' => $page_title ?? '仪表板'
+            ])
+        </hbox>
+
+        @include('components.status-bar', [
+            'status' => $app_status ?? '就绪',
+            'memory_usage' => $memory ?? 0,
+            'cpu_usage' => $cpu ?? 0,
+            'online_users' => $online_users ?? [],
+            'show_progress' => $show_progress ?? false,
+            'progress_value' => $progress ?? 0
+        ])
+    </vbox>
+</window>

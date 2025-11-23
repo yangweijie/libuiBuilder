@@ -1,0 +1,29 @@
+<!-- app/views/components/content-area.xml -->
+<vbox stretchy="true" padding="true">
+    <!-- 面包屑导航 -->
+    <hbox>
+        <label onclick="goHome">首页</label>
+        <label> > </label>
+        <label>{{$current_page ?? '仪表板'}}</label>
+        <spacer/>
+        <button onclick="refresh">刷新</button>
+    </hbox>
+
+    <separator/>
+
+    <!-- 主内容区域 -->
+    <vbox id="contentArea" stretchy="true">
+        @if($content_type === 'dashboard')
+        @include('components.dashboard-content')
+        @elseif($content_type === 'users')
+        @include('components.user-content')
+        @elseif($content_type === 'orders')
+        @include('components.order-content')
+        @else
+        <center>
+            <label style="title">欢迎使用{{$app_name}}</label>
+            <label>请从左侧菜单选择功能</label>
+        </center>
+        @endif
+    </vbox>
+</vbox>

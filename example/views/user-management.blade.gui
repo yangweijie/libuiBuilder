@@ -1,0 +1,62 @@
+{{-- app/views/user-management.blade.gui --}}
+<window title="用户管理 - {{app_name}}" size="1200,800">
+    <vbox>
+        <toolbar>
+            <button onclick="addUser">添加用户</button>
+            <button onclick="editUser" enabled="{{selectedUser != null}}">编辑用户</button>
+            <button onclick="deleteUser" enabled="{{selectedUser != null}}">删除用户</button>
+            <separator/>
+            <searchbox placeholder="搜索用户" onchange="searchUsers"/>
+        </toolbar>
+
+        <hbox stretchy="true">
+            <!-- 用户列表 -->
+            <vbox width="400">
+                <label>用户列表 ({{count($users)}})</label>
+                <table
+                    columns="ID,姓名,邮箱,状态"
+                    data="users"
+                    onselect="selectUser"
+                    selected="{{selectedUserId}}"
+                />
+            </vbox>
+
+            <separator orientation="vertical"/>
+
+            <!-- 用户详情 -->
+            <vbox stretchy="true">
+                @if($selectedUser)
+                    <label style="title">用户详情</label>
+                    <form layout="grid">
+                        <field label="姓名">
+                            <entry bind="selectedUser.name" onchange="markDirty"/>
+                        </field>
+                        <field label="邮箱">
+                            <entry bind="selectedUser.email" onchange="markDirty"/>
+                        </field>
+                        <field label="状态">
+                            <combobox
+                                items="激活,禁用,待审核"
+                                bind="selectedUser.status"
+                                onchange="markDirty"
+                            />
+                        </field>
+                        <field label="创建时间">
+                            <label>{{selectedUser.created_at}}</label>
+                        </field>
+                        <field label="">
+                            <actions>
+                                <button onclick="saveUser" enabled="{{isDirty}}">保存</button>
+                                <button onclick="resetUser" enabled="{{isDirty}}">重置</button>
+                            </actions>
+                        </field>
+                    </form>
+                @else
+                    <center>
+                        <label>请选择一个用户</label>
+                    </center>
+                @endif
+            </vbox>
+        </hbox>
+    </vbox>
+</window>

@@ -1,0 +1,60 @@
+<!-- app/views/components/sidebar.xml -->
+<vbox width="200" padding="true" background="gray-100">
+    <!-- 导航菜单 -->
+    <label style="title">导航菜单</label>
+    <separator/>
+
+    <!-- 主菜单项 -->
+    <vbox>
+        <button onclick="showDashboard" style="menu-item">
+            📊 仪表板
+        </button>
+        <button onclick="showUsers" style="menu-item">
+            👥 用户管理
+        </button>
+        <button onclick="showOrders" style="menu-item">
+            📦 订单管理
+        </button>
+        <button onclick="showProducts" style="menu-item">
+            🛍️ 商品管理
+        </button>
+        <button onclick="showReports" style="menu-item">
+            📈 报表分析
+        </button>
+    </vbox>
+
+    <separator/>
+
+    <!-- 系统菜单 -->
+    <label style="subtitle">系统</label>
+    <vbox>
+        <button onclick="showSettings" style="menu-item">
+            ⚙️ 系统设置
+        </button>
+        <button onclick="showLogs" style="menu-item">
+            📋 系统日志
+        </button>
+        <button onclick="showBackup" style="menu-item">
+            💾 数据备份
+        </button>
+    </vbox>
+
+    <separator/>
+
+    <!-- 用户信息 -->
+    @if($user)
+    <vbox border="true" padding="true">
+        <label style="small">当前用户</label>
+        <label style="bold">{{$user['name']}}</label>
+        <label style="small">{{$user['role']}}</label>
+        <button onclick="logout" style="small">退出登录</button>
+    </vbox>
+    @endif
+
+    <!-- 底部信息 -->
+    <spacer/>
+    <vbox>
+        <label style="small">版本: {{$app_version ?? '1.0.0'}}</label>
+        <label style="small">在线: {{$online_count ?? 0}} 人</label>
+    </vbox>
+</vbox>

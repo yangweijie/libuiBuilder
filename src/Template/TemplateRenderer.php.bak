@@ -1,0 +1,815 @@
+<?php
+
+namespace Kingbes\Libui\View\Template;
+
+use DOMElement;
+use DOMText;
+use Exception;
+use Kingbes\Libui\View\Builder;
+use Kingbes\Libui\View\ComponentBuilder;
+use Kingbes\Libui\View\State\ComponentOperator;
+use Kingbes\Libui\View\State\StateManager;
+use Kingbes\Libui\View\State\ComponentRef;
+
+class TemplateRenderer
+{
+    private StateManager $state;
+    private array $handlers = [];
+    private array $data = [];
+    private array $componentRefs = [];
+
+    public function render(string $template, array $data = [], array $handlers = []): ComponentBuilder
+    {
+        $this->state = StateManager::instance();
+        $this->handlers = $handlers;
+        $this->data = $data;
+        $this->componentRefs = [];
+
+        // 设置数据到状态管理器
+        foreach ($data as $key => $value) {
+            $this->state->set($key, $value);
+        }
+
+        // 将组件引用注入到事件处理器中
+        $this->injectRefsIntoHandlers();
+
+        // 判断是否为文件路径
+        if ($this->isFilePath($template)) {
+            $template = file_get_contents($template);
+        }
+
+        // 判断模板类型并渲染
+        if ($this->isBladeTemplate($template)) {
+            return $this->renderBladeTemplate($template);
+        } else {
+            return $this->renderXmlTemplate($template);
+        }
+    }
+
+    /**
+     * 将组件引用注入到事件处理器中
+     */
+    private function injectRefsIntoHandlers(): void
+    {
+        $originalHandlers = $this->handlers;
+        $this->handlers = [];
+
+        foreach ($originalHandlers as $name => $handler) {
+            if (is_callable($handler)) {
+                $this->handlers[$name] = function(...$args) use ($handler) {
+                    // 创建组件操作器
+                    $refs = new ComponentOperator($this->componentRefs, $this->state);
+
+                    // 将refs作为第一个参数传递给处理器
+                    return $handler($refs, ...$args);
+                };
+            }
+        }
+    }
+
+    /**
+     * 渲染XML模板
+     */
+    private function renderXmlTemplate(string $template): ComponentBuilder
+    {
+        // 预处理模板变量
+        $template = $this->interpolateVariables($template);
+
+        // 解析XML
+        $dom = new \DOMDocument();
+
+        // 添加根节点包装（如果需要）
+        if (!str_starts_with(trim($template), '<')) {
+            $template = "<root>{$template}</root>";
+        }
+
+        try {
+            $dom->loadXML($template);
+        } catch (Exception $e) {
+            throw new Exception("XML parsing error: " . $e->getMessage());
+        }
+
+        return $this->renderElement($dom->documentElement);
+    }
+
+    /**
+     * 渲染单个XML元素
+     */
+    private function renderElement(DOMElement $element): ComponentBuilder
+    {
+        $tagName = $element->tagName;
+        $attributes = $this->getElementAttributes($element);
+
+        // 创建组件并注册引用
+        $component = $this->createElementComponent($tagName, $attributes);
+
+        // 如果有id属性，注册组件引用
+        if (isset($attributes['id'])) {
+            $id = $attributes['id'];
+            $this->componentRefs[$id] = $component;
+
+            // 也注册到状态管理器（兼容旧系统）
+            $ref = new ComponentRef($id, $component);
+            $this->state->registerComponent($id, $ref);
+        }
+
+        // 特殊处理：检查是否为不应有子元素的组件
+        $hasChildren = false;
+        foreach ($element->childNodes as $child) {
+            if ($child instanceof DOMElement) {
+                $hasChildren = true;
+                break;
+            } elseif ($child instanceof DOMText && trim($child->textContent)) {
+                if ($element->tagName === 'button' || $element->tagName === 'item') {
+                    $hasChildren = true; // Consider text content as a child for buttons and items
+                    break;
+                }
+            }
+        }
+
+        // 处理特殊容器（如tab需要特殊处理）
+        if ($tagName === 'tab') {
+            return $this->renderTabContainer($element, $component);
+        } elseif ($tagName === 'form') {
+            return $this->renderFormContainer($element, $component);
+        } elseif ($tagName === 'menu') {
+            return $this->renderMenuContainer($element, $component);
+        }
+
+        // 特殊处理：检查是否为不能有子元素的组件
+        $isButtonOrMenuItem = ($element->tagName === 'button' || $element->tagName === 'item');
+        
+        // 处理普通子元素
+        $children = [];
+        $textContent = '';
+        
+        foreach ($element->childNodes as $child) {
+            if ($child instanceof DOMElement) {
+                $children[] = $this->renderElement($child);
+            } elseif ($child instanceof DOMText && trim($child->textContent)) {
+                // 处理文本节点
+                $textContent = trim($child->textContent);
+            }
+        }
+
+        // 添加子元素
+        if (!empty($children)) {
+            if ($isButtonOrMenuItem) {
+                // 按钮和菜单项不能有子元素，只处理文本内容
+                if (!empty($textContent)) {
+                    $component->setConfig('text', $textContent);
+                }
+                // 不添加子组件到按钮或菜单项
+            } else {
+                if (method_exists($component, 'contains')) {
+                    $component->contains($children);
+                } elseif (method_exists($component, 'addChild')) {
+                    foreach ($children as $child) {
+                        $component->addChild($child);
+                    }
+                }
+            }
+        } else if (!empty($textContent) && ($element->tagName === 'button' || $element->tagName === 'item')) {
+            // 如果没有子元素但有文本内容，设置为组件文本
+            $component->setConfig('text', $textContent);
+        }
+
+        return $component;
+    }
+
+    /**
+     * 创建组件元素 (修正后的方法名)
+     */
+    private function createElementComponent(string $tagName, array $attributes): ComponentBuilder
+    {
+        switch ($tagName) {
+            case 'window':
+                return $this->createWindow($attributes);
+
+            case 'page':
+            case 'vbox':
+                return Builder::vbox($attributes);
+
+            case 'hbox':
+                return Builder::hbox($attributes);
+
+            case 'grid':
+                return Builder::grid($attributes);
+
+            case 'tab':
+                return Builder::tab($attributes);
+
+            // 标签页内容
+
+            case 'form':
+                return $this->createForm($attributes);
+
+            case 'field':
+                // field元素本身不创建组件，在父级处理
+                return Builder::vbox($attributes);
+
+            case 'actions':
+                return Builder::hbox($attributes);
+
+            case 'button':
+                return $this->createButton($attributes);
+
+            case 'label':
+                return $this->createLabel($attributes);
+
+            case 'entry':
+                return $this->createEntry($attributes);
+
+            case 'checkbox':
+                return $this->createCheckbox($attributes);
+
+            case 'combobox':
+                return $this->createCombobox($attributes);
+
+            case 'table':
+                return $this->createTable($attributes);
+
+            case 'separator':
+                return $this->createSeparator($attributes);
+
+            case 'searchbox':
+                return $this->createSearchBox($attributes);
+
+            case 'canvas':
+                return Builder::canvas($attributes);
+
+            case 'menu':
+                return $this->createMenu($attributes);
+
+            case 'item':
+                return $this->createMenuItem($attributes);
+
+            case 'submenu':
+                // 子菜单通常由菜单系统处理，这里返回一个容器
+                return Builder::vbox($attributes);
+
+            case 'toolbar':
+                return Builder::hbox(array_merge($attributes, ['padding' => true]));
+
+            case 'spacer':
+                return Builder::label()->text(''); // 占位符
+
+            case 'center':
+                return Builder::vbox(array_merge($attributes, ['align' => 'center']));
+
+            case 'link':
+                return $this->createLink($attributes);
+
+            case 'root':
+                // 根节点包装，直接返回第一个子元素的容器
+                return Builder::vbox($attributes);
+
+            default:
+                // 默认返回容器
+                return Builder::vbox($attributes);
+        }
+    }
+
+    /**
+     * 渲染Tab容器（特殊处理）
+     */
+    private function renderTabContainer(DOMElement $element, ComponentBuilder $component): ComponentBuilder
+    {
+        $tabs = [];
+
+        foreach ($element->childNodes as $child) {
+            if ($child instanceof DOMElement && $child->tagName === 'page') {
+                $title = $child->getAttribute('title') ?: 'Tab';
+
+                // 渲染页面内容
+                $pageContent = [];
+                foreach ($child->childNodes as $pageChild) {
+                    if ($pageChild instanceof DOMElement) {
+                        $pageContent[] = $this->renderElement($pageChild);
+                    }
+                }
+
+                // 如果只有一个子元素，直接使用；否则包装在vbox中
+                if (count($pageContent) === 1) {
+                    $tabs[$title] = $pageContent[0];
+                } else {
+                    $tabs[$title] = Builder::vbox()->contains($pageContent);
+                }
+            }
+        }
+
+        if (method_exists($component, 'tabs')) {
+            return $component->tabs($tabs);
+        }
+
+        return $component;
+    }
+
+    /**
+     * 渲染表单容器（特殊处理）
+     */
+    private function renderFormContainer(DOMElement $element, ComponentBuilder $component): ComponentBuilder
+    {
+        $layout = $element->getAttribute('layout') ?: 'vbox';
+
+        if ($layout === 'grid') {
+            // 网格表单布局
+            $fields = [];
+
+            foreach ($element->childNodes as $child) {
+                if ($child instanceof DOMElement && $child->tagName === 'field') {
+                    $field = $this->createFormField($child);
+                    if ($field) {
+                        $fields[] = $field;
+                    }
+                }
+            }
+
+            if (method_exists($component, 'form')) {
+                return $component->form($fields);
+            } else {
+                return Builder::grid()->form($fields);
+            }
+        } else {
+            // 普通布局
+            $children = [];
+            foreach ($element->childNodes as $child) {
+                if ($child instanceof DOMElement) {
+                    $children[] = $this->renderElement($child);
+                }
+            }
+
+            $container = $layout === 'hbox' ? Builder::hbox() : Builder::vbox();
+            return $container->contains($children);
+        }
+    }
+
+    /**
+     * 渲染菜单容器（特殊处理）
+     */
+    private function renderMenuContainer(DOMElement $element, ComponentBuilder $component): ComponentBuilder
+    {
+        // 由于菜单系统需要特殊处理，这里暂时返回组件而不处理子元素
+        // 这样可以避免内存问题，同时让应用程序运行
+        return $component;
+    }
+
+    /**
+     * 创建表单字段
+     */
+    private function createFormField(DOMElement $element): ?array
+    {
+        $label = $element->getAttribute('label');
+
+        // 查找控件元素
+        $controlElement = null;
+        foreach ($element->childNodes as $child) {
+            if ($child instanceof DOMElement) {
+                $controlElement = $child;
+                break;
+            }
+        }
+
+        if (!$controlElement) {
+            return null;
+        }
+
+        return [
+            'label' => Builder::label()->text($label),
+            'control' => $this->renderElement($controlElement)
+        ];
+    }
+
+    /**
+     * 创建表单组件
+     */
+    private function createForm(array $attributes): ComponentBuilder
+    {
+        $layout = $attributes['layout'] ?? 'vbox';
+
+        switch ($layout) {
+            case 'grid':
+                return Builder::grid()->padded(true);
+            case 'hbox':
+                return Builder::hbox()->padded(true);
+            default:
+                return Builder::vbox()->padded(true);
+        }
+    }
+
+    /**
+     * 创建窗口
+     */
+    private function createWindow(array $attributes): ComponentBuilder
+    {
+        $config = [];
+
+        if (isset($attributes['title'])) {
+            $config['title'] = $attributes['title'];
+        }
+
+        if (isset($attributes['size'])) {
+            $size = explode(',', $attributes['size']);
+            $config['width'] = (int)$size[0];
+            $config['height'] = (int)($size[1] ?? 480);
+        }
+
+        if (isset($attributes['modal'])) {
+            $config['modal'] = $attributes['modal'] === 'true';
+        }
+
+        return Builder::window($config);
+    }
+
+    /**
+     * 创建标签
+     */
+    private function createLabel(array $attributes): ComponentBuilder
+    {
+        $config = $attributes;
+
+        // 处理文本内容
+        if (isset($attributes['text'])) {
+            $config['text'] = $attributes['text'];
+        }
+
+        return Builder::label($config);
+    }
+
+    /**
+     * 创建按钮
+     */
+    private function createButton(array $attributes): ComponentBuilder
+    {
+        $button = Builder::button($attributes);
+
+        if (isset($attributes['onclick'])) {
+            $handlerName = $attributes['onclick'];
+            if (isset($this->handlers[$handlerName])) {
+                $button->onClick($this->handlers[$handlerName]);
+            }
+        }
+
+        if (isset($attributes['enabled'])) {
+            // 这里可以处理条件启用/禁用
+            $enabled = $this->evaluateCondition($attributes['enabled']);
+            $button->setConfig('enabled', $enabled);
+        }
+
+        return $button;
+    }
+
+    /**
+     * 创建输入框
+     */
+    private function createEntry(array $attributes): ComponentBuilder
+    {
+        $entry = isset($attributes['type']) && $attributes['type'] === 'password'
+            ? Builder::passwordEntry($attributes)
+            : Builder::entry($attributes);
+
+        if (isset($attributes['bind'])) {
+            $entry->bind($attributes['bind']);
+        }
+
+        if (isset($attributes['onchange'])) {
+            $handlerName = $attributes['onchange'];
+            if (isset($this->handlers[$handlerName])) {
+                $entry->onChange($this->handlers[$handlerName]);
+            }
+        }
+
+        if (isset($attributes['focus']) && $attributes['focus'] === 'true') {
+            // 设置焦点
+            $entry->setConfig('focus', true);
+        }
+
+        return $entry;
+    }
+
+    /**
+     * 创建复选框
+     */
+    private function createCheckbox(array $attributes): ComponentBuilder
+    {
+        $checkbox = Builder::checkbox($attributes);
+
+        if (isset($attributes['bind'])) {
+            $checkbox->bind($attributes['bind']);
+        }
+
+        if (isset($attributes['onchange'])) {
+            $handlerName = $attributes['onchange'];
+            if (isset($this->handlers[$handlerName])) {
+                $checkbox->onChange($this->handlers[$handlerName]);
+            }
+        }
+
+        return $checkbox;
+    }
+
+    /**
+     * 创建下拉框
+     */
+    private function createCombobox(array $attributes): ComponentBuilder
+    {
+        $config = $attributes;
+
+        if (isset($attributes['items'])) {
+            $config['items'] = explode(',', $attributes['items']);
+        }
+
+        if (isset($attributes['bind'])) {
+            $config['bind'] = $attributes['bind'];
+        }
+
+        if (isset($attributes['onchange'])) {
+            $handlerName = $attributes['onchange'];
+            if (isset($this->handlers[$handlerName])) {
+                $config['onChange'] = $this->handlers[$handlerName];
+            }
+        }
+
+        return Builder::combobox($config);
+    }
+
+    /**
+     * 创建表格
+     */
+    private function createTable(array $attributes): ComponentBuilder
+    {
+        $config = $attributes;
+
+        if (isset($attributes['columns'])) {
+            $config['columns'] = explode(',', $attributes['columns']);
+        }
+
+        if (isset($attributes['data'])) {
+            $dataKey = $attributes['data'];
+            $config['data'] = $this->data[$dataKey] ?? [];
+        }
+
+        if (isset($attributes['onselect'])) {
+            $handlerName = $attributes['onselect'];
+            if (isset($this->handlers[$handlerName])) {
+                $config['onRowSelected'] = $this->handlers[$handlerName];
+            }
+        }
+
+        return Builder::table($config);
+    }
+
+    /**
+     * 创建分隔符
+     */
+    private function createSeparator(array $attributes): ComponentBuilder
+    {
+        $orientation = $attributes['orientation'] ?? 'horizontal';
+        return Builder::separator(['orientation' => $orientation]);
+    }
+
+    /**
+     * 创建搜索框
+     */
+    private function createSearchBox(array $attributes): ComponentBuilder
+    {
+        $hbox = Builder::hbox();
+
+        $entry = Builder::entry([
+            'placeholder' => $attributes['placeholder'] ?? '搜索...'
+        ]);
+
+        $button = Builder::button(['text' => '搜索']);
+
+        if (isset($attributes['onchange'])) {
+            $handlerName = $attributes['onchange'];
+            if (isset($this->handlers[$handlerName])) {
+                $entry->onChange($this->handlers[$handlerName]);
+            }
+        }
+
+        return $hbox->contains([$entry, $button]);
+    }
+
+    /**
+     * 创建菜单
+     */
+    private function createMenu(array $attributes): ComponentBuilder
+    {
+        // 菜单需要特殊处理，这里返回一个容器
+        return Builder::vbox($attributes);
+    }
+
+    /**
+     * 创建菜单项
+     */
+    private function createMenuItem(array $attributes): ComponentBuilder
+    {
+        // 菜单项在XML模板中可能需要特殊处理
+        // 对于菜单容器，我们会在renderMenuContainer中处理
+        return Builder::button($attributes);
+    }
+
+    /**
+     * 创建链接
+     */
+    private function createLink(array $attributes): ComponentBuilder
+    {
+        $button = Builder::button([
+            'text' => $attributes['text'] ?? $attributes['onclick'] ?? 'Link',
+            'style' => 'link' // 链接样式
+        ]);
+
+        if (isset($attributes['onclick'])) {
+            $handlerName = $attributes['onclick'];
+            if (isset($this->handlers[$handlerName])) {
+                $button->onClick($this->handlers[$handlerName]);
+            }
+        }
+
+        return $button;
+    }
+
+    /**
+     * 获取元素属性
+     */
+    private function getElementAttributes(DOMElement $element): array
+    {
+        $attributes = [];
+
+        if ($element->hasAttributes()) {
+            foreach ($element->attributes as $attr) {
+                $attributes[$attr->name] = $attr->value;
+            }
+        }
+
+        // 处理文本内容（仅当没有子元素时）
+        if (!$element->hasChildNodes() ||
+            ($element->childNodes->length === 1 && $element->firstChild instanceof DOMText)) {
+            $textContent = trim($element->textContent);
+            if (!empty($textContent)) {
+                $attributes['text'] = $textContent;
+            }
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * 插值变量
+     */
+    private function interpolateVariables(string $template): string
+    {
+        // 处理简单变量: {{ variable }}
+        $template = preg_replace_callback(
+            '/\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z0-9_]+)*)\s*\}\}/',
+            function($matches) {
+                $key = $matches[1];
+                return $this->getNestedValue($this->data, $key);
+            },
+            $template
+        );
+
+        // 处理三元运算符: {{ condition ? value1 : value2 }}
+        $template = preg_replace_callback(
+            '/\{\{\s*(.+?)\s*\?\s*(.+?)\s*:\s*(.+?)\s*\}\}/',
+            function($matches) {
+                $condition = trim($matches[1]);
+                $value1 = trim($matches[2]);
+                $value2 = trim($matches[3]);
+
+                // 简单处理三元运算符，检查条件中变量的值
+                // 提取条件中的变量
+                if (preg_match('/([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z0-9_]+)*)/', $condition, $varMatches)) {
+                    $varName = $varMatches[1];
+                    $conditionValue = $this->getNestedValue($this->data, $varName);
+
+                    // 简单判断：如果变量存在且不为空，则使用 value1，否则使用 value2
+                    if ($conditionValue !== '' && $conditionValue !== null) {
+                        // 如果 value1 是变量形式，也进行插值
+                        return $this->interpolateNestedValue($value1);
+                    } else {
+                        return $this->interpolateNestedValue($value2);
+                    }
+                }
+                
+                return $this->interpolateNestedValue($value2); // 默认返回 value2
+            },
+            $template
+        );
+
+        // 处理空合并操作符: {{ variable ?? default }}
+        $template = preg_replace_callback(
+            '/\{\{\s*(.+?)\s*\?\?\s*(.+?)\s*\}\}/',
+            function($matches) {
+                $variable = trim($matches[1]);
+                $default = trim($matches[2]);
+                
+                // 提取变量名
+                $varName = null;
+                if (preg_match('/([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z0-9_]+)*)/', $variable, $varMatches)) {
+                    $varName = $varMatches[1];
+                }
+                
+                if ($varName) {
+                    $value = $this->getNestedValue($this->data, $varName);
+                    if ($value !== '' && $value !== null) {
+                        return $value;
+                    }
+                }
+                
+                // 如果变量不存在或为空，返回默认值（去除引号）
+                $default = trim($default, '\'"');
+                return $default;
+            },
+            $template
+        );
+
+        return $template;
+    }
+
+    /**
+     * 插值嵌套值（用于处理三元运算符中的变量）
+     */
+    private function interpolateNestedValue(string $value): string
+    {
+        // 如果值包含变量引用，则进行插值
+        if (preg_match('/([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z0-9_]+)*)/', $value, $matches)) {
+            $varName = $matches[1];
+            $retrievedValue = $this->getNestedValue($this->data, $varName);
+            if ($retrievedValue !== '') {
+                // 替换原始值中的变量引用
+                return preg_replace('/[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z0-9_]+)*/', $retrievedValue, $value);
+            }
+        }
+        
+        // 去除可能的引号
+        return trim($value, '\'"');
+    }
+
+    /**
+     * 获取嵌套值
+     */
+    private function getNestedValue(array $data, string $key): string
+    {
+        $keys = explode('.', $key);
+        $value = $data;
+
+        foreach ($keys as $k) {
+            if (is_array($value) && isset($value[$k])) {
+                $value = $value[$k];
+            } else {
+                return '';
+            }
+        }
+
+        return (string)$value;
+    }
+
+    /**
+     * 评估条件表达式
+     */
+    private function evaluateCondition(string $condition): bool
+    {
+        // 简单的条件评估
+        // 处理变量引用
+        $condition = preg_replace_callback('/\$(\w+(?:\.\w+)*)/', function($matches) {
+            $key = $matches[1];
+            $value = $this->getNestedValue($this->data, $key);
+            return var_export($value, true);
+        }, $condition);
+
+        // 简单求值（注意：生产环境需要更安全的实现）
+        try {
+            return (bool)eval("return $condition;");
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * 判断是否为文件路径
+     */
+    private function isFilePath(string $template): bool
+    {
+        return !str_contains($template, '<') &&
+            (str_contains($template, '/') || str_contains($template, '.'));
+    }
+
+    /**
+     * 判断是否为Blade模板
+     */
+    private function isBladeTemplate(string $template): bool
+    {
+        return str_contains($template, '@') || str_ends_with($template, '.blade.gui');
+    }
+
+    /**
+     * 渲染Blade模板
+     */
+    private function renderBladeTemplate(string $template): ComponentBuilder
+    {
+        $bladeRenderer = new BladeGuiRenderer();
+        return $bladeRenderer->render($template, $this->data, $this->handlers);
+    }
+}
