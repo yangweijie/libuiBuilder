@@ -3,18 +3,18 @@
   "description": "Builder 方式开发 kingbes/libui gui 应用",
   "type": "library",
   "require": {
-    "ext/ffi": "*",
-    "kingbes/libui": "*"
+    "ext-dom": "*",
+    "ext-ffi": "*",
+    "ext-libxml": "*",
+    "kingbes/libui": "*",
+    "monolog/monolog": "^3.0@dev"
   },
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Kingbes\\Libui\\View\\": "src/",
+      "Kingbes\\Libui\\": "src/",
       "Tests\\": "tests/"
-    },
-    "files": [
-      "src/helper.php"
-    ]
+    }
   },
   "authors": [
     {
@@ -30,6 +30,7 @@
   "config": {
     "allow-plugins": {
       "pestphp/pest-plugin": true
-    }
+    },
+    "sort-packages": true
   }
 }
