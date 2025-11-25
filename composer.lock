@@ -4,8 +4,66 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bb0c177181b0a37f63e022be0d317a0d",
+    "content-hash": "206b97f02d7dd900da2471f61eb03ed9",
     "packages": [
+        {
+            "name": "corveda/php-sandbox",
+            "version": "v3.1",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/corveda/php-sandbox/v3.1/corveda-php-sandbox-v3.1.zip",
+                "reference": "0e14807f2172abfd8dd49fae7750a227d7309fe9",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "nikic/php-parser": "^5.0",
+                "php": ">=7.4|>=8.0",
+                "simpletools/functionparser": "^1.0"
+            },
+            "replace": {
+                "fieryprophet/php-sandbox": "*"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5",
+                "symfony/yaml": "~3.0|~4.0|~5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/functions.php"
+                ],
+                "psr-4": {
+                    "PHPSandbox\\": "src/"
+                }
+            },
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Elijah Horton",
+                    "email": "elijah@corveda.com"
+                },
+                {
+                    "name": "Corveda, LLC."
+                }
+            ],
+            "description": "A PHP library that can be used to run PHP code in a sandboxed environment",
+            "homepage": "https://phpsandbox.org/",
+            "keywords": [
+                "blacklist",
+                "parser",
+                "php",
+                "sandbox",
+                "whitelist"
+            ],
+            "support": {
+                "issues": "https://github.com/Corveda/PHPSandbox/issues",
+                "source": "https://github.com/Corveda/PHPSandbox/tree/v3.1"
+            },
+            "time": "2024-02-17T16:26:09+00:00"
+        },
         {
             "name": "kingbes/libui",
             "version": "v0.1.4",
@@ -135,6 +193,58 @@
             "time": "2025-10-27T13:40:53+00:00"
         },
         {
+            "name": "nikic/php-parser",
+            "version": "dev-master",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/nikic/php-parser/dev-master/nikic-php-parser-dev-master.zip",
+                "reference": "c97b23dce761ab3c913ee8ac5879af7a358f88de",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "ext-json": "*",
+                "ext-tokenizer": "*",
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "ircmaxell/php-yacc": "^0.0.7",
+                "phpunit/phpunit": "^9.0"
+            },
+            "bin": [
+                "bin/php-parse"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpParser\\": "lib/PhpParser"
+                }
+            },
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Nikita Popov"
+                }
+            ],
+            "description": "A PHP parser written in PHP",
+            "keywords": [
+                "parser",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/nikic/PHP-Parser/issues",
+                "source": "https://github.com/nikic/PHP-Parser/tree/master"
+            },
+            "time": "2025-10-26T16:58:55+00:00"
+        },
+        {
             "name": "psr/log",
             "version": "dev-master",
             "dist": {
@@ -177,6 +287,55 @@
                 "source": "https://github.com/php-fig/log/tree/3.0.2"
             },
             "time": "2024-09-11T13:17:53+00:00"
+        },
+        {
+            "name": "simpletools/functionparser",
+            "version": "dev-master",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/simpletools/functionparser/dev-master/simpletools-functionparser-dev-master.zip",
+                "reference": "70be7b13ede36befcbc76bc796740650ecaa14b9",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FunctionParser\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jeremy Lindblom",
+                    "role": "Creator"
+                },
+                {
+                    "name": "Ciaran Moore",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Function parser for PHP functions, methods, and closures",
+            "homepage": "https://github.com/getsimpletools/FunctionParser",
+            "keywords": [
+                "closure",
+                "function",
+                "parser",
+                "tokenizer"
+            ],
+            "support": {
+                "source": "https://github.com/getsimpletools/FunctionParser/tree/1.0.1"
+            },
+            "time": "2024-02-16T11:35:03+00:00"
         }
     ],
     "packages-dev": [
@@ -508,58 +667,6 @@
                 "source": "https://github.com/myclabs/DeepCopy/tree/1.13.4"
             },
             "time": "2025-08-01T08:46:24+00:00"
-        },
-        {
-            "name": "nikic/php-parser",
-            "version": "dev-master",
-            "dist": {
-                "type": "zip",
-                "url": "https://mirrors.cloud.tencent.com/repository/composer/nikic/php-parser/dev-master/nikic-php-parser-dev-master.zip",
-                "reference": "c97b23dce761ab3c913ee8ac5879af7a358f88de",
-                "shasum": ""
-            },
-            "require": {
-                "ext-ctype": "*",
-                "ext-json": "*",
-                "ext-tokenizer": "*",
-                "php": ">=7.4"
-            },
-            "require-dev": {
-                "ircmaxell/php-yacc": "^0.0.7",
-                "phpunit/phpunit": "^9.0"
-            },
-            "bin": [
-                "bin/php-parse"
-            ],
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "5.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "PhpParser\\": "lib/PhpParser"
-                }
-            },
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Nikita Popov"
-                }
-            ],
-            "description": "A PHP parser written in PHP",
-            "keywords": [
-                "parser",
-                "php"
-            ],
-            "support": {
-                "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/master"
-            },
-            "time": "2025-10-26T16:58:55+00:00"
         },
         {
             "name": "nunomaduro/collision",
@@ -3164,7 +3271,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "monolog/monolog": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

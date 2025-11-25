@@ -6,6 +6,7 @@
     "ext-dom": "*",
     "ext-ffi": "*",
     "ext-libxml": "*",
+    "corveda/php-sandbox": "^3.1",
     "kingbes/libui": "*",
     "monolog/monolog": "^3.0@dev"
   },

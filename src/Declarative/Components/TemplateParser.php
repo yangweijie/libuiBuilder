@@ -5,8 +5,9 @@ namespace Kingbes\Libui\Declarative\Components;
 use DOMDocument;
 use DOMElement;
 use InvalidArgumentException;
-use Kingbes\Libui\Declarative\ComponentRegistry;
-use Kingbes\Libui\Declarative\StateManager;
+use Kingbes\Libui\Declarative\ComponentRegistry;
+use Kingbes\Libui\Declarative\StateManager;
+use PHPSandbox\PHPSandbox;
 
 class TemplateParser
 {
@@ -101,36 +102,94 @@ class TemplateParser
         return $template;
     }
 
-    private function processDynamicAttributeValues(array $attributes): array
-    {
-        $processed = [];
-        foreach ($attributes as $key => $value) {
-            if (str_starts_with($key, 'data-dynamic-')) {
-                // Process dynamic attribute values like :disabled="!formValid"
-                $attrName = substr($key, 15); // remove 'data-dynamic-' prefix
-                $processed[$attrName] = $this->evaluateExpression($value);
-            } else {
-                $processed[$key] = $value;
-            }
-        }
-
-        return $processed;
+    private function processDynamicAttributeValues(array $attributes): array
+    {
+        $processed = [];
+        foreach ($attributes as $key => $value) {
+            if (str_starts_with($key, 'data-dynamic-')) {
+                // Process dynamic attribute values like :disabled="!formValid"
+                $attrName = substr($key, 13); // remove 'data-dynamic-' prefix (13 characters)
+                $processed[$attrName] = $this->evaluateExpression($value);
+            } else {
+                $processed[$key] = $value;
+            }
+        }
+
+        return $processed;
     }
 
-    private function evaluateExpression(string $expression): string
+    private function evaluateExpression(string $expression)
     {
-        // Simple expression evaluation for state references
-        // Replace getState('key') calls with actual values
+        // 首先处理 getState 调用，替换所有 getState('key') 调用
         $pattern = '/getState\(\'([^\']+)\'(?:,\s*\'([^\']*)\')?\)/';
         $result = preg_replace_callback($pattern, function ($matches) {
             $key = $matches[1];
             $default = $matches[2] ?? '';
             $value = \Kingbes\Libui\Declarative\StateManager::get($key, $default);
             // 确保返回字符串，如果值是数组则转换为字符串
-            return is_array($value) ? json_encode($value) : (string)$value;
+            // 对于在函数调用中的使用，我们需要确保字符串被正确引用
+            if (is_array($value)) {
+                // 如果值是数组，JSON编码后再加引号（因为eval中需要字符串参数）
+                $json = json_encode($value);
+                // 使用单引号包围，避免内部引号转义问题
+                return "'" . str_replace("'", "\\'", $json) . "'";
+            } else {
+                // 如果是字符串值（如JSON字符串），需要确保它在eval上下文中被正确引用
+                return "'" . str_replace("'", "\\'", $value) . "'";  // 使用单引号包围
+            }
         }, $expression);
 
-        return $result;
+        // 然后检查是否还有其他函数调用需要处理
+        if (preg_match('/[a-zA-Z_][a-zA-Z0-9_]*\s*\(/', $result)) {
+            // 如果表达式包含函数调用，我们需要安全地评估它
+            try {
+                // 使用 PHPSandbox 来安全执行表达式
+                $sandbox = new \PHPSandbox\PHPSandbox();
+                
+                // 为沙箱添加必要的函数
+                $sandbox->defineFunc('json_encode', 'json_encode');
+                $sandbox->defineFunc('json_decode', 'json_decode');
+                $sandbox->defineFunc('strlen', 'strlen');
+                $sandbox->defineFunc('count', 'count');
+                $sandbox->defineFunc('array_keys', 'array_keys');
+                $sandbox->defineFunc('implode', 'implode');
+                $sandbox->defineFunc('explode', 'explode');
+                $sandbox->defineFunc('trim', 'trim');
+                $sandbox->defineFunc('substr', 'substr');
+                $sandbox->defineFunc('strtolower', 'strtolower');
+                $sandbox->defineFunc('strtoupper', 'strtoupper');
+                $sandbox->defineFunc('ucfirst', 'ucfirst');
+                $sandbox->defineFunc('lcfirst', 'lcfirst');
+                $sandbox->defineFunc('ucwords', 'ucwords');
+                $sandbox->defineFunc('abs', 'abs');
+                $sandbox->defineFunc('min', 'min');
+                $sandbox->defineFunc('max', 'max');
+                $sandbox->defineFunc('round', 'round');
+                $sandbox->defineFunc('floor', 'floor');
+                $sandbox->defineFunc('ceil', 'ceil');
+                
+                // 添加 getState 函数到沙箱
+                $sandbox->defineFunc('getState', function($key, $default = null) {
+                    return \Kingbes\Libui\Declarative\StateManager::get($key, $default);
+                });
+
+                // 执行表达式并返回结果
+                $evalResult = $sandbox->execute("return ($result);");
+                
+                // 如果结果是数组，返回原数组；否则返回字符串
+                return is_array($evalResult) ? $evalResult : (string)$evalResult;
+            } catch (\Throwable $e) {
+                // 如果评估失败，返回处理过的表达式结果
+                return $result;
+            }
+        } else {
+            // 没有其他函数调用，直接返回处理过的表达式
+            // 如果结果是用引号包围的字符串，去掉外层引号
+            if (preg_match('/^"(.*)"$/', $result) && substr_count($result, '"') - substr_count($result, '\"') == 2) {
+                return stripcslashes(substr($result, 1, -1));
+            }
+            return $result;
+        }
     }
 
     private function evaluateCondition(string $condition): bool
@@ -189,26 +248,27 @@ class TemplateParser
         return preg_replace('/(<\/?)([a-zA-Z0-9_]+:)([a-zA-Z0-9_]+)/', '$1$3', $template);
     }
 
-    private function restoreAttributeNames(array $attributes): array
-    {
-        // Restore original attribute names from normalized ones
-        $restored = [];
-
-        foreach ($attributes as $attrName => $attrValue) {
-            if (str_starts_with($attrName, 'data-event-')) {
-                // data-event-click -> @click
-                $restored['@' . substr($attrName, 11)] = $attrValue;
-            } elseif (str_starts_with($attrName, 'data-binding-')) {
-                // data-binding-model -> v-model
-                $restored['v-' . substr($attrName, 13)] = $attrValue;
-            } elseif (str_starts_with($attrName, 'data-dynamic-')) {
-                // data-dynamic-disabled -> :disabled
-                $restored[':' . substr($attrName, 15)] = $attrValue;
-            } else {
-                $restored[$attrName] = $attrValue;
-            }
-        }
-
-        return $restored;
+    private function restoreAttributeNames(array $attributes): array
+    {
+        // Restore original attribute names from normalized ones
+        $restored = [];
+
+        foreach ($attributes as $attrName => $attrValue) {
+            if (str_starts_with($attrName, 'data-event-')) {
+                // data-event-click -> @click
+                $restored['@' . substr($attrName, 11)] = $attrValue;
+            } elseif (str_starts_with($attrName, 'data-binding-')) {
+                // data-binding-model -> v-model
+                $restored['v-' . substr($attrName, 13)] = $attrValue;
+            } elseif (str_starts_with($attrName, 'data-dynamic-')) {
+                // data-dynamic-options -> options (without colon)
+                $originalAttributeName = substr($attrName, 13); // remove 'data-dynamic-' prefix (13 characters)
+                $restored[$originalAttributeName] = $attrValue;
+            } else {
+                $restored[$attrName] = $attrValue;
+            }
+        }
+
+        return $restored;
     }
 }

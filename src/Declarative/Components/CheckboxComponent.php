@@ -13,44 +13,62 @@ class CheckboxComponent extends Component
         return 'ui:checkbox';
     }
 
-    public function render(): CData
-    {
-        $text = $this->getAttribute('text', '');
-        $checkbox = Checkbox::create($text);
-
-        if ($checked = $this->getAttribute('checked')) {
-            Checkbox::setChecked($checkbox, (bool)$checked);
-        }
-
-        // 处理 v-model 绑定
-        $vModel = $this->getAttribute('v-model');
-        if ($vModel) {
-            // 设置初始值
-            $initialValue = StateManager::get($vModel, false);
-            Checkbox::setChecked($checkbox, (bool)$initialValue);
-            
-            // 创建切换事件处理器，自动更新状态
-            $checkboxRef = $this->getRef();
-            Checkbox::onToggled($checkbox, function($checkbox) use ($vModel, $checkboxRef) {
-                $isChecked = Checkbox::checked($checkbox);
-                var_dump('isChecked', $isChecked);
-                var_dump($vModel);
-                StateManager::set($vModel, $isChecked);
-                
-                // 如果有额外的 on-toggle 事件处理器，也执行它
-                $originalOnToggle = $this->getAttribute('on-toggle');
-                if ($originalOnToggle && is_callable($originalOnToggle)) {
-                    $originalOnToggle($checkbox);
-                }
-            });
-        } else {
-            // 如果没有 v-model，处理普通的 on-toggle 事件
-            if ($onToggle = $this->getAttribute('on-toggle')) {
-                Checkbox::onToggled($checkbox, $onToggle);
-            }
-        }
-
-        return $checkbox;
+    public function render(): CData
+    {
+        $text = $this->getAttribute('text', '');
+        $checkbox = Checkbox::create($text);
+
+        if ($checked = $this->getAttribute('checked')) {
+            Checkbox::setChecked($checkbox, (bool)$checked);
+        }
+
+        // 处理 v-model 绑定
+        $vModel = $this->getAttribute('v-model');
+        if ($vModel) {
+            // 设置初始值
+            $initialValue = StateManager::get($vModel, false);
+            Checkbox::setChecked($checkbox, (bool)$initialValue);
+            
+            // 监听特定键的变化
+            StateManager::watch($vModel, function($newValue) use ($checkbox) {
+                Checkbox::setChecked($checkbox, (bool)$newValue);
+            });
+
+            // 如果是嵌套属性（如 form.agreeTerms），还需要监听父对象的变化
+            if (str_contains($vModel, '.')) {
+                $parts = explode('.', $vModel);
+                $parentKey = implode('.', array_slice($parts, 0, -1)); // 获取父键，如 'form'
+                
+                StateManager::watch($parentKey, function($newValue) use ($checkbox, $vModel, $parts) {
+                    if (is_array($newValue)) {
+                        $lastPart = end($parts); // 获取最后一部分，如 'agreeTerms'
+                        if (isset($newValue[$lastPart])) {
+                            Checkbox::setChecked($checkbox, (bool)$newValue[$lastPart]);
+                        }
+                    }
+                });
+            }
+            
+            // 创建切换事件处理器，自动更新状态
+            $checkboxRef = $this->getRef();
+            Checkbox::onToggled($checkbox, function($checkbox) use ($vModel, $checkboxRef) {
+                $isChecked = Checkbox::checked($checkbox);
+                StateManager::set($vModel, $isChecked);
+                
+                // 如果有额外的 on-toggle 事件处理器，也执行它
+                $originalOnToggle = $this->getAttribute('on-toggle');
+                if ($originalOnToggle && is_callable($originalOnToggle)) {
+                    $originalOnToggle($checkbox);
+                }
+            });
+        } else {
+            // 如果没有 v-model，处理普通的 on-toggle 事件
+            if ($onToggle = $this->getAttribute('on-toggle')) {
+                Checkbox::onToggled($checkbox, $onToggle);
+            }
+        }
+
+        return $checkbox;
     }
 
     public function getValue()

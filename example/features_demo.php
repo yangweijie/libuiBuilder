@@ -22,13 +22,13 @@ ErrorHandler::register();
 ini_set('date.timezone', 'Asia/Shanghai');
 // 特性演示模板
 $featuresDemoTemplate = <<<XML
-<ui:window title="特性演示" width="800" height="600" ref="mainWindow">
+<ui:window title="特性演示" width="800" height="600" ref="mainWindow" margined="true">
     <ui:form padded="true">
         <ui:label text="声明式组件系统演示" />
         
         <!-- 双向数据绑定演示 -->
-        <ui:entry label="用户名" ref="username" v-model="form.username" @change="setState('form.usernameLength', strlen(\$args[0]))" />
-        <ui:label :text="'用户名长度: ' . getState('form.usernameLength', 0)" />
+        <ui:entry label="用户名" ref="username" v-model="form.username" />
+        <ui:label :text="用户名长度: " />
         
         <!-- 条件渲染演示 -->
         <ui:entry label="角色" ref="role" v-model="form.role" />

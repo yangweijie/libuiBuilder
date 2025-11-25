@@ -129,60 +129,52 @@ abstract class Component
     {
         return function(...$args) use ($call) {
             try {
-                // 定义一个函数确保所有必要的函数和变量在 eval 环境中可用
-                $executor = function($call, $args, $thisRef) {
-                    // 直接在 eval 环境中确保函数和变量可用
-                    $code = "
-                        // 检查函数是否已定义，如果没有则定义
-                        if (!function_exists('setState')) {
-                            function setState(\$key, \$value) {
-                                return \\Kingbes\\Libui\\Declarative\\StateManager::set(\$key, \$value);
-                            }
-                        }
-                        if (!function_exists('getState')) {
-                            function getState(\$key, \$default = null) {
-                                return \\Kingbes\\Libui\\Declarative\\StateManager::get(\$key, \$default);
-                            }
-                        }
-                        if (!function_exists('watch')) {
-                            function watch(\$key, \$callback) {
-                                return \\Kingbes\\Libui\\Declarative\\StateManager::watch(\$key, \$callback);
-                            }
-                        }
-                        if (!function_exists('emit')) {
-                            function emit(\$event, ...\$args) {
-                                return \\Kingbes\\Libui\\Declarative\\EventBus::emit(\$event, ...\$args);
-                            }
-                        }
-                        if (!function_exists('getComponent')) {
-                            function getComponent(\$ref) {
-                                return \\Kingbes\\Libui\\Declarative\\StateManager::getComponent(\$ref);
-                            }
-                        }
-
-                        // 定义变量
-                        \$args = " . var_export($args, true) . ";
-                        \$componentThis = \$thisRef;
-
-                        // 根据调用类型执行
-                        \$isStatement = str_starts_with(trim(" . var_export($call, true) . "), 'echo') || 
-                                       str_starts_with(trim(" . var_export($call, true) . "), 'return') || 
-                                       strpos(" . var_export($call, true) . ", ';') !== false;
-
-                        if (\$isStatement) {
-                            // 执行语句
-                            return eval(" . var_export($call, true) . ");
-                        } else {
-                            // 执行表达式
-                            return eval('return ' . var_export($call, true) . ';');
-                        }
-                    ";
-                    
-                    return eval($code);
-                };
-
-                return $executor($call, $args, $this);
-            } catch (Throwable $e) {
+                // 使用 PHPSandbox 来安全执行 PHP 代码
+                $sandbox = new \PHPSandbox\PHPSandbox();
+                
+                // 为沙箱添加必要的函数
+                $sandbox->defineFunc('setState', function($key, $value) {
+                    return \Kingbes\Libui\Declarative\StateManager::set($key, $value);
+                });
+                $sandbox->defineFunc('getState', function($key, $default = null) {
+                    return \Kingbes\Libui\Declarative\StateManager::get($key, $default);
+                });
+                $sandbox->defineFunc('watch', function($key, $callback) {
+                    return \Kingbes\Libui\Declarative\StateManager::watch($key, $callback);
+                });
+                $sandbox->defineFunc('emit', function($event, ...$callbackArgs) {
+                    return \Kingbes\Libui\Declarative\EventBus::emit($event, ...$callbackArgs);
+                });
+                $sandbox->defineFunc('getComponent', function($ref) {
+                    return \Kingbes\Libui\Declarative\StateManager::getComponent($ref);
+                });
+                $sandbox->defineFunc('strlen', 'strlen');
+                $sandbox->defineFunc('count', 'count');
+                $sandbox->defineFunc('array_keys', 'array_keys');
+                $sandbox->defineFunc('implode', 'implode');
+                $sandbox->defineFunc('explode', 'explode');
+                $sandbox->defineFunc('trim', 'trim');
+                $sandbox->defineFunc('substr', 'substr');
+                $sandbox->defineFunc('strtolower', 'strtolower');
+                $sandbox->defineFunc('strtoupper', 'strtoupper');
+                $sandbox->defineFunc('ucfirst', 'ucfirst');
+                $sandbox->defineFunc('lcfirst', 'lcfirst');
+                $sandbox->defineFunc('ucwords', 'ucwords');
+                $sandbox->defineFunc('json_encode', 'json_encode');
+                $sandbox->defineFunc('json_decode', 'json_decode');
+                $sandbox->defineFunc('print_r', 'print_r');
+                $sandbox->defineFunc('var_dump', 'var_dump');
+                
+                // 如果调用中包含 args，需要特殊处理
+                if (strpos($call, 'args') !== false) {
+                    // 对于包含 args 的调用，我们需要将 args 作为变量定义
+                    $sandbox->defineVar('args', $args);
+                }
+                
+                // 执行代码并返回结果
+                $result = $sandbox->execute($call);
+                return $result;
+            } catch (\Throwable $e) {
                 // 记录错误日志，包含组件信息
                 $this->logger->error("PHP call error", [
                     'component' => $this->getTagName(),
