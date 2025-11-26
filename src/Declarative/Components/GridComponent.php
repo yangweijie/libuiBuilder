@@ -42,6 +42,13 @@ class GridComponent extends Component
         return $grid;
     }
 
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'padded',
+        ]);
+    }
+
     public function getValue()
     {
         // TODO: Implement getValue() method.

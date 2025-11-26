@@ -9,6 +9,7 @@ class ErrorHandler
 {
     public static function register(): void
     {
+        ini_set('error_log', __DIR__ . '/../../logs/error.log');
         // 注册异常处理器
         set_exception_handler([self::class, 'handleException']);
         

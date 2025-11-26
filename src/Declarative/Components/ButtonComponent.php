@@ -13,6 +13,14 @@ class ButtonComponent extends Component
     {
         return 'ui:button';
     }
+    
+    // 定义组件支持的属性
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'text', 'disabled'
+        ]);
+    }
 
     public function render(): CData
     {
@@ -33,6 +41,20 @@ class ButtonComponent extends Component
 
         $this->handle = $button;
         return $button;
+    }
+
+    // 重写应用属性方法
+    protected function applyAttribute(string $attributeName, $value): void
+    {
+        if ($attributeName === 'text' && $this->handle) {
+            // 如果是 text 属性，更新按钮文本
+            Button::setText($this->handle, (string)$value);
+        } elseif ($attributeName === 'disabled' && $this->handle) {
+            // 如果是 disabled 属性，更新按钮状态
+            Button::setEnabled($this->handle, !(bool)$value);
+        }
+        // 也可以处理其他属性
+        parent::applyAttribute($attributeName, $value);
     }
 
     public function getValue()

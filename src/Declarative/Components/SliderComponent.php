@@ -14,6 +14,14 @@ class SliderComponent extends Component
     {
         return 'ui:slider';
     }
+    
+    // 定义组件支持的属性
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'min', 'max', 'value', ':min', ':max'
+        ]);
+    }
 
     public function render(): CData
     {

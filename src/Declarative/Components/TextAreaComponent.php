@@ -14,6 +14,14 @@ class TextAreaComponent extends Component
     {
         return 'ui:textarea';
     }
+    
+    // 定义组件支持的属性
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'wrapping', 'placeholder', 'readonly', 'max-length'
+        ]);
+    }
 
     public function render(): CData
     {

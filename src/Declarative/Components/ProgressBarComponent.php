@@ -16,6 +16,14 @@ class ProgressBarComponent extends Component
     {
         return 'ui:progressbar';
     }
+    
+    // 定义组件支持的属性
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'value', ':value', 'auto-increment'
+        ]);
+    }
 
     public function render(): CData
     {

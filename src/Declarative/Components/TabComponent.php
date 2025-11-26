@@ -25,6 +25,13 @@ class TabComponent extends Component{
         return $tab;
     }
 
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'margined'
+        ]);
+    }
+
     public function getValue()
     {
         // TODO: Implement getValue() method.

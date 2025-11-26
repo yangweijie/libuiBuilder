@@ -30,6 +30,13 @@ class GroupComponent extends Component
         return $group;
     }
 
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'margined'
+        ]);
+    }
+
     public function getValue()
     {
         // TODO: Implement getValue() method.

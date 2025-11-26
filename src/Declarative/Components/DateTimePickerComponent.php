@@ -15,6 +15,14 @@ class DateTimePickerComponent extends Component
     {
         return 'ui:datetime';
     }
+    
+    // 定义组件支持的属性
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'type', 'min-date', 'max-date'
+        ]);
+    }
 
     public function render(): CData
     {

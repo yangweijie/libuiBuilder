@@ -11,6 +11,14 @@ class SeparatorComponent extends Component
     {
         return 'ui:separator';
     }
+    
+    // 定义组件支持的属性
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'direction'
+        ]);
+    }
 
     public function render(): CData
     {

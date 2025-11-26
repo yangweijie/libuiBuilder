@@ -13,6 +13,14 @@ class TableComponent extends Component
     {
         return 'ui:table';
     }
+    
+    // 定义组件支持的属性
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'data', 'columns', 'rows'
+        ]);
+    }
 
     public function render(): CData
     {

@@ -36,6 +36,13 @@ class BoxComponent  extends Component
         return $box;
     }
 
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'padded', 'direction'
+        ]);
+    }
+
     public function getValue()
     {
         // TODO: Implement getValue() method.

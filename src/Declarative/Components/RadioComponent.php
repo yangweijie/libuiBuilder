@@ -15,6 +15,14 @@ class RadioComponent extends Component
     {
         return 'ui:radio';
     }
+    
+    // 定义组件支持的属性
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'options'
+        ]);
+    }
 
     public function render(): CData
     {

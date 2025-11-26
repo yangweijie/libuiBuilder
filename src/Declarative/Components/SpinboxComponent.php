@@ -14,6 +14,14 @@ class SpinboxComponent extends Component
     {
         return 'ui:spinbox';
     }
+    
+    // 定义组件支持的属性
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'min', 'max', 'step'
+        ]);
+    }
 
     public function render(): CData
     {

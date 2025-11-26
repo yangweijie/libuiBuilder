@@ -32,6 +32,13 @@ class FormComponent extends Component
         return $form;
     }
 
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'padded',
+        ]);
+    }
+
     public function getValue()
     {
         // TODO: Implement getValue() method.

@@ -12,6 +12,14 @@ class WindowComponent extends Component
     {
         return 'ui:window';
     }
+    
+    // 定义组件支持的属性
+    protected function getSupportedAttributes(): array
+    {
+        return array_merge(parent::getSupportedAttributes(), [
+            'title', 'width', 'height', 'menubar', 'margined'
+        ]);
+    }
 
     public function render(): CData
     {
@@ -41,6 +49,23 @@ class WindowComponent extends Component
 
         $this->handle = $window;
         return $window;
+    }
+
+    // 重写应用属性方法
+    protected function applyAttribute(string $attributeName, $value): void
+    {
+        if ($attributeName === 'title' && $this->handle) {
+            // 如果是 title 属性，更新窗口标题
+            Window::setTitle($this->handle, (string)$value);
+        } elseif ($attributeName === 'width' && $this->handle) {
+            // 如果是 width 属性，窗口大小不能直接修改，可能需要重新创建
+            // 这里可以发出警告或记录日志
+        } elseif ($attributeName === 'height' && $this->handle) {
+            // 如果是 height 属性，窗口大小不能直接修改，可能需要重新创建
+            // 这里可以发出警告或记录日志
+        }
+        // 也可以处理其他属性
+        parent::applyAttribute($attributeName, $value);
     }
 
     public function getValue()

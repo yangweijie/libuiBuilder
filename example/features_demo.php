@@ -36,13 +36,13 @@ $featuresDemoTemplate = <<<XML
         <ui:button text="删除用户" @click="deleteUser()" v-show="getState('form.role', '') === 'admin'" />
         
         <!-- 动态属性演示 -->
-        <ui:entry label="邮箱" v-model="form.email" :disabled="strlen(getState('form.username', false)) > 0" />
+        <ui:entry label="邮箱" v-model="form.email" :v-show="strlen(getState('form.username', false)) > 0" />
         <ui:button text="注册" @click="registerUser()" :disabled="!getState('form.username', false) || !getState('form.email', false)" />
         <ui:label :text="getState('form.loading', false) ? '保存中...' : '准备就绪'" />
         
         <!-- 动态选项演示 -->
         <ui:combobox label="城市" v-model="form.city" :options="json_decode(getState('cities', '[]'), true)" />
-        <ui:label :text="'选中的城市: ' . getState('form.city', '')" />
+        <ui:label :text="getState('form.city', '')" />
         
         <!-- 事件系统演示 -->
         <ui:button text="设置加载状态" @click="setState('form.loading', true); echo '设置为加载状态';" />
