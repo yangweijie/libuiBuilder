@@ -73,6 +73,7 @@
       <path value="$PROJECT_DIR$/vendor/monolog/monolog" />
       <path value="$PROJECT_DIR$/vendor/corveda/php-sandbox" />
       <path value="$PROJECT_DIR$/vendor/simpletools/functionparser" />
+      <path value="$PROJECT_DIR$/vendor/dconco/phpspa" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.5">

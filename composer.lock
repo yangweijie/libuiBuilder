@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "206b97f02d7dd900da2471f61eb03ed9",
+    "content-hash": "90a516f9908e5b74906c952a59f4eef1",
     "packages": [
         {
             "name": "corveda/php-sandbox",
@@ -63,6 +63,82 @@
                 "source": "https://github.com/Corveda/PHPSandbox/tree/v3.1"
             },
             "time": "2024-02-17T16:26:09+00:00"
+        },
+        {
+            "name": "dconco/phpspa",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dconco/phpspa.git",
+                "reference": "a29936b45d49b78ace48106ee164934723ec1dcc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dconco/phpspa/zipball/a29936b45d49b78ace48106ee164934723ec1dcc",
+                "reference": "a29936b45d49b78ace48106ee164934723ec1dcc",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "app/core/Impl/Const/StateConstant.php",
+                    "app/client/Component/component.php",
+                    "app/client/Http/Redirect.php",
+                    "src/global/autoload.php"
+                ],
+                "psr-4": {
+                    "PhpSPA\\": "app/client/",
+                    "PhpSPA\\Core\\": "app/core/",
+                    "PhpSPA\\Exceptions\\": "app/exceptions/",
+                    "PhpSPA\\Interfaces\\": "app/interfaces/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dave Conco",
+                    "email": "concodave@gmail.com",
+                    "homepage": "https://dconco.github.io",
+                    "role": "Author & Maintainer"
+                },
+                {
+                    "name": "Samuel Paschalson",
+                    "email": "samuelpaschalson@gmail.com",
+                    "homepage": "https://samuel-paschalson.netlify.app",
+                    "role": "Contributor"
+                }
+            ],
+            "description": "A component-based library for building modern, reactive user interfaces in pure PHP. Inspired by React. ✨",
+            "keywords": [
+                "SPA",
+                "component-based",
+                "component-library",
+                "jsx",
+                "php",
+                "phpspa"
+            ],
+            "support": {
+                "issues": "https://github.com/dconco/phpspa/issues",
+                "source": "https://github.com/dconco/phpspa/tree/main"
+            },
+            "funding": [
+                {
+                    "url": "https://www.buymeacoffee.com/dconco",
+                    "type": "buy_me_a_coffee"
+                },
+                {
+                    "url": "https://github.com/dconco",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-11-18T01:45:13+00:00"
         },
         {
             "name": "kingbes/libui",
@@ -3272,6 +3348,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "dconco/phpspa": 20,
         "monolog/monolog": 20
     },
     "prefer-stable": false,
@@ -3282,5 +3359,5 @@
         "ext-libxml": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }

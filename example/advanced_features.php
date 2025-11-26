@@ -39,8 +39,8 @@ $advancedFeaturesTemplate = '
         <ui:button text="复杂操作演示" @click="performComplexOperation()" />
         <ui:button text="数据库操作演示" @click="performDatabaseOperation()" />
         
-        <!-- 杢头函数支持演示 -->
-        <ui:button text="箭头函数操作" @click="$this => { setState(\'statusMessage\', \'箭头函数执行中...\'); setState(\'counter\', getState(\'counter\', 0) + 1); echo \'计数: \' . getState(\'counter\', 0) . PHP_EOL; }" />
+        <!-- 箭头函数支持演示 -->
+        <ui:button text="箭头函数操作" @click="handleArrowFunction()" />
         <ui:label :text="\'当前计数: \' . getState(\'counter\', 0)" />
         
         <!-- 杢件通信演示 -->
@@ -122,7 +122,18 @@ function performComplexOperation() {
 // 辅助函数用于模拟方法链
 function modifyState() {
     StateManager::set('operation.stage', 'modify');
-    return (object)['validateData' => function() { return modifyState2(); }];
+    // 修复：返回一个有方法的对象
+    return new class {
+        public function validateData() {
+            StateManager::set('operation.validated', true);
+            return $this;
+        }
+        
+        public function processResult() {
+            StateManager::set('operation.processed', true);
+            return true;
+        }
+    };
 }
 
 function modifyState2() {
@@ -177,6 +188,13 @@ function contactEmergency() {
     $contact = StateManager::get('emergency.contact', '默认联系人');
     echo "紧急联系: {$contact}\n";
     StateManager::set('statusMessage', '已联系紧急联系人');
+}
+
+function handleArrowFunction() {
+    StateManager::set('statusMessage', '箭头函数执行中...');
+    $currentCounter = StateManager::get('counter', 0);
+    StateManager::set('counter', $currentCounter + 1);
+    echo "计数: " . StateManager::get('counter', 0) . PHP_EOL;
 }
 
 // 启用调试模式
