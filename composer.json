@@ -3,7 +3,7 @@
   "description": "Builder 方式开发 kingbes/libui gui 应用",
   "type": "library",
   "require": {
-    "ext/ffi": "*",
+    "ext-ffi": "*",
     "kingbes/libui": "*"
   },
   "license": "MIT",
@@ -13,8 +13,7 @@
       "Tests\\": "tests/"
     },
     "files": [
-      "src/helper.php",
-      "src/Functions.php"
+      "src/helper.php"
     ]
   },
   "authors": [
@@ -26,7 +25,8 @@
   "minimum-stability": "dev",
   "require-dev": {
     "pestphp/pest": "*",
-    "phpunit/phpunit": "*"
+    "phpunit/phpunit": "*",
+    "pestphp/pest-plugin": "4.x-dev"
   },
   "config": {
     "allow-plugins": {

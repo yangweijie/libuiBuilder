@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<ui version="1.0">
+  <window title="计算器" size="280,420" centered="true" margined="true">
+    <vbox padded="true">
+      
+      <!-- 显示屏 - 宽度与窗口宽度差不多，居中对齐 -->
+      <grid padded="false">
+        <input 
+          id="display"
+          row="0" 
+          col="0" 
+          readonly="true"
+          align="center"
+          expand="horizontal"
+          bind="display"
+          text="0"
+        />
+      </grid>
+      
+      <separator orientation="horizontal"/>
+      
+      <!-- 按钮区域 - 3列布局，每组4个按钮 -->
+      <grid padded="true">
+        
+        <!-- 第一组：方向键 -->
+        <button id="back" row="0" col="0" onclick="handleBack" align="center" expand="true">←</button>
+        <button id="up" row="1" col="0" onclick="handleUp" align="center" expand="true">↑</button>
+        <button id="down" row="2" col="0" onclick="handleDown" align="center" expand="true">↓</button>
+        <button id="one" row="3" col="0" onclick="handleOne" align="center" expand="true">1</button>
+        
+        <!-- 第二组：符号键 -->
+        <button id="tilde" row="0" col="1" onclick="handleTilde" align="center" expand="true">~</button>
+        <button id="caret" row="1" col="1" onclick="handleCaret" align="center" expand="true">^</button>
+        <button id="approx" row="2" col="1" onclick="handleApprox" align="center" expand="true">≈</button>
+        <button id="zero" row="3" col="1" onclick="handleZero" align="center" expand="true">0</button>
+        
+        <!-- 第三组：运算键 -->
+        <button id="subtract" row="0" col="2" onclick="handleSubtract" align="center" expand="true">−</button>
+        <button id="add" row="1" col="2" onclick="handleAdd" align="center" expand="true">+</button>
+        <button id="multiply" row="2" col="2" onclick="handleMultiply" align="center" expand="true">×</button>
+        <button id="equals" row="3" col="2" onclick="handleEquals" align="center" expand="true">=</button>
+        
+      </grid>
+      
+    </vbox>
+  </window>
+</ui>

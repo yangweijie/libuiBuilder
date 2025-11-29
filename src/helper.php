@@ -1,5 +1,7 @@
 <?php
 
+use Kingbes\Libui\View\State\StateManager;
+
 // 密码强度计算函数
 function calculateStrength($password): string
 {
@@ -56,4 +58,53 @@ function calculateStrength($password): string
         default:
             return '强';
     }
+}
+
+/**
+ * 状态管理辅助函数
+ * 
+ * 用法:
+ * - state() - 获取状态管理器实例
+ * - state('key') - 获取状态值
+ * - state('key', 'value') - 设置状态值
+ * - state(['key1' => 'value1', 'key2' => 'value2']) - 批量设置状态
+ */
+function state($key = null, $value = null)
+{
+    $manager = StateManager::instance();
+    
+    // 无参数时返回管理器实例
+    if ($key === null) {
+        return $manager;
+    }
+    
+    // 批量设置
+    if (is_array($key)) {
+        foreach ($key as $k => $v) {
+            $manager->set($k, $v);
+        }
+        return;
+    }
+    
+    // 设置值
+    if ($value !== null) {
+        $manager->set($key, $value);
+        return;
+    }
+    
+    // 获取值
+    return $manager->get($key);
+}
+
+/**
+ * 状态监听辅助函数
+ * 
+ * 用法:
+ * watch('key', function($new, $old) {
+ *     // 状态变化时的回调
+ * });
+ */
+function watch(string $key, callable $callback)
+{
+    StateManager::instance()->watch($key, $callback);
 }

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<ui version="1.0">
+  <window title="计算器" size="150,200" centered="true" margined="true">
+    <vbox padded="true">
+      <!-- 显示屏 -->
+      <grid padded="false">
+        <input
+          id="display"
+          row="0"
+          col="0"
+          readonly="true"
+          align="center"
+          bind="display"
+          text="0"
+          expand="true"
+        />
+      </grid>
+
+      <separator orientation="horizontal"/>
+      
+      <!-- 按钮区域 -->
+      <grid padded="true">
+        <!-- 第一行：清除和退格 -->
+        <button id="clear" row="0" col="0" onclick="handleClear"> C </button>
+        <button id="clearEntry" row="0" col="1" onclick="handleClearEntry">CE</button>
+        <button id="backspace" row="0" col="2" onclick="handleBackspace">⌫</button>
+        <button id="divide" row="0" col="3" onclick="handleOperation" data-operation="/"> ÷ </button>
+        
+        <!-- 第二行：7, 8, 9, × -->
+        <button id="seven" row="1" col="0" onclick="handleNumber" data-number="7"> 7 </button>
+        <button id="eight" row="1" col="1" onclick="handleNumber" data-number="8">8</button>
+        <button id="nine" row="1" col="2" onclick="handleNumber" data-number="9">9</button>
+        <button id="multiply" row="1" col="3" onclick="handleOperation" data-operation="*"> × </button>
+        
+        <!-- 第三行：4, 5, 6, - -->
+        <button id="four" row="2" col="0" onclick="handleNumber" data-number="4"> 4 </button>
+        <button id="five" row="2" col="1" onclick="handleNumber" data-number="5">5</button>
+        <button id="six" row="2" col="2" onclick="handleNumber" data-number="6">6</button>
+        <button id="subtract" row="2" col="3" onclick="handleOperation" data-operation="-"> - </button>
+        
+        <!-- 第四行：1, 2, 3, + -->
+        <button id="one" row="3" col="0" onclick="handleNumber" data-number="1"> 1 </button>
+        <button id="two" row="3" col="1" onclick="handleNumber" data-number="2">2</button>
+        <button id="three" row="3" col="2" onclick="handleNumber" data-number="3">3</button>
+        <button id="add" row="3" col="3" onclick="handleOperation" data-operation="+"> + </button>
+        
+        <!-- 第五行：0, ., ±, = -->
+        <button id="zero" row="4" col="0" colspan="2" onclick="handleNumber" data-number="0">0</button>
+        <button id="decimal" row="4" col="2" onclick="handleDecimal">.</button>
+        <button id="equals" row="4" col="3" onclick="handleEquals"> = </button>
+      </grid>
+    </vbox>
+  </window>
+</ui>

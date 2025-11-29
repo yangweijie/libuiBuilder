@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<ui version="1.0">
+  <window title="登录窗口" size="400,300" centered="true" margined="true">
+    <grid padded="true">
+      
+      <!-- 用户名行 -->
+      <label row="0" col="0" align="end,center">用户名:</label>
+      <input 
+        id="usernameInput"
+        row="0" 
+        col="1" 
+        bind="username"
+        placeholder="请输入用户名"
+        expand="horizontal"
+        onchange="handleUsernameChange"
+      />
+      
+      <!-- 密码行 -->
+      <label row="1" col="0" align="end,center">密码:</label>
+      <input 
+        id="passwordInput"
+        row="1" 
+        col="1" 
+        type="password"
+        bind="password"
+        placeholder="请输入密码"
+        expand="horizontal"
+        onchange="handlePasswordChange"
+      />
+      
+      <!-- 按钮行 -->
+      <hbox row="2" col="0" colspan="2" align="center">
+        <button id="loginBtn" onclick="handleLogin">登录</button>
+        <button onclick="handleReset">清空</button>
+      </hbox>
+      
+      <!-- 状态标签 -->
+      <label 
+        id="statusLabel" 
+        row="3" 
+        col="0" 
+        colspan="2" 
+        align="center"
+      >请输入登录信息</label>
+      
+    </grid>
+  </window>
+</ui>

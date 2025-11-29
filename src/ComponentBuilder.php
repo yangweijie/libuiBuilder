@@ -94,7 +94,7 @@ abstract class ComponentBuilder
     /**
      * 获取配置值
      */
-    public function getConfig(string $key, $default = null)
+    protected function getConfig(string $key, $default = null)
     {
         return $this->config[$key] ?? $default;
     }

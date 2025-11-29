@@ -37,19 +37,21 @@ class GridBuilder extends ComponentBuilder
     protected function buildChildren(): void
     {
         foreach ($this->gridItems as $item) {
-            $childHandle = $item['component']->build();
+            // 现在从对象获取最终配置
+            $config = $item->getConfig();
+            $childHandle = $config['component']->build();
 
             Grid::append(
                 $this->handle,
                 $childHandle,
-                $item['left'],
-                $item['top'],
-                $item['xspan'],
-                $item['yspan'],
-                $item['hexpand'] ? 1 : 0,
-                $item['halign']->value,
-                $item['vexpand'] ? 1 : 0,
-                $item['valign']
+                $config['left'],
+                $config['top'],
+                $config['xspan'],
+                $config['yspan'],
+                $config['hexpand'] ? 1 : 0,
+                $config['halign']->value,  // halign 需要 ->value （int）
+                $config['vexpand'] ? 1 : 0,
+                $config['valign']  // valign 需要枚举对象（Align）
             );
         }
     }
@@ -59,7 +61,7 @@ class GridBuilder extends ComponentBuilder
                           int $rowSpan = 1, int $colSpan = 1): GridItemBuilder
     {
         $item = new GridItemBuilder($component, $col, $row, $colSpan, $rowSpan);
-        $this->gridItems[] = $item->getConfig();
+        $this->gridItems[] = $item;  // 存储对象而不是配置数组
         return $item;
     }
 
@@ -67,7 +69,7 @@ class GridBuilder extends ComponentBuilder
     public function row(array $components): static
     {
         $currentRow = count($this->gridItems) > 0
-            ? max(array_column($this->gridItems, 'top')) + 1
+            ? max(array_map(fn($item) => $item->getConfig()['top'], $this->gridItems)) + 1
             : 0;
 
         foreach ($components as $index => $component) {
@@ -88,33 +90,61 @@ class GridBuilder extends ComponentBuilder
         return $this;
     }
 
-    public function padded(bool $padded = true): static
-    {
-        return $this->setConfig('padded', $padded);
-    }
-
-    /**
-     * 在表单下方追加额外的组件（比如按钮行、状态标签等）
-     * @param array $components 要追加的组件数组
-     * @return static
-     */
-    public function append(array $components): static
-    {
-        // 计算下一行的位置
-        $nextRow = count($this->gridItems) > 0
-            ? max(array_column($this->gridItems, 'top')) + 1
-            : 0;
-
-        // 添加每个组件到新行，每个组件占用单独的一行
-        foreach ($components as $index => $component) {
-            if ($component instanceof ComponentBuilder) {
-                // 将组件放置在网格中（从 nextRow 开始的连续行）
-                $this->place($component, $nextRow + $index, 0, 1, 2) // 占据两列，即整行
-                    ->expand(true, false)  // 水平扩展，填充整行
-                    ->align('start', 'center'); // 水平从开始（左对齐），垂直居中
-            }
-        }
-
-        return $this;
+    public function padded(bool $padded = true): static
+
+    {
+
+        return $this->setConfig('padded', $padded);
+
+    }
+
+
+
+    /**
+
+     * 在表单下方追加额外的组件（比如按钮行、状态标签等）
+
+     * @param array $components 要追加的组件数组
+
+     * @return static
+
+     */
+
+    public function append(array $components): static
+
+    {
+
+        // 计算下一行的位置
+
+        $nextRow = count($this->gridItems) > 0
+
+            ? max(array_map(fn($item) => $item->getConfig()['top'], $this->gridItems)) + 1
+
+            : 0;
+
+
+
+        // 添加每个组件到新行，每个组件占用单独的一行
+
+        foreach ($components as $index => $component) {
+
+            if ($component instanceof ComponentBuilder) {
+
+                // 将组件放置在网格中（从 nextRow 开始的连续行）
+
+                $this->place($component, $nextRow + $index, 0, 1, 2) // 占据两列，即整行
+
+                    ->expand(true, false)  // 水平扩展，填充整行
+
+                    ->align('start', 'center'); // 水平从开始（左对齐），垂直居中
+
+            }
+
+        }
+
+
+
+        return $this;
+
     }
 }
