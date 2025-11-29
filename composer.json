@@ -3,7 +3,9 @@
   "description": "Builder 方式开发 kingbes/libui gui 应用",
   "type": "library",
   "require": {
+    "ext-dom": "*",
     "ext-ffi": "*",
+    "ext-libxml": "*",
     "kingbes/libui": "*"
   },
   "license": "MIT",

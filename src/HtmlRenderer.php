@@ -168,16 +168,44 @@ class HtmlRenderer
             return $this->renderTemplateUse($element);
         }
         
-        // 映射 HTML 标签到渲染方法
+        // 处理标准 HTML 标签的别名和特殊类型
+        if ($tagName === 'select') {
+            // select 是 combobox 的别名
+            return $this->renderCombobox($element);
+        }
+        
+        if ($tagName === 'progress') {
+            // progress 是 progressbar 的别名
+            return $this->renderProgressBar($element);
+        }
+        
+        if ($tagName === 'hr') {
+            // hr 是 separator 的别名
+            return $this->renderSeparator($element);
+        }
+        
+        if ($tagName === 'textarea') {
+            // textarea 支持多行文本输入
+            return $this->renderTextarea($element);
+        }
+        
+        // 映射 HTML 标签到渲染方法（支持别名）
         $builder = match($tagName) {
+            // GUI 框架特有标签
             'window' => $this->renderWindow($element),
             'grid' => $this->renderGrid($element),
             'hbox' => $this->renderHBox($element),
             'vbox' => $this->renderVBox($element),
             'tab' => $this->renderTab($element),
+            
+            // 标准 HTML 标签
             'label' => $this->renderLabel($element),
             'input' => $this->renderInput($element),
             'button' => $this->renderButton($element),
+            'table' => $this->renderTable($element),
+            'canvas' => $this->renderCanvas($element),
+            
+            // libuiBuilder 特有标签（保持向后兼容）
             'checkbox' => $this->renderCheckbox($element),
             'radio' => $this->renderRadio($element),
             'combobox' => $this->renderCombobox($element),
@@ -185,8 +213,7 @@ class HtmlRenderer
             'slider' => $this->renderSlider($element),
             'progressbar' => $this->renderProgressBar($element),
             'separator' => $this->renderSeparator($element),
-            'table' => $this->renderTable($element),
-            'canvas' => $this->renderCanvas($element),
+            
             default => throw new Exception("Unknown tag: {$tagName}")
         };
         
@@ -429,7 +456,7 @@ class HtmlRenderer
     /**
      * 渲染 <input> 元素
      */
-    private function renderInput(DOMElement $element): EntryBuilder|MultilineEntryBuilder
+    private function renderInput(DOMElement $element): EntryBuilder|MultilineEntryBuilder|SpinboxBuilder|SliderBuilder
     {
         $type = $element->getAttribute('type');
         
@@ -437,16 +464,18 @@ class HtmlRenderer
         $builder = match($type) {
             'password' => Builder::passwordEntry(),
             'multiline', 'textarea' => Builder::multilineEntry(),
+            'number' => Builder::spinbox(), // 标准的数字输入框
+            'range' => Builder::slider(),   // 标准的滑动条
             default => Builder::entry()
         };
         
-        // 占位符
-        if ($placeholder = $element->getAttribute('placeholder')) {
+        // 占位符（仅对文本输入框有效）
+        if ($placeholder = $element->getAttribute('placeholder') && $builder instanceof EntryBuilder) {
             $builder->placeholder($placeholder);
         }
         
-        // 只读
-        if ($element->getAttribute('readonly') === 'true') {
+        // 只读（仅对文本输入框有效）
+        if ($element->getAttribute('readonly') === 'true' && $builder instanceof EntryBuilder) {
             $builder->readonly(true);
         }
         
@@ -454,6 +483,35 @@ class HtmlRenderer
         if ($builder instanceof MultilineEntryBuilder) {
             if ($element->getAttribute('wordwrap') === 'true') {
                 $builder->wordWrap(true);
+            }
+        }
+        
+        // 数字输入框特有属性
+        if ($builder instanceof SpinboxBuilder) {
+            if ($min = $element->getAttribute('min')) {
+                $builder->min((int)$min);
+            }
+            if ($max = $element->getAttribute('max')) {
+                $builder->max((int)$max);
+            }
+            if ($step = $element->getAttribute('step')) {
+                $builder->step((int)$step);
+            }
+            if ($value = $element->getAttribute('value')) {
+                $builder->value((int)$value);
+            }
+        }
+        
+        // 滑动条特有属性
+        if ($builder instanceof SliderBuilder) {
+            if ($min = $element->getAttribute('min')) {
+                $builder->min((int)$min);
+            }
+            if ($max = $element->getAttribute('max')) {
+                $builder->max((int)$max);
+            }
+            if ($value = $element->getAttribute('value')) {
+                $builder->value((int)$value);
             }
         }
         
@@ -535,6 +593,9 @@ class HtmlRenderer
             $builder->selected((int)$selected);
         }
         
+        // 应用通用属性（包括数据绑定）
+        $this->applyCommonAttributes($element, $builder);
+        
         return $builder;
     }
     
@@ -555,6 +616,9 @@ class HtmlRenderer
             $builder->value((int)$value);
         }
         
+        // 应用通用属性（包括数据绑定）
+        $this->applyCommonAttributes($element, $builder);
+        
         return $builder;
     }
     
@@ -574,6 +638,9 @@ class HtmlRenderer
         if ($value = $element->getAttribute('value')) {
             $builder->value((int)$value);
         }
+        
+        // 应用通用属性（包括数据绑定）
+        $this->applyCommonAttributes($element, $builder);
         
         return $builder;
     }
@@ -623,6 +690,50 @@ class HtmlRenderer
         if (!empty($columns)) {
             $builder->columns($columns);
         }
+        
+        return $builder;
+    }
+    
+    /**
+     * 渲染 <textarea> 元素
+     */
+    private function renderTextarea(DOMElement $element): MultilineEntryBuilder
+    {
+        $builder = Builder::multilineEntry();
+        
+        // 文本内容
+        $text = $element->textContent;
+        if ($text) {
+            $builder->text($text);
+        }
+        
+        // 占位符
+        if ($placeholder = $element->getAttribute('placeholder')) {
+            $builder->placeholder($placeholder);
+        }
+        
+        // 只读
+        if ($element->getAttribute('readonly') === 'true') {
+            $builder->readonly(true);
+        }
+        
+        // 自动换行
+        if ($element->getAttribute('wordwrap') === 'true') {
+            $builder->wordWrap(true);
+        }
+        
+        // 行数（虽然 libui 可能不支持，但保留属性）
+        if ($rows = $element->getAttribute('rows')) {
+            // 可以用于其他处理
+        }
+        
+        // 列数（虽然 libui 可能不支持，但保留属性）
+        if ($cols = $element->getAttribute('cols')) {
+            // 可以用于其他处理
+        }
+        
+        // 应用通用属性（包括数据绑定）
+        $this->applyCommonAttributes($element, $builder);
         
         return $builder;
     }

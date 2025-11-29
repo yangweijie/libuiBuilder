@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<ui version="1.0">
+  <window title="标准 HTML 标签演示" size="400,500" centered="true" margined="true">
+    <vbox padded="true">
+      
+      <label>标准 HTML 标签演示</label>
+      
+      <hr/>
+      
+      <!-- 基本输入框 -->
+      <label>姓名:</label>
+      <input id="nameInput" bind="name" placeholder="请输入姓名"/>
+      
+      <!-- 数字输入框 (标准 HTML type="number") -->
+      <label>年龄:</label>
+      <input type="number" id="ageInput" bind="age" min="0" max="120" value="25"/>
+      
+      <!-- 滑动条 (标准 HTML type="range") -->
+      <label>分数 (0-100):</label>
+      <input type="range" id="scoreInput" bind="score" min="0" max="100" value="75"/>
+      
+      <!-- 进度条 (标准 HTML progress 标签) -->
+      <label>进度:</label>
+      <progress id="progressBar" bind="progress" value="50" max="100">50%</progress>
+      
+      <!-- 下拉选择框 (标准 HTML select 标签) -->
+      <label for="optionSelect">选择选项:</label>
+      <select id="optionSelect" bind="selectedOption">
+        <option value="option1">选项 1</option>
+        <option value="option2">选项 2</option>
+        <option value="option3">选项 3</option>
+      </select>
+      
+      <!-- 多行文本 (标准 HTML textarea 标签) -->
+      <label>备注:</label>
+      <textarea id="commentsArea" bind="comments" rows="4" cols="40" placeholder="请输入备注信息"></textarea>
+      
+      <hr/>
+      
+      <!-- 提交按钮 -->
+      <button id="submitButton" onclick="handleSubmit">提交表单</button>
+      
+    </vbox>
+  </window>
+</ui>
