@@ -254,44 +254,58 @@ class TableBuilder extends ComponentBuilder
     public function setValue($value): void
     {
         if (is_array($value)) {
+            // 如果组件还未构建，只更新数据，不调用UI更新
+            if ($this->handle === null || $this->model === null) {
+                echo "表格数据已保存，等待组件构建后显示\n";
+                $this->data = $value;
+                $this->dataRef = &$this->data;
+                $this->setConfig('data', $value);
+                return;
+            }
+            
+            // 保存旧数据用于比较
             $oldData = $this->data;
             $oldCount = count($oldData);
             $newCount = count($value);
             
-            echo "表格setValue: 旧数据{$oldCount}行, 新数据{$newCount}行\n";
+            echo "表格setValue: 旧数据{$oldCount}行, 新数据{$newCount}行";
+            if ($oldCount > 0 && isset($oldData[0])) {
+                echo ", 旧数据第一行: " . json_encode($oldData[0], JSON_UNESCAPED_UNICODE);
+            }
+            if ($newCount > 0 && isset($value[0])) {
+                echo ", 新数据第一行: " . json_encode($value[0], JSON_UNESCAPED_UNICODE);
+            }
+            echo "\n";
+            
+            // 更新数据数组
+            $this->data = $value;
+            $this->dataRef = &$this->data;
+            $this->setConfig('data', $value);
             
             if ($newCount === $oldCount) {
                 // 数量相同，检查是否有数据更新
+                $hasChanges = false;
                 for ($i = 0; $i < $newCount; $i++) {
-                    if (isset($oldData[$i]) && $oldData[$i] !== $value[$i]) {
+                    if (!isset($oldData[$i]) || $oldData[$i] !== $value[$i]) {
+                        $hasChanges = true;
                         // 数据不同，调用updateRow
                         $this->updateRow($i, $value[$i]);
                     }
                 }
+                if (!$hasChanges) {
+                    echo "数据未变化，无需更新UI\n";
+                }
             } elseif ($newCount > $oldCount) {
-                // 新增行 - 先更新数据数组，再插入行
-                $this->data = $value;
-                $this->dataRef = &$this->data;
-                $this->setConfig('data', $value);
-                
+                // 新增行
                 for ($i = $oldCount; $i < $newCount; $i++) {
                     $this->insertRow($i, $value[$i]);
                 }
             } else {
-                // 删除行（从后往前删）- 先删除行，再更新数据数组
+                // 删除行（从后往前删）
                 for ($i = $oldCount - 1; $i >= $newCount; $i--) {
                     $this->deleteRow($i);
                 }
-                
-                $this->data = $value;
-                $this->dataRef = &$this->data;
-                $this->setConfig('data', $value);
             }
-            
-            // 最后更新数据数组（确保一致性）
-            $this->data = $value;
-            $this->dataRef = &$this->data;
-            $this->setConfig('data', $value);
         }
     }
     

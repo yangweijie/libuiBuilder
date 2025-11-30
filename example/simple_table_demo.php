@@ -11,13 +11,13 @@ App::init();
 // 初始化状态管理器
 $stateManager = StateManager::instance();
 
-// 示例数据
+// 示例数据 - 第一列是文本（复选框列当前不支持）
 $sampleData = [
-    ['id' => 1, 'name' => '张三', 'role' => '开发者', 'status' => '在职'],
-    ['id' => 2, 'name' => '李四', 'role' => '设计师', 'status' => '在职'],
-    ['id' => 3, 'name' => '王五', 'role' => '产品经理', 'status' => '离职'],
-    ['id' => 4, 'name' => '赵六', 'role' => '测试工程师', 'status' => '在职'],
-    ['id' => 5, 'name' => '钱七', 'role' => '运维工程师', 'status' => '在职'],
+    ['☐', 1, '张三', '开发者', '在职'],
+    ['☐', 2, '李四', '设计师', '在职'],
+    ['☐', 3, '王五', '产品经理', '离职'],
+    ['☐', 4, '赵六', '测试工程师', '在职'],
+    ['☐', 5, '钱七', '运维工程师', '在职'],
 ];
 
 $stateManager->set('tableData', $sampleData);
@@ -65,4 +65,12 @@ $stateManager->watch('selectedCount', function($count) {
 
 // 从 HTML 渲染
 $app = HtmlRenderer::render(__DIR__ . '/views/simple_table_demo.ui.html', $handlers);
+echo "渲染完成\n";
+
+// 先构建组件
+$app->build();
+echo "构建完成\n";
+
+// WindowBuilder::show() 会自动调用 build() 和 App::main()
 $app->show();
+echo "窗口已关闭\n";

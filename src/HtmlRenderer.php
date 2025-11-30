@@ -682,9 +682,11 @@ class HtmlRenderer
     {
         $builder = Builder::table();
         
-        // 提取表头信息
+        // 提取表头信息和列类型
         $columns = [];
+        $columnTypes = []; // 存储每列的类型
         $tableData = [];
+        $firstDataRow = null; // 用于推断列类型
         
         foreach ($element->childNodes as $child) {
             if ($child instanceof DOMElement) {
@@ -700,18 +702,21 @@ class HtmlRenderer
                         }
                     }
                 } elseif ($child->tagName === 'tbody') {
-                    // 从 tbody 中提取表格数据
+                    // 从 tbody 中提取第一行以推断列类型
+                    $rowIndex = 0;
                     foreach ($child->childNodes as $tr) {
                         if ($tr instanceof DOMElement && $tr->tagName === 'tr') {
-                            $rowData = [];
+                            $colIndex = 0;
                             foreach ($tr->childNodes as $td) {
                                 if ($td instanceof DOMElement && $td->tagName === 'td') {
-                                    $rowData[] = $td->textContent;
+                                    // 第一行：推断列类型
+                                    if ($rowIndex === 0) {
+                                        $columnTypes[$colIndex] = $this->detectColumnType($td);
+                                    }
+                                    $colIndex++;
                                 }
                             }
-                            if (!empty($rowData)) {
-                                $tableData[] = $rowData;
-                            }
+                            $rowIndex++;
                         }
                     }
                 } elseif ($child->tagName === 'column') {
@@ -721,31 +726,60 @@ class HtmlRenderer
             }
         }
         
+        // 构建列配置（包含类型信息）
         if (!empty($columns)) {
-            $builder->columns($columns);
+            $columnConfigs = [];
+            foreach ($columns as $index => $title) {
+                $columnConfigs[] = [
+                    'title' => $title,
+                    'type' => $columnTypes[$index] ?? 'text'
+                ];
+            }
+            $builder->columns($columnConfigs);
         }
         
-        if (!empty($tableData)) {
-            $builder->data($tableData);
-        }
+        // 注意：不使用 tbody 中的占位数据
+        // 真实数据应该通过 bind 属性从 StateManager 获取
         
         // 应用通用属性（包括数据绑定）
         $this->applyCommonAttributes($element, $builder);
         
-        
-        
-        // 如果有数据绑定，设置监听器
-        if ($bind = $element->getAttribute('bind')) {
-            $stateManager = StateManager::instance();
-            
-            $stateManager->watch($bind, function($newData) use ($builder) {
-                if (is_array($newData)) {
-                    $builder->setValue($newData);
-                }
-            });
-        }
+        // 注：数据绑定监听器已在 ComponentBuilder::bind() 中设置，
+        // 不需要在这里重复设置
         
         return $builder;
+    }
+    
+    /**
+     * 检测列类型（根据 td 内容）
+     * 
+     * 注意：libui 的表格模型需要所有列类型一致，
+     * 混合类型（checkbox + text）需要更复杂的 API。
+     * 当前版本仅支持纯文本列。
+     */
+    private function detectColumnType(DOMElement $td): string
+    {
+        // TODO: 复选框列需要使用不同的表格模型 API
+        // 目前禁用复选框检测，避免 segfault
+        
+        /* 暂时禁用
+        foreach ($td->childNodes as $child) {
+            if ($child instanceof DOMElement) {
+                if ($child->tagName === 'input' && $child->getAttribute('type') === 'checkbox') {
+                    return 'checkbox';
+                }
+                if ($child->tagName === 'button') {
+                    return 'button';
+                }
+                if ($child->tagName === 'progress' || $child->tagName === 'progressbar') {
+                    return 'progress';
+                }
+            }
+        }
+        */
+        
+        // 默认为文本列
+        return 'text';
     }
     
     /**
