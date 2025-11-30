@@ -224,7 +224,7 @@ class HtmlRenderer
     }
     
     /**
-     * 应用通用属性（id, bind, 事件等）
+     * 应用通用属性（id, bind, ref, 事件等）
      */
     private function applyCommonAttributes(DOMElement $element, ComponentBuilder $builder): void
     {
@@ -233,9 +233,12 @@ class HtmlRenderer
             $builder->id($id);
         }
         
-        // 数据绑定
+        // 数据绑定 - 优先级：bind > ref
         if ($bind = $element->getAttribute('bind')) {
             $builder->bind($bind);
+        } else if ($ref = $element->getAttribute('ref')) {
+            // ref 属性被解释为绑定到同名状态
+            $builder->bind($ref);
         }
         
         // 事件绑定
