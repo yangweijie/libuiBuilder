@@ -470,6 +470,135 @@
         .info-message h2 {
             margin-bottom: 10px;
         }
+
+        /* ==================== 主题系统 ==================== */
+        :root {
+            --window-bg: #ffffff;
+            --window-border: #bdc3c7;
+            --titlebar-bg: linear-gradient(to bottom, #ecf0f1, #bdc3c7);
+            --titlebar-text: #2c3e50;
+            --button-bg: #3498db;
+            --button-hover: #2980b9;
+            --button-active: #21618c;
+            --input-border: #bdc3c7;
+            --input-focus: #3498db;
+            --input-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --sidebar-bg: #2c3e50;
+            --sidebar-header-bg: #1a252f;
+            --state-item-bg: #34495e;
+            --preview-bg: #ecf0f1;
+        }
+        
+        /* 暗色主题 */
+        [data-theme="dark"] {
+            --window-bg: #2c3e50;
+            --window-border: #34495e;
+            --titlebar-bg: linear-gradient(to bottom, #34495e, #2c3e50);
+            --titlebar-text: #ecf0f1;
+            --button-bg: #3498db;
+            --button-hover: #2980b9;
+            --button-active: #21618c;
+            --input-border: #34495e;
+            --input-focus: #3498db;
+            --input-bg: #34495e;
+            --text-primary: #ecf0f1;
+            --text-secondary: #95a5a6;
+            --preview-bg: #1a252f;
+        }
+        
+        /* macOS 风格 */
+        [data-theme="macos"] {
+            --window-bg: #f5f5f5;
+            --window-border: #d1d1d1;
+            --titlebar-bg: linear-gradient(to bottom, #e8e8e8, #d1d1d1);
+            --titlebar-text: #333333;
+            --button-bg: #007aff;
+            --button-hover: #0051d5;
+            --button-active: #003d99;
+            --input-border: #d1d1d1;
+            --input-focus: #007aff;
+            --input-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --preview-bg: #f0f0f0;
+        }
+        
+        /* Windows 风格 */
+        [data-theme="windows"] {
+            --window-bg: #ffffff;
+            --window-border: #cccccc;
+            --titlebar-bg: linear-gradient(to bottom, #f0f0f0, #cccccc);
+            --titlebar-text: #000000;
+            --button-bg: #e1e1e1;
+            --button-hover: #c5c5c5;
+            --button-active: #a9a9a9;
+            --input-border: #cccccc;
+            --input-focus: #0078d4;
+            --input-bg: #ffffff;
+            --text-primary: #000000;
+            --text-secondary: #666666;
+            --preview-bg: #f5f5f5;
+        }
+        
+        /* 扁平风格 */
+        [data-theme="flat"] {
+            --window-bg: #ffffff;
+            --window-border: transparent;
+            --titlebar-bg: #4a90e2;
+            --titlebar-text: #ffffff;
+            --button-bg: #4a90e2;
+            --button-hover: #357abd;
+            --button-active: #2968a3;
+            --input-border: #e0e0e0;
+            --input-focus: #4a90e2;
+            --input-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #999999;
+            --preview-bg: #f8f9fa;
+        }
+        
+        /* 主题选择器样式 */
+        .theme-section {
+            padding: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .theme-section h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #3498db;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 5px;
+        }
+        
+        .theme-selector select {
+            width: 100%;
+            padding: 8px;
+            background: #34495e;
+            border: 1px solid #4a5f7f;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .theme-selector select:hover {
+            background: #4a5f7f;
+        }
+        
+        .theme-selector select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .theme-selector select option {
+            background: #34495e;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -483,6 +612,20 @@
         <div class="file-input-wrapper">
             <label for="fileInput">选择 .ui.html 文件:</label>
             <input type="file" id="fileInput" accept=".html,.ui.html">
+        </div>
+
+        <!-- 主题选择区域 -->
+        <div class="theme-section">
+            <h3>🎨 主题选择</h3>
+            <div class="theme-selector">
+                <select id="themeSelect">
+                    <option value="default">🌞 默认主题</option>
+                    <option value="dark">🌙 暗色主题</option>
+                    <option value="macos">🍎 macOS 风格</option>
+                    <option value="windows">🪟 Windows 风格</option>
+                    <option value="flat">📦 扁平风格</option>
+                </select>
+            </div>
         </div>
 
         <div class="state-panel">
@@ -1185,6 +1328,101 @@
             if (file && (file.name.endsWith('.html') || file.name.endsWith('.ui.html'))) {
                 currentFile = file;
                 await loadFile(file);
+            }
+        });
+
+        // ==================== 主题管理系统 ====================
+        class ThemeManager {
+            constructor() {
+                this.currentTheme = 'default';
+                this.themeSelect = document.getElementById('themeSelect');
+                this.init();
+            }
+        
+            init() {
+                // 从localStorage恢复主题
+                const savedTheme = localStorage.getItem('libuibuilder-theme');
+                if (savedTheme) {
+                    this.currentTheme = savedTheme;
+                    this.applyTheme(this.currentTheme);
+                    this.themeSelect.value = this.currentTheme;
+                }
+        
+                // 监听主题切换
+                this.themeSelect.addEventListener('change', (e) => {
+                    this.switchTheme(e.target.value);
+                });
+        
+                // 添加主题切换动画
+                this.addThemeTransition();
+            }
+        
+            switchTheme(theme) {
+                this.currentTheme = theme;
+                this.applyTheme(theme);
+                localStorage.setItem('libuibuilder-theme', theme);
+                
+                // 添加切换动画效果
+                this.addThemeSwitchAnimation();
+                
+                // 更新预览内容（重新渲染以应用新主题）
+                if (currentFile) {
+                    setTimeout(() => loadFile(currentFile), 100);
+                }
+            }
+        
+            applyTheme(theme) {
+                if (theme === 'default') {
+                    document.body.removeAttribute('data-theme');
+                } else {
+                    document.body.setAttribute('data-theme', theme);
+                }
+            }
+        
+            addThemeTransition() {
+                // 为所有UI组件添加过渡效果
+                const style = document.createElement('style');
+                style.textContent = `
+                    .ui-window, .ui-window-titlebar, .ui-button, .ui-input, 
+                    .ui-textarea, .ui-combobox, .ui-spinbox, .ui-slider {
+                        transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        
+            addThemeSwitchAnimation() {
+                const preview = document.getElementById('previewContent');
+                preview.style.transition = 'opacity 0.2s ease';
+                preview.style.opacity = '0.7';
+                
+                setTimeout(() => {
+                    preview.style.opacity = '1';
+                }, 100);
+            }
+        
+            // 获取当前主题信息
+            getCurrentTheme() {
+                return {
+                    name: this.currentTheme,
+                    displayName: this.themeSelect.options[this.themeSelect.selectedIndex].text
+                };
+            }
+        }
+        
+        // 初始化主题管理器
+        const themeManager = new ThemeManager();
+        
+        // 添加主题快捷键支持
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey) {
+                switch(e.key) {
+                    case '1': themeManager.switchTheme('default'); break;
+                    case '2': themeManager.switchTheme('dark'); break;
+                    case '3': themeManager.switchTheme('macos'); break;
+                    case '4': themeManager.switchTheme('windows'); break;
+                    case '5': themeManager.switchTheme('flat'); break;
+                }
             }
         });
     </script>
