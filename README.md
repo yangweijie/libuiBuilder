@@ -11,6 +11,7 @@ Builder 方式开发 [kingbes/libui](https://github.com/kingbes/libui) GUI 应�
 - 🎯 **事件系统** - 简洁的事件处理
 - 📦 **组件复用** - 模板系统支持
 - 🧪 **完整测试** - Pest 测试覆盖
+- 👁️ **可视化预览工具** - 浏览器实时预览 `.ui.html` 布局
 
 ## 🚀 快速开始
 
@@ -105,12 +106,35 @@ $app = HtmlRenderer::render('views/login.ui.html', $handlers);
 $app->show();
 ```
 
+## 🛠️ 开发工具
+
+### 可视化预览工具
+
+在编写 `.ui.html` 模板时，使用可视化预览工具实时查看布局效果：
+
+```bash
+# 在浏览器中打开预览工具
+open tools/preview.html
+
+# 然后加载任意 .ui.html 文件
+# 例如: example/views/login.ui.html
+```
+
+**特性**:
+- ✅ 零依赖，纯浏览器运行
+- ✅ 完整支持 Grid 布局属性
+- ✅ 可视化显示状态绑定和事件处理器
+- ✅ 缩放控制和网格线显示
+
+详细使用说明: [tools/README.md](tools/README.md)
+
 ## 📚 文档
 
 - [HTML 渲染器完整文档](docs/HTML_RENDERER.md)
 - [Builder API 参考](docs/BUILDER_API.md)
 - [状态管理指南](docs/STATE_MANAGEMENT.md)
 - [Grid 布局详解](docs/GRID_LAYOUT.md)
+- [可视化预览工具](tools/README.md) 🆕
 
 ## 🎯 核心概念
 
