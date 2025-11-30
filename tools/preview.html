@@ -180,21 +180,45 @@
 
         /* libuiBuilder 组件样式 */
         .ui-window {
-            border: 1px solid #bdc3c7;
+            border: 1px solid var(--window-border);
             border-radius: 8px;
-            overflow: hidden;
-            background: white;
+            background: var(--window-bg);
         }
-
+        
         .ui-window-titlebar {
-            background: linear-gradient(to bottom, #ecf0f1, #bdc3c7);
-            padding: 10px 15px;
-            border-bottom: 1px solid #95a5a6;
-            font-weight: 600;
-            font-size: 14px;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
+            background: var(--titlebar-bg);
+            color: var(--titlebar-text);
+        }
+        
+        .ui-input,
+        .ui-textarea,
+        .ui-combobox,
+        .ui-spinbox,
+        .ui-slider {
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+        
+        .ui-input:focus,
+        .ui-textarea:focus,
+        .ui-combobox:focus,
+        .ui-spinbox:focus,
+        .ui-slider:focus {
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .ui-label {
+            color: var(--text-primary);
+        }
+        
+        .preview-wrapper {
+            background: var(--preview-bg);
+        }
+        
+        body {
+            background: var(--sidebar-bg);
         }
 
         .ui-window-content {
@@ -237,7 +261,6 @@
 
         .ui-input {
             padding: 6px 10px;
-            border: 1px solid #bdc3c7;
             border-radius: 4px;
             font-size: 13px;
             outline: none;
@@ -253,10 +276,10 @@
             background: #ecf0f1;
         }
 
-        .ui-button {
+         .ui-button {
             padding: 8px 16px;
-            background: #3498db;
-            color: white;
+            background: var(--button-bg);
+            color: var(--titlebar-text);
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -269,13 +292,13 @@
             align-items: center;
             justify-content: center;
         }
-
+        
         .ui-button:hover {
-            background: #2980b9;
+            background: var(--button-hover);
         }
-
+        
         .ui-button:active {
-            background: #21618c;
+            background: var(--button-active);
         }
 
         .ui-checkbox {
@@ -320,7 +343,6 @@
         .ui-spinbox,
         .ui-slider {
             padding: 6px 10px;
-            border: 1px solid #bdc3c7;
             border-radius: 4px;
             font-size: 13px;
             min-width: 150px;
