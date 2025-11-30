@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<ui version="1.0">
+  <window title="Contacts (HTML 渲染示例)" size="600,600" margined="true">
+    <vbox padded="true">
+      <!-- 表单区域 -->
+      <vbox id="formArea" padded="true">
+        <label>Name</label>
+        <input id="formName" bind="form.Name" placeholder="输入姓名"/>
+        <label>Email</label>
+        <input id="formEmail" bind="form.Email" placeholder="输入邮箱"/>
+        <label>Phone</label>
+        <input id="formPhone" bind="form.Phone" placeholder="输入电话"/>
+        <label>City</label>
+        <input id="formCity" bind="form.City" placeholder="输入城市"/>
+        <label>State</label>
+        <input id="formState" bind="form.State" placeholder="输入州"/>
+        <button id="saveBtn" onclick="saveContact">Save Contact</button>
+        <separator/>
+      </vbox>
+
+      <!-- 搜索区域 -->
+      <hbox padded="true">
+        <input id="searchEntry" bind="searchKeyword" placeholder="搜索联系人..."/>
+        <button id="searchBtn" onclick="searchContacts">Search</button>
+      </hbox>
+      <separator/>
+
+      <!-- 表格组件 -->
+      <table id="contactTable" bind="filteredContacts">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>City</th>
+            <th>State</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </vbox>
+  </window>
+</ui>
+

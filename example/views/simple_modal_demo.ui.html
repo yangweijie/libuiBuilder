@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<ui version="1.0">
+  <window title="弹窗表格演示" size="600,400" centered="true" margined="true">
+    <vbox padded="true">
+      
+      <label>用户管理表格</label>
+      
+      <hr/>
+      
+      <!-- 操作按钮 -->
+      <grid padded="true">
+        <button id="addBtn" row="0" col="0" onclick="handleAddNew">新增用户</button>
+        <button id="editBtn" row="0" col="1" onclick="handleEdit">编辑用户</button>
+        <button id="deleteBtn" row="0" col="2" onclick="handleDelete">删除用户</button>
+      </grid>
+      
+      <!-- 数据表格 -->
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>姓名</th>
+            <th>年龄</th>
+            <th>部门</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>张三</td>
+            <td>25</td>
+            <td>技术部</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>李四</td>
+            <td>30</td>
+            <td>设计部</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>王五</td>
+            <td>28</td>
+            <td>产品部</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- 弹窗区域 - 通过状态控制显示/隐藏 -->
+      <vbox id="modalArea" padded="true">
+        <label id="modalTitle">新增用户</label>
+        
+        <hr/>
+        
+        <grid padded="true">
+          <label row="0" col="0">姓名:</label>
+          <input id="modalName" row="0" col="1" placeholder="请输入姓名"/>
+          
+          <label row="1" col="0">年龄:</label>
+          <input type="number" row="1" col="1" min="18" max="65" value="25"/>
+          
+          <label row="2" col="0">部门:</label>
+          <input id="modalDept" row="2" col="1" placeholder="请输入部门"/>
+          
+          <button id="saveBtn" row="3" col="0" onclick="handleSave">保存</button>
+          <button id="cancelBtn" row="3" col="1" onclick="handleCancel">取消</button>
+        </grid>
+      </vbox>
+      
+    </vbox>
+  </window>
+</ui>

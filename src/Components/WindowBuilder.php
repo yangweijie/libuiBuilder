@@ -10,6 +10,11 @@ use FFI\CData;
 
 class WindowBuilder extends ComponentBuilder
 {
+    public function __construct(array $config = [])
+    {
+        echo "WindowBuilder::__construct called\n";
+        parent::__construct($config);
+    }
     protected function getDefaultConfig(): array
     {
         return [

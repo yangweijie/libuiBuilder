@@ -335,6 +335,9 @@ class HtmlRenderer
             // 放置到 Grid
             $gridItem = $builder->place($childBuilder, $row, $col, $rowspan, $colspan);
             
+            // 同时将组件添加到children数组以支持getComponentById
+            $builder->addChild($childBuilder);
+            
             // 对齐方式
             if ($align = $child->getAttribute('align')) {
                 $alignParts = array_map('trim', explode(',', $align));
@@ -679,16 +682,67 @@ class HtmlRenderer
     {
         $builder = Builder::table();
         
-        // 列定义
+        // 提取表头信息
         $columns = [];
+        $tableData = [];
+        
         foreach ($element->childNodes as $child) {
-            if ($child instanceof DOMElement && $child->tagName === 'column') {
-                $columns[] = $child->textContent;
+            if ($child instanceof DOMElement) {
+                if ($child->tagName === 'thead') {
+                    // 从 thead 中提取列标题
+                    foreach ($child->childNodes as $tr) {
+                        if ($tr instanceof DOMElement && $tr->tagName === 'tr') {
+                            foreach ($tr->childNodes as $th) {
+                                if ($th instanceof DOMElement && $th->tagName === 'th') {
+                                    $columns[] = $th->textContent;
+                                }
+                            }
+                        }
+                    }
+                } elseif ($child->tagName === 'tbody') {
+                    // 从 tbody 中提取表格数据
+                    foreach ($child->childNodes as $tr) {
+                        if ($tr instanceof DOMElement && $tr->tagName === 'tr') {
+                            $rowData = [];
+                            foreach ($tr->childNodes as $td) {
+                                if ($td instanceof DOMElement && $td->tagName === 'td') {
+                                    $rowData[] = $td->textContent;
+                                }
+                            }
+                            if (!empty($rowData)) {
+                                $tableData[] = $rowData;
+                            }
+                        }
+                    }
+                } elseif ($child->tagName === 'column') {
+                    // 兼容旧的 column 定义方式
+                    $columns[] = $child->textContent;
+                }
             }
         }
         
         if (!empty($columns)) {
             $builder->columns($columns);
+        }
+        
+        if (!empty($tableData)) {
+            $builder->data($tableData);
+        }
+        
+        // 应用通用属性（包括数据绑定）
+        $this->applyCommonAttributes($element, $builder);
+        
+        
+        
+        // 如果有数据绑定，设置监听器
+        if ($bind = $element->getAttribute('bind')) {
+            $stateManager = StateManager::instance();
+            
+            $stateManager->watch($bind, function($newData) use ($builder) {
+                if (is_array($newData)) {
+                    $builder->setValue($newData);
+                }
+            });
         }
         
         return $builder;

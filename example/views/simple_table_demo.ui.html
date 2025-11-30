@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<ui version="1.0">
+  <window title="表格演示" size="600,400" centered="true" margined="true">
+    <vbox padded="true">
+      
+      <label>用户信息表格</label>
+      
+      <hr/>
+      
+      <!-- 操作按钮 -->
+      <grid padded="true">
+        <button id="refreshBtn" row="0" col="0" onclick="handleRefresh">刷新</button>
+        <button id="selectAllBtn" row="0" col="1" onclick="handleSelectAll">全选</button>
+        <button id="clearBtn" row="0" col="2" onclick="handleClearSelection">清除选择</button>
+        <button id="deleteBtn" row="0" col="3" onclick="handleDelete">删除</button>
+        <button id="exportBtn" row="0" col="4" onclick="handleExport">导出</button>
+      </grid>
+      
+      <!-- 数据表格 -->
+      <table>
+        <thead>
+          <tr>
+            <th>选择</th>
+            <th>ID</th>
+            <th>姓名</th>
+            <th>角色</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox"/></td>
+            <td>1</td>
+            <td>张三</td>
+            <td>开发者</td>
+            <td>在职</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"/></td>
+            <td>2</td>
+            <td>李四</td>
+            <td>设计师</td>
+            <td>在职</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"/></td>
+            <td>3</td>
+            <td>王五</td>
+            <td>产品经理</td>
+            <td>离职</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"/></td>
+            <td>4</td>
+            <td>赵六</td>
+            <td>测试工程师</td>
+            <td>在职</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"/></td>
+            <td>5</td>
+            <td>钱七</td>
+            <td>运维工程师</td>
+            <td>在职</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- 状态信息 -->
+      <hr/>
+      <label id="statusInfo">选中: 0 条记录</label>
+      
+    </vbox>
+  </window>
+</ui>

@@ -2,11 +2,11 @@
 
 namespace Kingbes\Libui\View;
 
-use BadMethodCallException;
-use InvalidArgumentException;
 use Kingbes\Libui\View\State\StateManager;
 use Kingbes\Libui\View\State\ComponentRef;
+use Kingbes\Libui\Control;
 use FFI\CData;
+use BadMethodCallException;
 
 abstract class ComponentBuilder
 {
@@ -58,12 +58,21 @@ abstract class ComponentBuilder
      */
     public function addChild(ComponentBuilder $child): static
     {
+        echo "ComponentBuilder::addChild called for " . get_class($this) . " -> " . get_class($child) . "\n";
+        echo "  Before add - children hash: " . spl_object_hash($this) . "\n";
+        echo "  Before add - children array: " . (isset($this->children) ? "exists" : "not exists") . "\n";
+        echo "  Before add - children count: " . (isset($this->children) ? count($this->children) : "N/A") . "\n";
+        
         if (!$this->canHaveChildren()) {
             throw new InvalidArgumentException(static::class . ' cannot have children');
         }
 
         $this->children[] = $child;
         $child->parent = $this;
+        
+        echo "  After add - children count: " . count($this->children) . "\n";
+        echo "  After add - children[0] class: " . get_class($this->children[0]) . "\n";
+        
         return $this;
     }
 
@@ -84,11 +93,13 @@ abstract class ComponentBuilder
     }
 
     /**
-     * 显示组件（只对窗口有效）
+     * 显示组件
      */
     public function show(): void
     {
-        throw new BadMethodCallException('Only Window can be shown directly');
+        if ($this->handle) {
+            Control::show($this->handle);
+        }
     }
 
     /**
@@ -170,7 +181,27 @@ abstract class ComponentBuilder
 
         // 如果绑定了状态，自动更新状态
         if ($this->boundState && $event === 'change') {
-            StateManager::instance()->set($this->boundState, $this->getValue());
+            $value = $this->getValue();
+            
+            // 如果绑定路径包含点（如formData.name），同时更新对象和路径
+            if (strpos($this->boundState, '.') !== false) {
+                [$objectKey, $property] = explode('.', $this->boundState, 2);
+                
+                // 获取当前对象
+                $object = StateManager::instance()->get($objectKey, []);
+                
+                // 更新对象的属性
+                $object[$property] = $value;
+                
+                // 同时更新完整对象
+                StateManager::instance()->set($objectKey, $object);
+                
+                // 也更新路径本身（保持向后兼容）
+                StateManager::instance()->set($this->boundState, $value);
+            } else {
+                // 普通绑定，只更新键
+                StateManager::instance()->set($this->boundState, $value);
+            }
         }
     }
 
@@ -204,6 +235,40 @@ abstract class ComponentBuilder
     protected function state(): StateManager
     {
         return StateManager::instance();
+    }
+    
+    /**
+     * 隐藏组件
+     */
+    public function hide(): void
+    {
+        if ($this->handle) {
+            Control::hide($this->handle);
+        }
+    }
+    
+    /**
+     * 根据ID获取子组件
+     */
+    public function getComponentById(string $id): ?ComponentBuilder
+    {
+        // 检查当前组件 - 使用 $this->id 而不是 getConfig('id') 
+        // 因为 getConfig('id') 可能返回对象而不是字符串
+        if (isset($this->id) && $this->id === $id) {
+            return $this;
+        }
+        
+        // 递归查找子组件
+        if (isset($this->children)) {
+            foreach ($this->children as $child) {
+                $found = $child->getComponentById($id);
+                if ($found) {
+                    return $found;
+                }
+            }
+        }
+        
+        return null;
     }
 
     public function build(): CData

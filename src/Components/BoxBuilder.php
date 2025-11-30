@@ -61,4 +61,19 @@ class BoxBuilder extends ComponentBuilder
     {
         return $this->setConfig('stretchy', $stretchy);
     }
+    
+    /**
+     * 实现setValue方法以支持数据绑定
+     */
+    public function setValue($value): void
+    {
+        // 对于容器组件，控制显示/隐藏
+        if (is_bool($value)) {
+            if ($value) {
+                $this->show();
+            } else {
+                $this->hide();
+            }
+        }
+    }
 }
