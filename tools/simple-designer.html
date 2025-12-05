@@ -51,6 +51,108 @@
             width: 60px !important;
         }
         
+        /* 选项和标签页管理样式 */
+        .options-list, .tabs-list {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 8px;
+            background: #f8f9fa;
+        }
+        
+        .option-item, .tab-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            gap: 4px;
+        }
+        
+        .option-item.active, .tab-item.active {
+            background: #e3f2fd;
+            border-radius: 4px;
+            padding: 2px;
+        }
+        
+        .option-input, .tab-input {
+            flex: 1;
+            padding: 4px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+        
+        .option-remove, .tab-remove, .tab-activate {
+            padding: 2px 6px;
+            border: none;
+            border-radius: 2px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .option-remove, .tab-remove {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .option-remove:hover, .tab-remove:hover {
+            background: #c82333;
+        }
+        
+        .tab-activate {
+            background: #28a745;
+            color: white;
+        }
+        
+        .tab-activate:hover:not(:disabled) {
+            background: #218838;
+        }
+        
+        .tab-activate:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .option-add, .tab-add {
+            width: 100%;
+            padding: 6px;
+            margin-top: 4px;
+            border: 1px dashed #0078d4;
+            background: transparent;
+            color: #0078d4;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .option-add:hover, .tab-add:hover {
+            background: rgba(0, 120, 212, 0.1);
+        }
+        
+        /* 属性面板保存按钮样式 */
+        #savePropertiesBtn {
+            width: 100% !important;
+            padding: 10px !important;
+            margin-top: 10px !important;
+            background: #28a745 !important;
+            border: none !important;
+            border-radius: 4px !important;
+            color: white !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+        }
+        
+        #savePropertiesBtn:hover {
+            background: #218838 !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+        }
+        
+        #savePropertiesBtn:active {
+            transform: translateY(0) !important;
+            box-shadow: none !important;
+        }
+        
         .designer-canvas {
             flex: 1;
             background: #fafafa;
@@ -601,7 +703,46 @@
                         if (targetComponent && this.isContainerComponent(targetComponent.type)) {
                             this.addComponentToContainer(this.draggedComponent, targetComponent, x, y);
                         } else {
-                            this.addComponent(this.draggedComponent, x, y);
+                            // 如果拖拽的是非Window容器组件且画布上没有Window组件，则自动创建Window
+                            if (this.isContainerComponent(this.draggedComponent) && this.draggedComponent !== 'window') {
+                                const hasWindow = this.components.some(c => c.type === 'window');
+                                if (!hasWindow) {
+                                    // 创建默认Window组件
+                                    const windowComponent = {
+                                        id: `component_${++this.componentIdCounter}`,
+                                        type: 'window',
+                                        x: 0, // 初始坐标，居中逻辑将在下面处理
+                                        y: 0,
+                                        props: this.getDefaultProps('window'),
+                                        children: []
+                                    };
+                                    
+                                    // 使用与addComponent方法相同的居中逻辑
+                                    let width = 400;
+                                    let height = 300;
+                                    if (windowComponent.props.size) {
+                                        const [w, h] = windowComponent.props.size.split(',').map(s => parseInt(s.trim()));
+                                        if (!isNaN(w)) width = w;
+                                        if (!isNaN(h)) height = h;
+                                    }
+                                    
+                                    windowComponent.x = Math.max(50, (rect.width - width) / 2);
+                                    windowComponent.y = Math.max(50, (rect.height - height) / 2);
+                                    
+                                    this.components.push(windowComponent);
+                                    this.renderComponent(windowComponent);
+                                    this.hideEmptyState();
+                                    
+                                    // 将拖拽的组件添加到新创建的Window中
+                                    this.addComponentToContainer(this.draggedComponent, windowComponent, x, y);
+                                } else {
+                                    // 如果已经有Window，直接添加到画布
+                                    this.addComponent(this.draggedComponent, x, y);
+                                }
+                            } else {
+                                // 如果不是容器组件或就是Window组件，则直接添加到画布
+                                this.addComponent(this.draggedComponent, x, y);
+                            }
                         }
                     }
                 });
@@ -661,7 +802,9 @@
                         padded: 'true'
                     },
                     tab: {
-                        padded: 'true'
+                        padded: 'true',
+                        tabs: '标签页1,标签页2',
+                        activeTab: '0'
                     },
                     input: {
                         placeholder: '请输入文本',
@@ -678,6 +821,7 @@
                     },
                     combobox: {
                         selected: '0',
+                        options: '选项 1,选项 2,选项 3',
                         stretchy: 'horizontal'
                     },
                     spinbox: {
@@ -969,11 +1113,15 @@
                         } else if (component.props.stretchy === 'vertical') {
                             comboboxStyle = 'width: 100%; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;';
                         }
+                        
+                        const options = component.props.options ? component.props.options.split(',') : ['选项 1', '选项 2', '选项 3'];
+                        const selected = component.props.selected || '0';
+                        
                         content.innerHTML = `
                             <select class="ui-combobox" style="${comboboxStyle}">
-                                <option>选项 1</option>
-                                <option>选项 2</option>
-                                <option>选项 3</option>
+                                ${options.map((option, index) => 
+                                    `<option value="${index}" ${index == selected ? 'selected' : ''}>${option}</option>`
+                                ).join('')}
                             </select>
                         `;
                         break;
@@ -1171,8 +1319,27 @@
                 // 添加特定组件的属性
                 html += this.getComponentProperties(component);
 
+                // 添加保存按钮
+                html += `
+                    <div class="property-group">
+                        <div class="property-row">
+                            <button class="btn btn-primary" id="savePropertiesBtn" style="width: 100%; margin-top: 10px;">
+                                保存属性
+                            </button>
+                        </div>
+                    </div>
+                `;
+
                 propertiesPanel.innerHTML = html;
                 this.bindPropertyEvents(component);
+                
+                // 绑定保存按钮事件
+                const saveBtn = document.getElementById('savePropertiesBtn');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', () => {
+                        this.saveComponentProperties(component);
+                    });
+                }
             }
 
             getComponentProperties(component) {
@@ -1214,7 +1381,6 @@
                     case 'box':
                     case 'form':
                     case 'grid':
-                    case 'tab':
                         html += `
                             <div class="property-group">
                                 <h4>容器属性</h4>
@@ -1224,6 +1390,43 @@
                                         <option value="true" ${component.props.padded === 'true' ? 'selected' : ''}>是</option>
                                         <option value="false" ${component.props.padded === 'false' ? 'selected' : ''}>否</option>
                                     </select>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'tab':
+                        const tabs = component.props.tabs ? component.props.tabs.split(',') : ['标签页1', '标签页2'];
+                        const activeTab = parseInt(component.props.activeTab || '0');
+                        html += `
+                            <div class="property-group">
+                                <h4>标签页属性</h4>
+                                <div class="property-row">
+                                    <label class="property-label">内边距:</label>
+                                    <select class="property-input" data-prop="padded">
+                                        <option value="true" ${component.props.padded === 'true' ? 'selected' : ''}>是</option>
+                                        <option value="false" ${component.props.padded === 'false' ? 'selected' : ''}>否</option>
+                                    </select>
+                                </div>
+                                <div class="property-row">
+                                    <label class="property-label">当前标签:</label>
+                                    <select class="property-input" data-prop="activeTab">
+                                        ${tabs.map((tab, index) => 
+                                            `<option value="${index}" ${activeTab === index ? 'selected' : ''}>${tab}</option>`
+                                        ).join('')}
+                                    </select>
+                                </div>
+                                <div class="property-row">
+                                    <label class="property-label">标签列表:</label>
+                                    <div class="tabs-list">
+                                        ${tabs.map((tab, index) => `
+                                            <div class="tab-item ${activeTab === index ? 'active' : ''}">
+                                                <input type="text" class="tab-input" value="${tab}" data-index="${index}">
+                                                <button class="tab-remove" data-index="${index}">×</button>
+                                                <button class="tab-activate" data-index="${index}" ${activeTab === index ? 'disabled' : ''}>激活</button>
+                                            </div>
+                                        `).join('')}
+                                        <button class="tab-add">+ 添加标签页</button>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -1259,12 +1462,29 @@
                         break;
 
                     case 'combobox':
+                        const options = component.props.options ? component.props.options.split(',') : ['选项 1', '选项 2', '选项 3'];
                         html += `
                             <div class="property-group">
                                 <h4>下拉框属性</h4>
                                 <div class="property-row">
                                     <label class="property-label">选中项:</label>
-                                    <input type="number" class="property-input" data-prop="selected" value="${component.props.selected || '0'}" min="0">
+                                    <select class="property-input" data-prop="selected">
+                                        ${options.map((option, index) => 
+                                            `<option value="${index}" ${component.props.selected == index ? 'selected' : ''}>${option}</option>`
+                                        ).join('')}
+                                    </select>
+                                </div>
+                                <div class="property-row">
+                                    <label class="property-label">选项列表:</label>
+                                    <div class="options-list">
+                                        ${options.map((option, index) => `
+                                            <div class="option-item">
+                                                <input type="text" class="option-input" value="${option}" data-index="${index}">
+                                                <button class="option-remove" data-index="${index}">×</button>
+                                            </div>
+                                        `).join('')}
+                                        <button class="option-add">+ 添加选项</button>
+                                    </div>
                                 </div>
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
@@ -1477,10 +1697,193 @@
                         const prop = e.target.dataset.prop;
                         const value = e.target.value;
                         component.props[prop] = value;
-                        this.refreshComponent(component);
-                        this.updateCodePreview();
+                        // 注释掉实时刷新，只在保存时刷新
+                        // this.refreshComponent(component);
+                        // this.updateCodePreview();
                     });
                 });
+                
+                // Combobox 选项管理
+                if (component.type === 'combobox') {
+                    this.setupComboboxEvents(component);
+                }
+                
+                // Tab 标签页管理
+                if (component.type === 'tab') {
+                    this.setupTabEvents(component);
+                }
+            }
+            
+            saveComponentProperties(component) {
+                // 收集所有属性值
+                const propertyInputs = document.querySelectorAll('.property-input');
+                propertyInputs.forEach(input => {
+                    const prop = input.dataset.prop;
+                    const value = input.value;
+                    component.props[prop] = value;
+                });
+                
+                // 刷新组件显示
+                this.refreshComponent(component);
+                this.updateCodePreview();
+                
+                // 显示保存成功提示
+                this.showSaveNotification();
+            }
+            
+            showSaveNotification() {
+                // 创建保存成功提示
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: #28a745;
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 4px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                    z-index: 9999;
+                    font-size: 14px;
+                    animation: slideInRight 0.3s ease;
+                `;
+                notification.textContent = '属性已保存';
+                
+                // 添加动画样式
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOutRight {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                document.body.appendChild(notification);
+                
+                // 3秒后自动移除提示
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 3000);
+            }
+            
+            setupComboboxEvents(component) {
+                // 选项输入事件
+                const optionInputs = document.querySelectorAll('.option-input');
+                optionInputs.forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        const options = component.props.options ? component.props.options.split(',') : ['选项 1', '选项 2', '选项 3'];
+                        options[index] = e.target.value;
+                        component.props.options = options.join(',');
+                        this.refreshComponent(component);
+                        this.updateCodePreview();
+                        this.showProperties(component); // 刷新属性面板
+                    });
+                });
+                
+                // 删除选项事件
+                const removeBtns = document.querySelectorAll('.option-remove');
+                removeBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        let options = component.props.options ? component.props.options.split(',') : ['选项 1', '选项 2', '选项 3'];
+                        if (options.length > 1) {
+                            options.splice(index, 1);
+                            component.props.options = options.join(',');
+                            // 调整选中索引
+                            const currentSelected = parseInt(component.props.selected || '0');
+                            if (currentSelected >= options.length) {
+                                component.props.selected = (options.length - 1).toString();
+                            }
+                            this.refreshComponent(component);
+                            this.updateCodePreview();
+                            this.showProperties(component);
+                        }
+                    });
+                });
+                
+                // 添加选项事件
+                const addBtn = document.querySelector('.option-add');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        const options = component.props.options ? component.props.options.split(',') : ['选项 1', '选项 2', '选项 3'];
+                        options.push(`选项 ${options.length + 1}`);
+                        component.props.options = options.join(',');
+                        this.refreshComponent(component);
+                        this.updateCodePreview();
+                        this.showProperties(component);
+                    });
+                }
+            }
+            
+            setupTabEvents(component) {
+                // 标签输入事件
+                const tabInputs = document.querySelectorAll('.tab-input');
+                tabInputs.forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        const tabs = component.props.tabs ? component.props.tabs.split(',') : ['标签页1', '标签页2'];
+                        tabs[index] = e.target.value;
+                        component.props.tabs = tabs.join(',');
+                        this.refreshComponent(component);
+                        this.updateCodePreview();
+                        this.showProperties(component);
+                    });
+                });
+                
+                // 删除标签页事件
+                const removeBtns = document.querySelectorAll('.tab-remove');
+                removeBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        let tabs = component.props.tabs ? component.props.tabs.split(',') : ['标签页1', '标签页2'];
+                        if (tabs.length > 1) {
+                            tabs.splice(index, 1);
+                            component.props.tabs = tabs.join(',');
+                            // 调整当前激活标签
+                            const currentActive = parseInt(component.props.activeTab || '0');
+                            if (currentActive >= tabs.length) {
+                                component.props.activeTab = (tabs.length - 1).toString();
+                            }
+                            this.refreshComponent(component);
+                            this.updateCodePreview();
+                            this.showProperties(component);
+                        }
+                    });
+                });
+                
+                // 激活标签页事件
+                const activateBtns = document.querySelectorAll('.tab-activate');
+                activateBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        component.props.activeTab = index.toString();
+                        this.refreshComponent(component);
+                        this.updateCodePreview();
+                        this.showProperties(component);
+                    });
+                });
+                
+                // 添加标签页事件
+                const addBtn = document.querySelector('.tab-add');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        const tabs = component.props.tabs ? component.props.tabs.split(',') : ['标签页1', '标签页2'];
+                        tabs.push(`标签页${tabs.length + 1}`);
+                        component.props.tabs = tabs.join(',');
+                        this.refreshComponent(component);
+                        this.updateCodePreview();
+                        this.showProperties(component);
+                    });
+                }
             }
 
             refreshComponent(component) {
@@ -1845,7 +2248,13 @@
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 comboboxHTML += ` stretchy="${component.props.stretchy}"`;
                             }
-                            comboboxHTML += '></combobox>';
+                            
+                            const options = component.props.options ? component.props.options.split(',') : ['选项 1', '选项 2', '选项 3'];
+                            comboboxHTML += '>\n';
+                            options.forEach(option => {
+                                comboboxHTML += `${spaces}    <option>${option}</option>\n`;
+                            });
+                            comboboxHTML += `${spaces}</combobox>`;
                             return comboboxHTML;
 
                         case 'spinbox':
