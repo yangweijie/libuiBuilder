@@ -127,6 +127,34 @@
             background: rgba(0, 120, 212, 0.1);
         }
         
+        /* HTML风格选择器样式 */
+        .html-style-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 20px;
+        }
+        
+        .html-style-selector label {
+            font-size: 12px;
+            color: #6c757d;
+            white-space: nowrap;
+        }
+        
+        .style-select {
+            padding: 4px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 12px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .style-select:focus {
+            outline: none;
+            border-color: #0078d4;
+        }
+        
         /* 属性面板保存按钮样式 */
         #savePropertiesBtn {
             width: 100% !important;
@@ -392,6 +420,13 @@
                 <button class="platform-btn" data-platform="macos">macOS</button>
                 <button class="platform-btn" data-platform="linux">Linux</button>
             </div>
+            <div class="html-style-selector">
+                <label for="htmlStyleSelect">HTML风格:</label>
+                <select id="htmlStyleSelect" class="style-select">
+                    <option value="gui">GUI标签</option>
+                    <option value="html">类HTML标签</option>
+                </select>
+            </div>
         </div>
         <div class="header-right">
             <button class="btn btn-primary" id="saveBtn">保存</button>
@@ -623,6 +658,7 @@
                 this.selectedComponent = null;
                 this.componentIdCounter = 0;
                 this.draggedComponent = null;
+                this.htmlGenerationStyle = 'gui'; // 'gui' 或 'html'
                 this.init();
             }
 
@@ -647,6 +683,15 @@
                 document.getElementById('exportBtn').addEventListener('click', () => this.export());
                 document.getElementById('previewBtn').addEventListener('click', () => this.preview());
                 document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
+                
+                // HTML生成风格选择器
+                const styleSelect = document.getElementById('htmlStyleSelect');
+                if (styleSelect) {
+                    styleSelect.addEventListener('change', (e) => {
+                        this.htmlGenerationStyle = e.target.value;
+                        this.updateCodePreview();
+                    });
+                }
             }
 
             setupDragAndDrop() {
@@ -2092,13 +2137,21 @@
             }
 
             generateHTML() {
+                const self = this; // 保存this引用
+                
                 function generateComponentHTML(component, indent = 0) {
                     const spaces = '    '.repeat(indent);
+
+                    // 根据生成风格选择标签
+                    function getTag(tagGui, tagHtml) {
+                        return self.htmlGenerationStyle === 'html' ? tagHtml : tagGui;
+                    }
 
                     switch (component.type) {
                         case 'window':
                             const size = component.props.size || '400,300';
-                            let windowHTML = `${spaces}<window title="${component.props.title || '窗口'}" size="${size}"`;
+                            const tag = getTag('window', 'div');
+                            let windowHTML = `${spaces}<${tag} title="${component.props.title || '窗口'}" size="${size}"`;
                             
                             if (component.props.centered === 'true') windowHTML += ' centered="true"';
                             if (component.props.margined === 'true') windowHTML += ' margined="true"';
@@ -2114,11 +2167,12 @@
                                 windowHTML += `${spaces}    窗口内容\n`;
                             }
                             
-                            windowHTML += `${spaces}</window>`;
+                            windowHTML += `${spaces}</${tag}>`;
                             return windowHTML;
 
                         case 'hbox':
-                            let hboxHTML = `${spaces}<hbox`;
+                            const hboxTag = getTag('hbox', 'div');
+                            let hboxHTML = `${spaces}<${hboxTag}`;
                             if (component.props.padded === 'true') hboxHTML += ' padded="true"';
                             hboxHTML += '>\n';
                             
@@ -2131,11 +2185,12 @@
                                 hboxHTML += `${spaces}    HBox 内容\n`;
                             }
                             
-                            hboxHTML += `${spaces}</hbox>`;
+                            hboxHTML += `${spaces}</${hboxTag}>`;
                             return hboxHTML;
 
                         case 'vbox':
-                            let vboxHTML = `${spaces}<vbox`;
+                            const vboxTag = getTag('vbox', 'div');
+                            let vboxHTML = `${spaces}<${vboxTag}`;
                             if (component.props.padded === 'true') vboxHTML += ' padded="true"';
                             vboxHTML += '>\n';
                             
@@ -2148,11 +2203,12 @@
                                 vboxHTML += `${spaces}    VBox 内容\n`;
                             }
                             
-                            vboxHTML += `${spaces}</vbox>`;
+                            vboxHTML += `${spaces}</${vboxTag}>`;
                             return vboxHTML;
 
                         case 'box':
-                            let boxHTML = `${spaces}<box`;
+                            const boxTag = getTag('box', 'div');
+                            let boxHTML = `${spaces}<${boxTag}`;
                             if (component.props.padded === 'true') boxHTML += ' padded="true"';
                             boxHTML += '>\n';
                             
@@ -2165,11 +2221,12 @@
                                 boxHTML += `${spaces}    Box 内容\n`;
                             }
                             
-                            boxHTML += `${spaces}</box>`;
+                            boxHTML += `${spaces}</${boxTag}>`;
                             return boxHTML;
 
                         case 'form':
-                            let formHTML = `${spaces}<form`;
+                            const formTag = getTag('form', 'form');
+                            let formHTML = `${spaces}<${formTag}`;
                             if (component.props.padded === 'true') formHTML += ' padded="true"';
                             formHTML += '>\n';
                             
@@ -2182,11 +2239,12 @@
                                 formHTML += `${spaces}    Form 内容\n`;
                             }
                             
-                            formHTML += `${spaces}</form>`;
+                            formHTML += `${spaces}</${formTag}>`;
                             return formHTML;
 
                         case 'grid':
-                            let gridHTML = `${spaces}<grid`;
+                            const gridTag = getTag('grid', 'div');
+                            let gridHTML = `${spaces}<${gridTag}`;
                             if (component.props.padded === 'true') gridHTML += ' padded="true"';
                             gridHTML += '>\n';
                             
@@ -2199,11 +2257,12 @@
                                 gridHTML += `${spaces}    Grid 内容\n`;
                             }
                             
-                            gridHTML += `${spaces}</grid>`;
+                            gridHTML += `${spaces}</${gridTag}>`;
                             return gridHTML;
 
                         case 'tab':
-                            let tabHTML = `${spaces}<tab`;
+                            const tabTag = getTag('tab', 'div');
+                            let tabHTML = `${spaces}<${tabTag}`;
                             if (component.props.padded === 'true') tabHTML += ' padded="true"';
                             tabHTML += '>\n';
                             
@@ -2216,11 +2275,12 @@
                                 tabHTML += `${spaces}    Tab 内容\n`;
                             }
                             
-                            tabHTML += `${spaces}</tab>`;
+                            tabHTML += `${spaces}</${tabTag}>`;
                             return tabHTML;
 
                         case 'input':
-                            let inputHTML = `${spaces}<input placeholder="${component.props.placeholder || '请输入'}"`;
+                            const inputTag = getTag('input', 'input');
+                            let inputHTML = `${spaces}<${inputTag} placeholder="${component.props.placeholder || '请输入'}"`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 inputHTML += ` stretchy="${component.props.stretchy}"`;
                             }
@@ -2228,7 +2288,8 @@
                             return inputHTML;
 
                         case 'textarea':
-                            let textareaHTML = `${spaces}<textarea placeholder="${component.props.placeholder || '请输入多行文本'}" rows="${component.props.rows || '3'}"`;
+                            const textareaTag = getTag('textarea', 'textarea');
+                            let textareaHTML = `${spaces}<${textareaTag} placeholder="${component.props.placeholder || '请输入多行文本'}" rows="${component.props.rows || '3'}"`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 textareaHTML += ` stretchy="${component.props.stretchy}"`;
                             }
@@ -2236,7 +2297,8 @@
                             return textareaHTML;
 
                         case 'password':
-                            let passwordHTML = `${spaces}<input type="password" placeholder="${component.props.placeholder || '请输入密码'}"`;
+                            const passwordTag = getTag('password', 'input');
+                            let passwordHTML = `${spaces}<${passwordTag} type="password" placeholder="${component.props.placeholder || '请输入密码'}"`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 passwordHTML += ` stretchy="${component.props.stretchy}"`;
                             }
@@ -2244,37 +2306,43 @@
                             return passwordHTML;
 
                         case 'combobox':
-                            let comboboxHTML = `${spaces}<combobox selected="${component.props.selected || '0'}"`;
+                            const comboboxTag = getTag('combobox', 'select');
+                            let comboboxHTML = `${spaces}<${comboboxTag} selected="${component.props.selected || '0'}"`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 comboboxHTML += ` stretchy="${component.props.stretchy}"`;
                             }
                             
-                            const options = component.props.options ? component.props.options.split(',') : ['选项 1', '选项 2', '选项 3'];
                             comboboxHTML += '>\n';
+                            
+                            const options = component.props.options ? component.props.options.split(',') : ['选项 1', '选项 2', '选项 3'];
                             options.forEach(option => {
                                 comboboxHTML += `${spaces}    <option>${option}</option>\n`;
                             });
-                            comboboxHTML += `${spaces}</combobox>`;
+                            
+                            comboboxHTML += `${spaces}</${comboboxTag}>`;
                             return comboboxHTML;
 
                         case 'spinbox':
-                            let spinboxHTML = `${spaces}<spinbox min="${component.props.min || '0'}" max="${component.props.max || '100'}" value="${component.props.value || '0'}"`;
+                            const spinboxTag = getTag('spinbox', 'input');
+                            let spinboxHTML = `${spaces}<${spinboxTag} type="number" min="${component.props.min || '0'}" max="${component.props.max || '100'}" value="${component.props.value || '0'}"`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 spinboxHTML += ` stretchy="${component.props.stretchy}"`;
                             }
-                            spinboxHTML += '></spinbox>';
+                            spinboxHTML += ' />';
                             return spinboxHTML;
 
                         case 'slider':
-                            let sliderHTML = `${spaces}<slider min="${component.props.min || '0'}" max="${component.props.max || '100'}" value="${component.props.value || '50'}"`;
+                            const sliderTag = getTag('slider', 'input');
+                            let sliderHTML = `${spaces}<${sliderTag} type="range" min="${component.props.min || '0'}" max="${component.props.max || '100'}" value="${component.props.value || '50'}"`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 sliderHTML += ` stretchy="${component.props.stretchy}"`;
                             }
-                            sliderHTML += '></slider>';
+                            sliderHTML += ' />';
                             return sliderHTML;
 
                         case 'button':
-                            let buttonHTML = `${spaces}<button`;
+                            const buttonTag = getTag('button', 'button');
+                            let buttonHTML = `${spaces}<${buttonTag}`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 buttonHTML += ` stretchy="${component.props.stretchy}"`;
                             }
@@ -2282,49 +2350,57 @@
                             return buttonHTML;
 
                         case 'checkbox':
-                            let checkboxHTML = `${spaces}<checkbox text="${component.props.text || '复选框'}"`;
-                            if (component.props.checked === 'true') checkboxHTML += ' checked="true"';
+                            const checkboxTag = getTag('checkbox', 'input');
+                            let checkboxHTML = `${spaces}<${checkboxTag} type="checkbox"`;
+                            if (component.props.text) checkboxHTML += ` value="${component.props.text}"`;
+                            if (component.props.checked === 'true') checkboxHTML += ' checked="checked"';
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 checkboxHTML += ` stretchy="${component.props.stretchy}"`;
                             }
-                            checkboxHTML += '></checkbox>';
+                            checkboxHTML += ' />';
                             return checkboxHTML;
 
                         case 'radio':
-                            let radioHTML = `${spaces}<radio text="${component.props.text || '单选框'}"`;
+                            const radioTag = getTag('radio', 'input');
+                            let radioHTML = `${spaces}<${radioTag} type="radio"`;
+                            if (component.props.text) radioHTML += ` value="${component.props.text}"`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 radioHTML += ` stretchy="${component.props.stretchy}"`;
                             }
-                            radioHTML += '></radio>';
+                            radioHTML += ' />';
                             return radioHTML;
 
                         case 'label':
-                            let labelHTML = `${spaces}<label`;
+                            const labelTag = getTag('label', 'label');
+                            let labelHTML = `${spaces}<${labelTag}`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 labelHTML += ` stretchy="${component.props.stretchy}"`;
                             }
-                            labelHTML += `>${component.props.text || '标签'}</label>`;
+                            labelHTML += `>${component.props.text || '标签'}</${labelTag}>`;
                             return labelHTML;
 
                         case 'progressbar':
-                            let progressbarHTML = `${spaces}<progressbar value="${component.props.value || '60'}"`;
+                            const progressbarTag = getTag('progressbar', 'progress');
+                            let progressbarHTML = `${spaces}<${progressbarTag} value="${component.props.value || '60'}" max="100"`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 progressbarHTML += ` stretchy="${component.props.stretchy}"`;
                             }
-                            progressbarHTML += '></progressbar>';
+                            progressbarHTML += '></progress>';
                             return progressbarHTML;
 
                         case 'separator':
-                            let separatorHTML = `${spaces}<separator`;
+                            const separatorTag = getTag('separator', 'hr');
+                            let separatorHTML = `${spaces}<${separatorTag}`;
                             if (component.props.orientation === 'vertical') separatorHTML += ' orientation="vertical"';
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 separatorHTML += ` stretchy="${component.props.stretchy}"`;
                             }
-                            separatorHTML += '></separator>';
+                            separatorHTML += ' />';
                             return separatorHTML;
 
                         case 'table':
-                            let tableHTML = `${spaces}<table`;
+                            const tableTag = getTag('table', 'table');
+                            let tableHTML = `${spaces}<${tableTag}`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 tableHTML += ` stretchy="${component.props.stretchy}"`;
                             }
@@ -2336,7 +2412,12 @@
                     }
                 }
 
-                let html = '<!DOCTYPE html>\n<html>\n<head>\n    <meta charset="UTF-8">\n    <title>libuiBuilder 生成的界面</title>\n</head>\n<body>\n';
+                let html;
+                if (this.htmlGenerationStyle === 'html') {
+                    html = '<!DOCTYPE html>\n<html>\n<head>\n    <meta charset="UTF-8">\n    <title>libuiBuilder 生成的界面</title>\n</head>\n<body>\n';
+                } else {
+                    html = '<!DOCTYPE html>\n<ui version="1.0">\n';
+                }
                 
                 if (this.components.length > 0) {
                     this.components.forEach(component => {
@@ -2344,7 +2425,11 @@
                     });
                 }
                 
-                html += '</body>\n</html>';
+                if (this.htmlGenerationStyle === 'html') {
+                    html += '</body>\n</html>';
+                } else {
+                    html += '</ui>';
+                }
                 return html;
             }
 
@@ -2429,12 +2514,18 @@
             const floatingBtn = document.getElementById('floatingToggleBtn');
             const toggleBtn = document.getElementById('toggleCodeBtn');
             const expandBtn = document.getElementById('expandCodeBtn');
+            const styleSelect = document.getElementById('htmlStyleSelect');
             
             // 确保初始状态是展开的
             panel.classList.remove('collapsed');
             floatingBtn.innerHTML = '&lt;/&gt;';
             toggleBtn.style.display = 'inline-block';
             expandBtn.style.display = 'none';
+            
+            // 设置HTML生成风格选择器的默认值
+            if (styleSelect) {
+                styleSelect.value = designer.htmlGenerationStyle;
+            }
             
             // 绑定代码预览相关事件
             document.getElementById('copyCodeBtn').addEventListener('click', () => {
