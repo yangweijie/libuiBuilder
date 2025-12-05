@@ -1,0 +1,17 @@
+{
+  "name": "libuibuilder-designer-test",
+  "version": "1.0.0",
+  "description": "端到端测试脚本用于重现libuiBuilder设计器bug",
+  "main": "test_designer_bug.js",
+  "scripts": {
+    "test": "node test_designer_bug.js",
+    "test:headless": "node test_designer_bug_headless.js"
+  },
+  "keywords": ["libui", "designer", "e2e-test", "puppeteer"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  },
+  "devDependencies": {}
+}
