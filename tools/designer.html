@@ -57,13 +57,15 @@
             border-radius: 4px;
             padding: 8px;
             background: #f8f9fa;
+            width: 70%;
+            box-sizing: border-box;
         }
         
         .option-item, .tab-item {
             display: flex;
             align-items: center;
-            margin-bottom: 6px;
-            gap: 4px;
+            margin-bottom: 8px;
+            gap: 8px;
         }
         
         .option-item.active, .tab-item.active {
@@ -78,14 +80,17 @@
             border: 1px solid #dee2e6;
             border-radius: 2px;
             font-size: 12px;
+            min-width: 0; /* 防止flex子项溢出 */
         }
         
         .option-remove, .tab-remove, .tab-activate {
-            padding: 2px 6px;
+            padding: 4px 8px;
             border: none;
             border-radius: 2px;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0; /* 防止按钮被压缩 */
         }
         
         .option-remove, .tab-remove {
@@ -100,6 +105,7 @@
         .tab-activate {
             background: #28a745;
             color: white;
+            width: 45px;
         }
         
         .tab-activate:hover:not(:disabled) {
@@ -357,25 +363,64 @@
             font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
         }
         
-        /* 浮动按钮 */
         .floating-btn {
             position: fixed;
-            bottom: 220px;
+            bottom: 20px;
             right: 20px;
-            width: 48px;
-            height: 48px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             border: none;
-            background: #0078d4;
+            background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
             color: white;
-            font-size: 18px;
+            font-size: 22px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Consolas', monospace;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 20px rgba(0,120,212,0.25), 0 2px 6px rgba(0,0,0,0.15);
             z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            line-height: 1;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            /* 确保图标完美居中 */
+            text-indent: 0;
+            /* 添加微妙的内边距确保视觉居中 */
+            padding: 0 2px;
         }
         
         .floating-btn:hover {
-            background: #005a9e;
+            background: linear-gradient(135deg, #106ebe 0%, #004a8c 100%);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,120,212,0.35), 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .floating-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,120,212,0.3), 0 2px 6px rgba(0,0,0,0.15);
+        }
+        
+        /* 添加发光效果 */
+        .floating-btn::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .floating-btn:hover::before {
+            opacity: 1;
         }
         
         .property-group {
@@ -3409,13 +3454,17 @@
             if (panel.classList.contains('collapsed')) {
                 // 当前是收起状态，展开
                 panel.classList.remove('collapsed');
-                floatingBtn.innerHTML = '&lt;/&gt;';
+                panel.style.display = 'block'; // 显示整个footer
+                floatingBtn.style.display = 'none'; // 隐藏浮动按钮
+                floatingBtn.innerHTML = '&lt;/&gt;'; // 保持图标不变
                 toggleBtn.style.display = 'inline-block';
                 expandBtn.style.display = 'none';
             } else {
                 // 当前是展开状态，收起
                 panel.classList.add('collapsed');
-                floatingBtn.innerHTML = '1';
+                panel.style.display = 'none'; // 隐藏整个footer
+                floatingBtn.style.display = 'flex'; // 显示浮动按钮
+                floatingBtn.innerHTML = '&lt;/&gt;'; // 保持图标不变
                 toggleBtn.style.display = 'none';
                 expandBtn.style.display = 'inline-block';
             }
@@ -3435,7 +3484,9 @@
             
             // 确保初始状态是展开的
             panel.classList.remove('collapsed');
-            floatingBtn.innerHTML = '&lt;/&gt;';
+            panel.style.display = 'block'; // 显示整个footer
+            floatingBtn.style.display = 'none'; // 隐藏浮动按钮
+            floatingBtn.innerHTML = '&lt;/&gt;'; // 保持图标不变
             toggleBtn.style.display = 'inline-block';
             expandBtn.style.display = 'none';
             
