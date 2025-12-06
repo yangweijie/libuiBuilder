@@ -685,6 +685,17 @@
                 this.updatingProperties = false; // 防止属性更新循环
                 this.init();
             }
+            
+            // 生成简化的拉伸选项HTML
+            getStretchyOptions(currentValue) {
+                const isStretched = currentValue !== 'false';
+                return `
+                    <select class="property-input" data-prop="stretchy">
+                        <option value="false" ${!isStretched ? 'selected' : ''}>不拉伸</option>
+                        <option value="true" ${isStretched ? 'selected' : ''}>拉伸</option>
+                    </select>
+                `;
+            }
 
             init() {
                 this.setupEventListeners();
@@ -921,7 +932,7 @@
                     },
                     input: {
                         placeholder: '请输入文本',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -932,7 +943,7 @@
                     textarea: {
                         placeholder: '请输入多行文本',
                         rows: '3',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -942,7 +953,7 @@
                     },
                     password: {
                         placeholder: '请输入密码',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -953,7 +964,7 @@
                     combobox: {
                         selected: '0',
                         options: '选项 1,选项 2,选项 3',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -965,7 +976,7 @@
                         min: '0',
                         max: '100',
                         value: '0',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -977,7 +988,7 @@
                         min: '0',
                         max: '100',
                         value: '50',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -987,7 +998,7 @@
                     },
                     button: {
                         text: '按钮',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -998,7 +1009,7 @@
                     checkbox: {
                         text: '复选框',
                         checked: 'false',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -1008,7 +1019,7 @@
                     },
                     radio: {
                         text: '单选框',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -1018,7 +1029,7 @@
                     },
                     label: {
                         text: '标签文本',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -1028,7 +1039,7 @@
                     },
                     progressbar: {
                         value: '60',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -1038,7 +1049,7 @@
                     },
                     separator: {
                         orientation: 'horizontal',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -1049,7 +1060,7 @@
                     table: {
                         columns: '列1,列2',
                         data: '数据1,数据2',
-                        stretchy: 'horizontal',
+                        stretchy: 'true',
                         // Grid布局属性
                         row: '0',
                         col: '0',
@@ -1442,10 +1453,8 @@
 
                     case 'input':
                         let inputStyle = 'width: 200px; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px;';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             inputStyle = 'flex: 1; min-width: 80px; max-width: 100%; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            inputStyle = 'width: 100%; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;';
                         }
                         content.innerHTML = `
                             <input type="text" class="ui-entry" placeholder="${component.props.placeholder || '请输入文本'}" style="${inputStyle}">
@@ -1454,10 +1463,8 @@
 
                     case 'textarea':
                         let textareaStyle = 'width: 200px; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px;';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             textareaStyle = 'flex: 1; min-width: 80px; max-width: 100%; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            textareaStyle = 'width: 100%; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;';
                         }
                         content.innerHTML = `
                             <textarea class="ui-multiline-entry" placeholder="${component.props.placeholder || '请输入多行文本'}" rows="${component.props.rows || '3'}" style="${textareaStyle}"></textarea>
@@ -1466,10 +1473,8 @@
 
                     case 'password':
                         let passwordStyle = 'width: 200px; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px;';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             passwordStyle = 'flex: 1; min-width: 80px; max-width: 100%; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            passwordStyle = 'width: 100%; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;';
                         }
                         content.innerHTML = `
                             <input type="password" class="ui-entry" placeholder="${component.props.placeholder || '请输入密码'}" style="${passwordStyle}">
@@ -1478,10 +1483,8 @@
 
                     case 'combobox':
                         let comboboxStyle = 'width: 150px; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px;';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             comboboxStyle = 'flex: 1; min-width: 80px; max-width: 100%; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            comboboxStyle = 'width: 100%; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;';
                         }
                         
                         const options = component.props.options ? component.props.options.split(',') : ['选项 1', '选项 2', '选项 3'];
@@ -1498,10 +1501,8 @@
 
                     case 'spinbox':
                         let spinboxStyle = 'width: 120px;';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             spinboxStyle = 'flex: 1; min-width: 80px; max-width: 100%;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            spinboxStyle = 'width: 100%;';
                         }
                         content.innerHTML = `
                             <div class="ui-spinbox" style="${spinboxStyle}">
@@ -1514,10 +1515,8 @@
 
                     case 'slider':
                         let sliderStyle = 'width: 200px;';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             sliderStyle = 'flex: 1; min-width: 80px; max-width: 100%;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            sliderStyle = 'width: 100%;';
                         }
                         content.innerHTML = `
                             <div class="ui-slider" style="${sliderStyle}">
@@ -1529,10 +1528,8 @@
 
                     case 'button':
                         let buttonStyle = 'padding: 6px 16px; border: 1px solid #0078d4; background: #0078d4; color: white; border-radius: 4px; cursor: pointer;';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             buttonStyle = 'flex: 1; min-width: 80px; max-width: 100%; padding: 6px 16px; border: 1px solid #0078d4; background: #0078d4; color: white; border-radius: 4px; cursor: pointer; box-sizing: border-box;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            buttonStyle = 'width: 100%; padding: 6px 16px; border: 1px solid #0078d4; background: #0078d4; color: white; border-radius: 4px; cursor: pointer; box-sizing: border-box;';
                         }
                         content.innerHTML = `
                             <button class="ui-button" style="${buttonStyle}">
@@ -1543,10 +1540,8 @@
 
                     case 'checkbox':
                         let checkboxStyle = '';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             checkboxStyle = 'flex: 1;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            checkboxStyle = 'width: 100%;';
                         }
                         content.innerHTML = `
                             <label class="ui-checkbox" style="${checkboxStyle}">
@@ -1558,10 +1553,8 @@
 
                     case 'radio':
                         let radioStyle = '';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             radioStyle = 'flex: 1;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            radioStyle = 'width: 100%;';
                         }
                         content.innerHTML = `
                             <div class="ui-radio-buttons" style="${radioStyle}">
@@ -1575,10 +1568,8 @@
 
                     case 'label':
                         let labelStyle = 'font-size: 14px; color: #333;';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             labelStyle = 'flex: 1; font-size: 14px; color: #333;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            labelStyle = 'width: 100%; font-size: 14px; color: #333;';
                         }
                         content.innerHTML = `
                             <span class="ui-label" style="${labelStyle}">
@@ -1589,10 +1580,8 @@
 
                     case 'progressbar':
                         let progressbarStyle = 'width: 200px;';
-                        if (component.props.stretchy === 'true' || component.props.stretchy === 'horizontal') {
+                        if (component.props.stretchy === 'true') {
                             progressbarStyle = 'flex: 1; min-width: 80px; max-width: 100%;';
-                        } else if (component.props.stretchy === 'vertical') {
-                            progressbarStyle = 'width: 100%;';
                         }
                         content.innerHTML = `
                             <div class="ui-progress-bar" style="${progressbarStyle}">
@@ -1929,12 +1918,7 @@
                                 ` : ''}
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
-                                    <select class="property-input" data-prop="stretchy">
-                                        <option value="false" ${component.props.stretchy === 'false' ? 'selected' : ''}>不拉伸</option>
-                                        <option value="true" ${component.props.stretchy === 'true' ? 'selected' : ''}>全部拉伸</option>
-                                        <option value="horizontal" ${component.props.stretchy === 'horizontal' ? 'selected' : ''}>水平拉伸</option>
-                                        <option value="vertical" ${component.props.stretchy === 'vertical' ? 'selected' : ''}>垂直拉伸</option>
-                                    </select>
+                                    ${this.getStretchyOptions(component.props.stretchy)}
                                 </div>
                             </div>
                         `;
@@ -1967,12 +1951,7 @@
                                 </div>
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
-                                    <select class="property-input" data-prop="stretchy">
-                                        <option value="false" ${component.props.stretchy === 'false' ? 'selected' : ''}>不拉伸</option>
-                                        <option value="true" ${component.props.stretchy === 'true' ? 'selected' : ''}>全部拉伸</option>
-                                        <option value="horizontal" ${component.props.stretchy === 'horizontal' ? 'selected' : ''}>水平拉伸</option>
-                                        <option value="vertical" ${component.props.stretchy === 'vertical' ? 'selected' : ''}>垂直拉伸</option>
-                                    </select>
+                                    ${this.getStretchyOptions(component.props.stretchy)}
                                 </div>
                             </div>
                         `;
@@ -1997,12 +1976,7 @@
                                 </div>
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
-                                    <select class="property-input" data-prop="stretchy">
-                                        <option value="false" ${component.props.stretchy === 'false' ? 'selected' : ''}>不拉伸</option>
-                                        <option value="true" ${component.props.stretchy === 'true' ? 'selected' : ''}>全部拉伸</option>
-                                        <option value="horizontal" ${component.props.stretchy === 'horizontal' ? 'selected' : ''}>水平拉伸</option>
-                                        <option value="vertical" ${component.props.stretchy === 'vertical' ? 'selected' : ''}>垂直拉伸</option>
-                                    </select>
+                                    ${this.getStretchyOptions(component.props.stretchy)}
                                 </div>
                             </div>
                         `;
@@ -2018,12 +1992,7 @@
                                 </div>
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
-                                    <select class="property-input" data-prop="stretchy">
-                                        <option value="false" ${component.props.stretchy === 'false' ? 'selected' : ''}>不拉伸</option>
-                                        <option value="true" ${component.props.stretchy === 'true' ? 'selected' : ''}>全部拉伸</option>
-                                        <option value="horizontal" ${component.props.stretchy === 'horizontal' ? 'selected' : ''}>水平拉伸</option>
-                                        <option value="vertical" ${component.props.stretchy === 'vertical' ? 'selected' : ''}>垂直拉伸</option>
-                                    </select>
+                                    ${this.getStretchyOptions(component.props.stretchy)}
                                 </div>
                             </div>
                         `;
@@ -2042,12 +2011,7 @@
                                 </div>
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
-                                    <select class="property-input" data-prop="stretchy">
-                                        <option value="false" ${component.props.stretchy === 'false' ? 'selected' : ''}>不拉伸</option>
-                                        <option value="true" ${component.props.stretchy === 'true' ? 'selected' : ''}>全部拉伸</option>
-                                        <option value="horizontal" ${component.props.stretchy === 'horizontal' ? 'selected' : ''}>水平拉伸</option>
-                                        <option value="vertical" ${component.props.stretchy === 'vertical' ? 'selected' : ''}>垂直拉伸</option>
-                                    </select>
+                                    ${this.getStretchyOptions(component.props.stretchy)}
                                 </div>
                             </div>
                         `;
@@ -2063,12 +2027,7 @@
                                 </div>
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
-                                    <select class="property-input" data-prop="stretchy">
-                                        <option value="false" ${component.props.stretchy === 'false' ? 'selected' : ''}>不拉伸</option>
-                                        <option value="true" ${component.props.stretchy === 'true' ? 'selected' : ''}>全部拉伸</option>
-                                        <option value="horizontal" ${component.props.stretchy === 'horizontal' ? 'selected' : ''}>水平拉伸</option>
-                                        <option value="vertical" ${component.props.stretchy === 'vertical' ? 'selected' : ''}>垂直拉伸</option>
-                                    </select>
+                                    ${this.getStretchyOptions(component.props.stretchy)}
                                 </div>
                             </div>
                         `;
@@ -2084,12 +2043,7 @@
                                 </div>
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
-                                    <select class="property-input" data-prop="stretchy">
-                                        <option value="false" ${component.props.stretchy === 'false' ? 'selected' : ''}>不拉伸</option>
-                                        <option value="true" ${component.props.stretchy === 'true' ? 'selected' : ''}>全部拉伸</option>
-                                        <option value="horizontal" ${component.props.stretchy === 'horizontal' ? 'selected' : ''}>水平拉伸</option>
-                                        <option value="vertical" ${component.props.stretchy === 'vertical' ? 'selected' : ''}>垂直拉伸</option>
-                                    </select>
+                                    ${this.getStretchyOptions(component.props.stretchy)}
                                 </div>
                             </div>
                         `;
@@ -2112,12 +2066,7 @@
                                 </div>
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
-                                    <select class="property-input" data-prop="stretchy">
-                                        <option value="false" ${component.props.stretchy === 'false' ? 'selected' : ''}>不拉伸</option>
-                                        <option value="true" ${component.props.stretchy === 'true' ? 'selected' : ''}>全部拉伸</option>
-                                        <option value="horizontal" ${component.props.stretchy === 'horizontal' ? 'selected' : ''}>水平拉伸</option>
-                                        <option value="vertical" ${component.props.stretchy === 'vertical' ? 'selected' : ''}>垂直拉伸</option>
-                                    </select>
+                                    ${this.getStretchyOptions(component.props.stretchy)}
                                 </div>
                             </div>
                         `;
@@ -2133,12 +2082,7 @@
                                 </div>
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
-                                    <select class="property-input" data-prop="stretchy">
-                                        <option value="false" ${component.props.stretchy === 'false' ? 'selected' : ''}>不拉伸</option>
-                                        <option value="true" ${component.props.stretchy === 'true' ? 'selected' : ''}>全部拉伸</option>
-                                        <option value="horizontal" ${component.props.stretchy === 'horizontal' ? 'selected' : ''}>水平拉伸</option>
-                                        <option value="vertical" ${component.props.stretchy === 'vertical' ? 'selected' : ''}>垂直拉伸</option>
-                                    </select>
+                                    ${this.getStretchyOptions(component.props.stretchy)}
                                 </div>
                             </div>
                         `;
@@ -2154,12 +2098,7 @@
                                 </div>
                                 <div class="property-row">
                                     <label class="property-label">拉伸:</label>
-                                    <select class="property-input" data-prop="stretchy">
-                                        <option value="false" ${component.props.stretchy === 'false' ? 'selected' : ''}>不拉伸</option>
-                                        <option value="true" ${component.props.stretchy === 'true' ? 'selected' : ''}>全部拉伸</option>
-                                        <option value="horizontal" ${component.props.stretchy === 'horizontal' ? 'selected' : ''}>水平拉伸</option>
-                                        <option value="vertical" ${component.props.stretchy === 'vertical' ? 'selected' : ''}>垂直拉伸</option>
-                                    </select>
+                                    ${this.getStretchyOptions(component.props.stretchy)}
                                 </div>
                             </div>
                         `;
@@ -2825,28 +2764,28 @@
                 
                 // 根据父容器类型自动设置默认拉伸属性
                 if (containerComponent.type === 'hbox') {
-                    // HBox中子组件默认水平拉伸
-                    component.props.stretchy = 'horizontal';
+                    // HBox中子组件默认拉伸
+                    component.props.stretchy = 'true';
                 } else if (containerComponent.type === 'vbox') {
-                    // VBox中子组件默认垂直拉伸
-                    component.props.stretchy = 'vertical';
+                    // VBox中子组件默认拉伸
+                    component.props.stretchy = 'true';
                 } else if (containerComponent.type === 'box') {
                     // Box中子组件默认不拉伸
                     component.props.stretchy = 'false';
                 } else if (containerComponent.type === 'form') {
-                    // Form中子组件默认水平拉伸
-                    component.props.stretchy = 'horizontal';
+                    // Form中子组件默认拉伸
+                    component.props.stretchy = 'true';
                 } else if (containerComponent.type === 'grid') {
                     // Grid容器中自动计算下一个可用位置
                     const nextPos = this.calculateNextGridPosition(containerComponent);
                     component.props.row = nextPos.row.toString();
                     component.props.col = nextPos.col.toString();
-                    component.props.stretchy = 'horizontal';
+                    component.props.stretchy = 'true';
                 } else if (containerComponent.type === 'tab') {
                     // Tab容器中，将组件添加到当前激活的标签页
                     const activeTab = parseInt(containerComponent.props.activeTab || '0');
                     component.props.tabIndex = activeTab.toString();
-                    component.props.stretchy = 'horizontal';
+                    component.props.stretchy = 'true';
                 }
                 
                 // 添加到父容器的children数组
