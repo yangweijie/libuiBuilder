@@ -772,45 +772,89 @@
                         if (targetComponent && this.isContainerComponent(targetComponent.type)) {
                             this.addComponentToContainer(this.draggedComponent, targetComponent, x, y);
                         } else {
-                            // 如果拖拽的是非Window容器组件且画布上没有Window组件，则自动创建Window
-                            if (this.isContainerComponent(this.draggedComponent) && this.draggedComponent !== 'window') {
-                                const hasWindow = this.components.some(c => c.type === 'window');
-                                if (!hasWindow) {
-                                    // 创建默认Window组件
-                                    const windowComponent = {
+                            // 检查是否需要自动创建容器
+                            const hasWindow = this.components.some(c => c.type === 'window');
+                            
+                            if (!hasWindow) {
+                                // 画布上没有Window，需要创建Window和可能的HBox
+                                let windowComponent = {
+                                    id: `component_${++this.componentIdCounter}`,
+                                    type: 'window',
+                                    x: 0,
+                                    y: 0,
+                                    props: this.getDefaultProps('window'),
+                                    children: []
+                                };
+                                
+                                // 居中Window
+                                let width = 400;
+                                let height = 300;
+                                if (windowComponent.props.size) {
+                                    const [w, h] = windowComponent.props.size.split(',').map(s => parseInt(s.trim()));
+                                    if (!isNaN(w)) width = w;
+                                    if (!isNaN(h)) height = h;
+                                }
+                                
+                                windowComponent.x = Math.max(50, (rect.width - width) / 2);
+                                windowComponent.y = Math.max(50, (rect.height - height) / 2);
+                                
+                                this.components.push(windowComponent);
+                                this.renderComponent(windowComponent);
+                                this.hideEmptyState();
+                                
+                                let targetContainer = windowComponent;
+                                
+                                // 如果拖拽的是控件组件（非容器），在Window中创建HBox
+                                if (this.isControlComponent(this.draggedComponent)) {
+                                    const hboxComponent = {
                                         id: `component_${++this.componentIdCounter}`,
-                                        type: 'window',
-                                        x: 0, // 初始坐标，居中逻辑将在下面处理
+                                        type: 'hbox',
+                                        x: 0,
                                         y: 0,
-                                        props: this.getDefaultProps('window'),
-                                        children: []
+                                        props: { ...this.getDefaultProps('hbox'), padded: 'true' },
+                                        children: [],
+                                        parent: windowComponent.id
                                     };
                                     
-                                    // 使用与addComponent方法相同的居中逻辑
-                                    let width = 400;
-                                    let height = 300;
-                                    if (windowComponent.props.size) {
-                                        const [w, h] = windowComponent.props.size.split(',').map(s => parseInt(s.trim()));
-                                        if (!isNaN(w)) width = w;
-                                        if (!isNaN(h)) height = h;
+                                    windowComponent.children.push(hboxComponent);
+                                    this.renderComponent(hboxComponent, windowComponent);
+                                    targetContainer = hboxComponent;
+                                }
+                                
+                                // 将拖拽的组件添加到目标容器中
+                                this.addComponentToContainer(this.draggedComponent, targetContainer, x, y);
+                                
+                            } else {
+                                // 画布上已有Window，检查拖拽目标
+                                const targetComponent = this.getComponentAtPosition(e.clientX, e.clientY);
+                                
+                                if (targetComponent && this.isContainerComponent(targetComponent.type)) {
+                                    // 拖拽到容器上，直接添加
+                                    this.addComponentToContainer(this.draggedComponent, targetComponent, x, y);
+                                } else if (this.isControlComponent(this.draggedComponent)) {
+                                    // 拖拽的是控件但没有拖到容器上，找到第一个Window并在其中创建HBox
+                                    const windowComponent = this.components.find(c => c.type === 'window');
+                                    if (windowComponent) {
+                                        const hboxComponent = {
+                                            id: `component_${++this.componentIdCounter}`,
+                                            type: 'hbox',
+                                            x: 0,
+                                            y: 0,
+                                            props: { ...this.getDefaultProps('hbox'), padded: 'true' },
+                                            children: [],
+                                            parent: windowComponent.id
+                                        };
+                                        
+                                        windowComponent.children.push(hboxComponent);
+                                        this.renderComponent(hboxComponent, windowComponent);
+                                        
+                                        // 将控件添加到新创建的HBox中
+                                        this.addComponentToContainer(this.draggedComponent, hboxComponent, x, y);
                                     }
-                                    
-                                    windowComponent.x = Math.max(50, (rect.width - width) / 2);
-                                    windowComponent.y = Math.max(50, (rect.height - height) / 2);
-                                    
-                                    this.components.push(windowComponent);
-                                    this.renderComponent(windowComponent);
-                                    this.hideEmptyState();
-                                    
-                                    // 将拖拽的组件添加到新创建的Window中
-                                    this.addComponentToContainer(this.draggedComponent, windowComponent, x, y);
                                 } else {
-                                    // 如果已经有Window，直接添加到画布
+                                    // 拖拽的是容器组件，直接添加到画布
                                     this.addComponent(this.draggedComponent, x, y);
                                 }
-                            } else {
-                                // 如果不是容器组件或就是Window组件，则直接添加到画布
-                                this.addComponent(this.draggedComponent, x, y);
                             }
                         }
                     }
@@ -2741,6 +2785,17 @@
             
             isContainerComponent(type) {
                 return ['window', 'grid', 'hbox', 'vbox', 'box', 'form', 'tab', 'group'].includes(type);
+            }
+            
+            isControlComponent(type) {
+                // 输入控件
+                const inputControls = ['input', 'textarea', 'password', 'combobox', 'spinbox', 'slider'];
+                // 按钮控件
+                const buttonControls = ['button', 'checkbox', 'radio'];
+                // 显示控件
+                const displayControls = ['label', 'progressbar', 'separator', 'table'];
+                
+                return inputControls.includes(type) || buttonControls.includes(type) || displayControls.includes(type);
             }
             
             highlightContainer(container) {
