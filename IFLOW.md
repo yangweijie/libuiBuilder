@@ -337,6 +337,91 @@ $handlers = [
 - `GroupBuilder` - 分组控件（带有标题的容器）
 - `DrawContext` - 绘图上下文
 
+## 表格组件详解
+
+### 功能特性
+- **多种列类型支持**：text（文本）、image（图片）、checkbox（复选框）、progress（进度条）、button（按钮）、imageText（图片+文本）
+- **数据管理**：可视化编辑表格数据，支持增加/删除行
+- **按钮自定义**：按钮列支持 "文本:值" 格式，如 "删除:delete"
+- **实时预览**：属性修改即时反映在预览区
+- **HTML代码生成**：生成语义化的表格HTML代码
+
+### 使用示例
+
+#### 基础表格
+```html
+<table columns="姓名,年龄,操作">
+    <thead>
+        <tr>
+            <th>姓名</th>
+            <th>年龄</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>张三</td>
+            <td>25</td>
+            <td><button value="edit">编辑</button></td>
+        </tr>
+        <tr>
+            <td>李四</td>
+            <td>30</td>
+            <td><button value="delete">删除</button></td>
+        </tr>
+    </tbody>
+</table>
+```
+
+#### 带列类型的表格
+```html
+<table columns="姓名,状态,进度,操作" columnTypes="text,checkbox,progress,button">
+    <thead>
+        <tr>
+            <th>姓名</th>
+            <th>状态</th>
+            <th>进度</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>任务A</td>
+            <td><input type="checkbox" checked></td>
+            <td><progress value="75" max="100"></progress>
+            <td><button value="complete">完成</button></td>
+        </tr>
+    </tbody>
+</table>
+```
+
+### 列类型说明
+
+| 类型 | 说明 | 示例数据 | HTML输出 |
+|------|------|----------|----------|
+| text | 普通文本 | "示例文本" | `<td>示例文本</td>` |
+| image | 图片 | "image.png" | `<td><img src="image.png" alt="image.png"></td>` |
+| checkbox | 复选框 | "true"/"false" | `<td><input type="checkbox" checked></td>` |
+| progress | 进度条 | "75" | `<td><progress value="75" max="100"></progress>` |
+| button | 按钮 | "删除:delete" | `<td><button value="delete">删除</button></td>` |
+| imageText | 图片+文本 | "icon.png:设置" | `<td><img src="icon.png"> 设置</td>` |
+
+### 按钮列格式
+按钮列支持两种格式：
+1. **简单文本**：直接显示按钮文本，值为空
+   - 示例：`删除` → `<button>删除</button>`
+2. **文本:值格式**：显示文本，设置value属性
+   - 示例：`删除:delete` → `<button value="delete">删除</button>`
+
+### 可视化设计器中的表格操作
+1. **设置列标题**：在"列标题"输入框中输入，用逗号分隔
+2. **选择列类型**：每列可独立选择数据类型
+3. **编辑数据**：直接在数据表格中编辑单元格内容
+4. **管理行**：
+   - 点击"+ 添加行"添加新行
+   - 点击红色"删除"按钮删除行
+5. **实时预览**：所有修改即时反映在左侧预览区
+
 ## 内置模板
 
 ### FormTemplate - 表单模板

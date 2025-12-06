@@ -475,6 +475,115 @@
             color: #6c757d;
             font-size: 14px;
         }
+        
+        /* 表格列类型管理样式 */
+        .column-types-list {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 8px;
+            background: #f8f9fa;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .column-type-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            padding: 4px;
+            background: white;
+            border-radius: 2px;
+        }
+        
+        .column-name {
+            font-size: 12px;
+            color: #495057;
+            min-width: 60px;
+        }
+        
+        .column-type-select {
+            flex: 1;
+            padding: 2px 4px;
+            border: 1px solid #dee2e6;
+            border-radius: 2px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        /* 表格数据管理样式 */
+        .table-data-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: white;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        
+        .data-table th,
+        .data-table td {
+            border: 1px solid #dee2e6;
+            padding: 4px;
+            text-align: center;
+        }
+        
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .cell-input {
+            width: 100%;
+            border: none;
+            padding: 2px;
+            font-size: 11px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        
+        .cell-input:focus {
+            outline: 1px solid #0078d4;
+            background: #f0f8ff;
+        }
+        
+        .row-remove {
+            padding: 2px 6px;
+            border: none;
+            border-radius: 2px;
+            background: #dc3545;
+            color: white;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .row-remove:hover {
+            background: #c82333;
+        }
+        
+        .add-row-btn {
+            width: 100%;
+            padding: 6px;
+            margin-top: 4px;
+            border: 1px dashed #0078d4;
+            background: transparent;
+            color: #0078d4;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .add-row-btn:hover {
+            background: rgba(0, 120, 212, 0.1);
+        }
     </style>
 </head>
 <body class="windows">
@@ -1199,7 +1308,21 @@
                     if (parentComponent.type === 'hbox') {
                         element.style.display = 'inline-block';
                         element.style.verticalAlign = 'top';
+                        // 处理HBox中的拉伸属性
+                        if (component.props.stretchy === 'true') {
+                            element.style.flex = '1';
+                            element.style.minWidth = '0';
+                            element.style.display = 'block';
+                        }
                     } else if (parentComponent.type === 'vbox') {
+                        element.style.display = 'block';
+                        // 处理VBox中的拉伸属性
+                        if (component.props.stretchy === 'true') {
+                            element.style.flex = '1';
+                            element.style.minWidth = '0';
+                            element.style.minHeight = '0';
+                        }
+                    } else if (parentComponent.type === 'box') {
                         element.style.display = 'block';
                     } else if (parentComponent.type === 'box') {
                         element.style.display = 'inline-block';
@@ -1652,20 +1775,112 @@
                         break;
 
                     case 'table':
-                        let tableStyle = 'width: 200px;';
+                        let tableStyle = 'width: 200px; min-width: 200px;';
                         if (component.props.stretchy === 'true') {
-                            tableStyle = 'width: 100%;';
+                            tableStyle = 'width: 100%; min-width: 200px; flex: 1;';
                         }
+                        
+                        const columns = component.props.columns ? component.props.columns.split(',') : ['列1', '列2'];
+                        const columnTypes = component.props.columnTypes ? component.props.columnTypes.split(',') : ['text', 'text'];
+                        
+                        // 如果没有表格数据，根据列类型创建示例数据
+                        let tableData = component.props.tableData ? JSON.parse(component.props.tableData) : null;
+                        if (!tableData) {
+                            tableData = [
+                                columns.map((col, index) => {
+                                    const colType = columnTypes[index] || 'text';
+                                    switch (colType) {
+                                        case 'button':
+                                            return '按钮:button';
+                                        case 'checkbox':
+                                            return 'false';
+                                        case 'progress':
+                                            return '50';
+                                        default:
+                                            return `数据${index + 1}`;
+                                    }
+                                }),
+                                columns.map((col, index) => {
+                                    const colType = columnTypes[index] || 'text';
+                                    switch (colType) {
+                                        case 'button':
+                                            return '编辑:edit';
+                                        case 'checkbox':
+                                            return 'true';
+                                        case 'progress':
+                                            return '75';
+                                        default:
+                                            return `数据${index + 3}`;
+                                    }
+                                })
+                            ];
+                        }
+                        
+                        // 生成表头
+                        let headerHTML = columns.map(col => `<th>${col}</th>`).join('');
+                        
+                        // 生成数据行
+                        let rowsHTML = '';
+                        tableData.forEach(row => {
+                            rowsHTML += '<tr>';
+                            // 确保每行都有足够的列
+                            for (let i = 0; i < columns.length; i++) {
+                                const cell = row[i] || ''; // 如果没有数据，使用空字符串
+                                const colType = columnTypes[i] || 'text';
+                                let cellHTML = '';
+                                
+                                switch (colType) {
+                                    case 'text':
+                                        cellHTML = `<td>${cell}</td>`;
+                                        break;
+                                    case 'image':
+                                        cellHTML = `<td><img src="https://via.placeholder.com/16x16" alt="${cell}" style="width: 16px; height: 16px;"></td>`;
+                                        break;
+                                    case 'checkbox':
+                                        const checked = cell === 'true' || cell === '1' ? 'checked' : '';
+                                        cellHTML = `<td><input type="checkbox" ${checked} disabled></td>`;
+                                        break;
+                                    case 'progress':
+                                        const progress = Math.min(100, Math.max(0, parseInt(cell) || 0));
+                                        cellHTML = `
+                                            <td>
+                                                <div class="ui-progress-bar" style="width: 60px; height: 8px;">
+                                                    <div class="fill" style="width: ${progress}%; background: #0078d4;"></div>
+                                                </div>
+                                            </td>
+                                        `;
+                                        break;
+                                    case 'button':
+                                        // 支持按钮文本格式: "文本:值" 或纯文本
+                                        let buttonText = cell;
+                                        let buttonValue = cell;
+                                        if (cell.includes(':')) {
+                                            const parts = cell.split(':');
+                                            buttonText = parts[0];
+                                            buttonValue = parts[1];
+                                        }
+                                        cellHTML = `<td><button style="padding: 2px 6px; font-size: 10px;" title="${buttonValue}">${buttonText}</button></td>`;
+                                        break;
+                                    case 'imageText':
+                                        cellHTML = `
+                                            <td style="display: flex; align-items: center; gap: 4px;">
+                                                <img src="https://via.placeholder.com/16x16" alt="" style="width: 16px; height: 16px;">
+                                                <span style="font-size: 10px;">${cell}</span>
+                                            </td>
+                                        `;
+                                        break;
+                                    default:
+                                        cellHTML = `<td>${cell}</td>`;
+                                }
+                                rowsHTML += cellHTML;
+                            }
+                            rowsHTML += '</tr>';
+                        });
+                        
                         content.innerHTML = `
                             <table class="mini-table" style="${tableStyle}">
-                                <tr>
-                                    <th>列1</th>
-                                    <th>列2</th>
-                                </tr>
-                                <tr>
-                                    <td>数据1</td>
-                                    <td>数据2</td>
-                                </tr>
+                                <tr>${headerHTML}</tr>
+                                ${rowsHTML}
                             </table>
                         `;
                         break;
@@ -2071,6 +2286,13 @@
                         break;
 
                     case 'table':
+                        const columns = component.props.columns ? component.props.columns.split(',') : ['列1', '列2'];
+                        const columnTypes = component.props.columnTypes ? component.props.columnTypes.split(',') : ['text', 'text'];
+                        const tableData = component.props.tableData ? JSON.parse(component.props.tableData) : [
+                            ['数据1', '数据2'],
+                            ['数据3', '数据4']
+                        ];
+                        
                         html += `
                             <div class="property-group">
                                 <h4>表格属性</h4>
@@ -2079,8 +2301,57 @@
                                     <input type="text" class="property-input" data-prop="columns" value="${component.props.columns || '列1,列2'}">
                                 </div>
                                 <div class="property-row">
+                                    <label class="property-label">列类型:</label>
+                                    <div class="column-types-list">
+                                        ${columns.map((col, index) => `
+                                            <div class="column-type-item">
+                                                <span class="column-name">${col}</span>
+                                                <select class="column-type-select" data-index="${index}">
+                                                    <option value="text" ${columnTypes[index] === 'text' ? 'selected' : ''}>文本</option>
+                                                    <option value="image" ${columnTypes[index] === 'image' ? 'selected' : ''}>图片</option>
+                                                    <option value="checkbox" ${columnTypes[index] === 'checkbox' ? 'selected' : ''}>复选框</option>
+                                                    <option value="progress" ${columnTypes[index] === 'progress' ? 'selected' : ''}>进度条</option>
+                                                    <option value="button" ${columnTypes[index] === 'button' ? 'selected' : ''}>按钮</option>
+                                                    <option value="imageText" ${columnTypes[index] === 'imageText' ? 'selected' : ''}>图片+文本</option>
+                                                </select>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <div class="property-row">
                                     <label class="property-label">拉伸:</label>
                                     ${this.getStretchyOptions(component.props.stretchy)}
+                                </div>
+                            </div>
+                            <div class="property-group">
+                                <h4>表格数据</h4>
+                                <div style="font-size: 11px; color: #6c757d; margin-bottom: 8px;">
+                                    提示：按钮列可使用 "文本:值" 格式，如 "删除:delete" 或 "编辑:edit"
+                                </div>
+                                <div class="table-data-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                ${columns.map(col => `<th>${col}</th>`).join('')}
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${tableData.map((row, rowIndex) => `
+                                                <tr data-row="${rowIndex}">
+                                                    ${row.map((cell, cellIndex) => `
+                                                        <td>
+                                                            <input type="text" class="cell-input" data-row="${rowIndex}" data-col="${cellIndex}" value="${cell}">
+                                                        </td>
+                                                    `).join('')}
+                                                    <td>
+                                                        <button class="row-remove" data-row="${rowIndex}">删除</button>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                    <button class="add-row-btn">+ 添加行</button>
                                 </div>
                             </div>
                         `;
@@ -2181,6 +2452,52 @@
                             return;
                         }
                         
+                        // 特殊处理Table组件的columns属性
+                        if (component.type === 'table' && prop === 'columns') {
+                            // 获取新旧列数
+                            const oldColumns = component.props.columns ? component.props.columns.split(',') : [];
+                            const newColumns = value.split(',');
+                            
+                            // 更新列类型数组
+                            const oldTypes = component.props.columnTypes ? component.props.columnTypes.split(',') : [];
+                            const newTypes = [...oldTypes];
+                            
+                            // 如果新增了列，添加默认类型
+                            if (newColumns.length > oldTypes.length) {
+                                for (let i = oldTypes.length; i < newColumns.length; i++) {
+                                    newTypes.push('text'); // 新列默认为文本类型
+                                }
+                            }
+                            // 如果减少了列，截断类型数组
+                            else if (newColumns.length < oldTypes.length) {
+                                newTypes.length = newColumns.length;
+                            }
+                            component.props.columnTypes = newTypes.join(',');
+                            
+                            // 更新表格数据
+                            const tableData = component.props.tableData ? JSON.parse(component.props.tableData) : [];
+                            tableData.forEach(row => {
+                                // 如果新增了列，添加空数据
+                                if (newColumns.length > row.length) {
+                                    for (let i = row.length; i < newColumns.length; i++) {
+                                        row.push('');
+                                    }
+                                }
+                                // 如果减少了列，截断数据
+                                else if (newColumns.length < row.length) {
+                                    row.length = newColumns.length;
+                                }
+                            });
+                            component.props.tableData = JSON.stringify(tableData);
+                            
+                            // 刷新属性面板以显示新的列类型和数据
+                            this.showProperties(component);
+                            // 更新组件预览
+                            this.refreshComponent(component);
+                            this.updateCodePreview();
+                            return;
+                        }
+                        
                         // 检查是否是Grid布局属性
                         const isGridProp = ['row', 'col', 'rowspan', 'colspan', 'align'].includes(prop);
                         
@@ -2206,6 +2523,11 @@
                 // Tab 标签页管理
                 if (component.type === 'tab') {
                     this.setupTabEvents(component);
+                }
+                
+                // Table 数据管理
+                if (component.type === 'table') {
+                    this.setupTableEvents(component);
                 }
             }
             
@@ -2583,6 +2905,88 @@
                         // 重新应用Grid样式
                         this.applyGridStyles(element, component, parentComponent);
                     }
+                }
+            }
+            
+            // 表格事件管理
+            setupTableEvents(component) {
+                // 列类型选择事件
+                const columnTypeSelects = document.querySelectorAll('.column-type-select');
+                columnTypeSelects.forEach(select => {
+                    select.addEventListener('change', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        const columnTypes = component.props.columnTypes ? component.props.columnTypes.split(',') : ['text', 'text'];
+                        columnTypes[index] = e.target.value;
+                        component.props.columnTypes = columnTypes.join(',');
+                        this.refreshComponent(component);
+                        this.updateCodePreview();
+                    });
+                });
+                
+                // 单元格数据编辑事件
+                const cellInputs = document.querySelectorAll('.cell-input');
+                cellInputs.forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        const rowIndex = parseInt(e.target.dataset.row);
+                        const colIndex = parseInt(e.target.dataset.col);
+                        const tableData = component.props.tableData ? JSON.parse(component.props.tableData) : [];
+                        
+                        if (!tableData[rowIndex]) {
+                            tableData[rowIndex] = [];
+                        }
+                        tableData[rowIndex][colIndex] = e.target.value;
+                        component.props.tableData = JSON.stringify(tableData);
+                        this.refreshComponent(component);
+                        this.updateCodePreview();
+                    });
+                });
+                
+                // 删除行事件
+                const rowRemoveBtns = document.querySelectorAll('.row-remove');
+                rowRemoveBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const rowIndex = parseInt(e.target.dataset.row);
+                        const tableData = component.props.tableData ? JSON.parse(component.props.tableData) : [];
+                        
+                        if (tableData.length > 1) {
+                            tableData.splice(rowIndex, 1);
+                            component.props.tableData = JSON.stringify(tableData);
+                            this.showProperties(component); // 刷新属性面板
+                            this.refreshComponent(component);
+                            this.updateCodePreview();
+                        }
+                    });
+                });
+                
+                // 添加行事件
+                const addRowBtn = document.querySelector('.add-row-btn');
+                if (addRowBtn) {
+                    addRowBtn.addEventListener('click', () => {
+                        const columns = component.props.columns ? component.props.columns.split(',') : ['列1', '列2'];
+                        const columnTypes = component.props.columnTypes ? component.props.columnTypes.split(',') : ['text', 'text'];
+                        const tableData = component.props.tableData ? JSON.parse(component.props.tableData) : [];
+                        
+                        // 创建新行，为不同类型的列提供合适的默认值
+                        const newRow = columns.map((col, index) => {
+                            const colType = columnTypes[index] || 'text';
+                            switch (colType) {
+                                case 'button':
+                                    return '按钮:button'; // 按钮列默认使用 "文本:值" 格式
+                                case 'checkbox':
+                                    return 'false'; // 复选框默认未选中
+                                case 'progress':
+                                    return '0'; // 进度条默认为0
+                                default:
+                                    return ''; // 其他类型默认为空
+                            }
+                        });
+                        tableData.push(newRow);
+                        component.props.tableData = JSON.stringify(tableData);
+                        
+                        this.showProperties(component); // 刷新属性面板
+                        this.refreshComponent(component);
+                        this.updateCodePreview();
+                    });
                 }
             }
             
@@ -3353,15 +3757,81 @@
 
                         case 'table':
                             const tableTag = getTag('table', 'table');
+                            const columns = component.props.columns ? component.props.columns.split(',') : ['列1', '列2'];
+                            const columnTypes = component.props.columnTypes ? component.props.columnTypes.split(',') : ['text', 'text'];
+                            const tableData = component.props.tableData ? JSON.parse(component.props.tableData) : [
+                                ['数据1', '数据2'],
+                                ['数据3', '数据4']
+                            ];
+                            
                             let tableHTML = `${spaces}<${tableTag}`;
                             if (component.props.stretchy && component.props.stretchy !== 'false') {
                                 tableHTML += ` stretchy="${component.props.stretchy}"`;
+                            }
+                            if (component.props.columns) {
+                                tableHTML += ` columns="${component.props.columns}"`;
+                            }
+                            if (component.props.columnTypes) {
+                                tableHTML += ` columnTypes="${component.props.columnTypes}"`;
                             }
                             
                             // 添加Grid布局属性
                             tableHTML = addGridAttributes(tableHTML, component.props);
                             
-                            tableHTML += '></table>';
+                            tableHTML += '>\n';
+                            
+                            // 生成表头
+                            tableHTML += `${spaces}    <thead>\n`;
+                            tableHTML += `${spaces}        <tr>\n`;
+                            columns.forEach(col => {
+                                tableHTML += `${spaces}            <th>${col}</th>\n`;
+                            });
+                            tableHTML += `${spaces}        </tr>\n`;
+                            tableHTML += `${spaces}    </thead>\n`;
+                            
+                            // 生成表体
+                            tableHTML += `${spaces}    <tbody>\n`;
+                            tableData.forEach(row => {
+                                tableHTML += `${spaces}        <tr>\n`;
+                                row.forEach((cell, index) => {
+                                    const colType = columnTypes[index] || 'text';
+                                    switch (colType) {
+                                        case 'text':
+                                            tableHTML += `${spaces}            <td>${cell}</td>\n`;
+                                            break;
+                                        case 'image':
+                                            tableHTML += `${spaces}            <td><img src="${cell}" alt="image"></td>\n`;
+                                            break;
+                                        case 'checkbox':
+                                            const checked = cell === 'true' || cell === '1' ? ' checked' : '';
+                                            tableHTML += `${spaces}            <td><input type="checkbox"${checked}></td>\n`;
+                                            break;
+                                        case 'progress':
+                                            tableHTML += `${spaces}            <td><progress value="${cell}" max="100"></td>\n`;
+                                            break;
+                                        case 'button':
+                                            // 支持按钮文本格式: "文本:值" 或纯文本
+                                            let buttonText = cell;
+                                            let buttonValue = cell;
+                                            if (cell.includes(':')) {
+                                                const parts = cell.split(':');
+                                                buttonText = parts[0];
+                                                buttonValue = parts[1];
+                                            }
+                                            tableHTML += `${spaces}            <td><button value="${buttonValue}">${buttonText}</button></td>\n`;
+                                            break;
+                                        case 'imageText':
+                                            tableHTML += `${spaces}            <td><img src="${cell}" alt=""> ${cell}</td>\n`;
+                                            break;
+                                        default:
+                                            tableHTML += `${spaces}            <td>${cell}</td>\n`;
+                                    }
+                                });
+                                tableHTML += `${spaces}        </tr>\n`;
+                            });
+                            tableHTML += `${spaces}    </tbody>\n`;
+                            
+                            tableHTML += `${spaces}</${tableTag}>`;
                             return tableHTML;
 
                         default:
