@@ -228,8 +228,22 @@
             gap: 4px;
         }
         
+        .component-controls {
+            position: absolute;
+            top: -30px;
+            right: 0;
+            display: none; /* 默认隐藏 */
+            gap: 4px;
+            z-index: 1001 !important; /* 确保控制按钮始终在顶层 */
+        }
+        
+        /* 当前选中的组件显示删除按钮 */
         .component-element.selected .component-controls {
             display: flex;
+        }
+        
+        .component-element {
+            position: relative;
         }
         
         .control-btn {
@@ -483,6 +497,14 @@
                                 <span>标签页</span>
                             </div>
                             <span class="component-name">Tab</span>
+                        </div>
+                        <div class="component-item" draggable="true" data-component="group">
+                            <div class="component-preview group-preview">
+                                <fieldset style="border: 1px solid #ccc; border-radius: 4px; padding: 4px; min-width: 60px; min-height: 40px;">
+                                    <legend style="font-size: 11px; padding: 0 4px;">分组</legend>
+                                </fieldset>
+                            </div>
+                            <span class="component-name">Group</span>
                         </div>
                     </div>
                 </div>
@@ -988,6 +1010,10 @@
                         align: 'fill',
                         rowspan: '1',
                         colspan: '1'
+                    },
+                    group: {
+                        title: '分组',
+                        margined: 'true'
                     }
                 };
 
@@ -1007,6 +1033,7 @@
                                       parentEl.querySelector('.ui-form') || 
                                       parentEl.querySelector('.ui-grid') || 
                                       parentEl.querySelector('.ui-tab') ||
+                                      parentEl.querySelector('.group-content') ||
                                       parentEl.querySelector('.component-content');
                     }
                 } else {
@@ -1105,6 +1132,15 @@
                     }
                 }
                 
+                // 确保组件元素可以接收鼠标事件（即使在容器内部）
+                element.style.pointerEvents = 'auto';
+                
+                // 确保组件的容器元素有适当的边距以接收鼠标事件
+                if (!element.style.margin || element.style.margin === '0px' || element.style.margin === '0') {
+                    // 如果没有设置边距，确保组件容器元素可以接收事件
+                    element.style.outline = 'none'; // 避免显示轮廓
+                }
+                
                 targetElement.appendChild(element);
                 
                 // 更新容器占位符
@@ -1146,6 +1182,20 @@
                 // 创建控制按钮
                 const controls = this.createComponentControls(component);
                 div.appendChild(controls);
+                
+                // 确保控制按钮总是处于顶层
+                const updateControlsZIndex = () => {
+                    const controls = div.querySelector('.component-controls');
+                    if (controls) {
+                        controls.style.zIndex = '1001';
+                    }
+                };
+                
+                // 首次设置
+                updateControlsZIndex();
+                
+                // 监听组件的属性变化来更新z-index
+                setTimeout(updateControlsZIndex, 0);
 
                 // 添加事件监听
                 div.addEventListener('click', (e) => {
@@ -1155,6 +1205,67 @@
                         this.selectComponent(component);
                     }
                 });
+                
+                // 鼠标悬停显示控制按钮，鼠标离开隐藏（除非组件被选中）
+                div.addEventListener('mouseenter', (e) => {
+                    // 只在组件未被选中时显示控制按钮
+                    if (!div.classList.contains('selected')) {
+                        const controls = div.querySelector('.component-controls');
+                        if (controls) {
+                            controls.style.display = 'flex';
+                        }
+                    }
+                });
+                
+                div.addEventListener('mouseleave', (e) => {
+                    // 检查鼠标是否移动到了子元素上，如果是，则不隐藏控制按钮
+                    // 只有真正离开组件区域时才隐藏
+                    setTimeout(() => {
+                        if (!div.matches(':hover')) {
+                            // 只在组件未被选中时隐藏控制按钮
+                            if (!div.classList.contains('selected')) {
+                                const controls = div.querySelector('.component-controls');
+                                if (controls) {
+                                    controls.style.display = 'none';
+                                }
+                            }
+                        }
+                    }, 10); // 延迟检查，避免因快速移动导致的问题
+                });
+
+                // 对于容器组件，确保内容区域也能触发父组件的mouseenter/mouseleave事件
+                if (this.isContainerComponent(component.type)) {
+                    // 使用setTimeout确保内容元素已添加到DOM中
+                    setTimeout(() => {
+                        const contentElement = div.querySelector('.component-content');
+                        if (contentElement) {
+                            // 监听内容区域的mouseenter事件并冒泡到父组件
+                            contentElement.addEventListener('mouseenter', (e) => {
+                                if (!div.classList.contains('selected')) {
+                                    const controls = div.querySelector('.component-controls');
+                                    if (controls) {
+                                        controls.style.display = 'flex';
+                                    }
+                                }
+                            });
+                            
+                            // 监听内容区域的mouseleave事件，并检查是否移出了整个组件
+                            contentElement.addEventListener('mouseleave', (e) => {
+                                // 使用setTimeout来检查组件是否仍处于hover状态
+                                setTimeout(() => {
+                                    if (!div.matches(':hover')) {
+                                        if (!div.classList.contains('selected')) {
+                                            const controls = div.querySelector('.component-controls');
+                                            if (controls) {
+                                                controls.style.display = 'none';
+                                            }
+                                        }
+                                    }
+                                }, 10);
+                            });
+                        }
+                    }, 0);
+                }
 
                 return div;
             }
@@ -1423,6 +1534,17 @@
                         `;
                         break;
 
+                    case 'group':
+                        const groupPadding = component.props.margined === 'true' ? '16px' : '8px';
+                        content.innerHTML = `
+                            <fieldset class="ui-group" style="min-width: 200px; min-height: 120px; border: 2px solid #0078d4; border-radius: 4px; padding: ${groupPadding}; width: 100%; position: relative; box-sizing: border-box;">
+                                <legend style="padding: 0 8px; font-weight: bold; color: #0078d4;">${component.props.title || '分组'}</legend>
+                                <div class="group-content" style="min-height: 60px; width: 100%; box-sizing: border-box;">
+                                </div>
+                            </fieldset>
+                        `;
+                        break;
+
                     default:
                         content.innerHTML = `<div style="padding: 8px; border: 1px solid #ccc;">${component.type}</div>`;
                 }
@@ -1451,13 +1573,13 @@
             selectComponent(component) {
                 // 清除之前的选择
                 document.querySelectorAll('.component-element').forEach(el => {
-                    el.classList.remove('selected');
+                    el.classList.remove('selected', 'current-selected');
                 });
 
                 // 选中当前组件
                 const element = document.querySelector(`[data-component-id="${component.id}"]`);
                 if (element) {
-                    element.classList.add('selected');
+                    element.classList.add('selected', 'current-selected');
                 }
 
                 this.selectedComponent = component;
@@ -1662,6 +1784,25 @@
                                         `).join('')}
                                         <button class="tab-add">+ 添加标签页</button>
                                     </div>
+                                </div>
+                            </div>
+                        `;
+                        break;
+
+                    case 'group':
+                        html += `
+                            <div class="property-group">
+                                <h4>分组属性</h4>
+                                <div class="property-row">
+                                    <label class="property-label">标题:</label>
+                                    <input type="text" class="property-input" data-prop="title" value="${component.props.title || '分组'}">
+                                </div>
+                                <div class="property-row">
+                                    <label class="property-label">边距:</label>
+                                    <select class="property-input" data-prop="margined">
+                                        <option value="true" ${component.props.margined === 'true' ? 'selected' : ''}>是</option>
+                                        <option value="false" ${component.props.margined === 'false' ? 'selected' : ''}>否</option>
+                                    </select>
                                 </div>
                             </div>
                         `;
@@ -2324,7 +2465,7 @@
             }
             
             isContainerComponent(type) {
-                return ['window', 'grid', 'hbox', 'vbox', 'box', 'form', 'tab'].includes(type);
+                return ['window', 'grid', 'hbox', 'vbox', 'box', 'form', 'tab', 'group'].includes(type);
             }
             
             highlightContainer(container) {
@@ -2662,6 +2803,31 @@
                             
                             tabHTML += `${spaces}</${tabTag}>`;
                             return tabHTML;
+
+                        case 'group':
+                            const groupTag = getTag('group', 'fieldset');
+                            let groupHTML = `${spaces}<${groupTag}`;
+                            
+                            // 添加标题和边距属性
+                            if (component.props.title) groupHTML += ` title="${component.props.title}"`;
+                            if (component.props.margined === 'true') groupHTML += ' margined="true"';
+                            
+                            // 添加Grid布局属性
+                            groupHTML = addGridAttributes(groupHTML, component.props);
+                            
+                            groupHTML += '>\n';
+                            
+                            // 递归生成子组件（不添加图例，因为标题已通过title属性指定）
+                            if (component.children && component.children.length > 0) {
+                                component.children.forEach(child => {
+                                    groupHTML += generateComponentHTML(child, indent + 1) + '\n';
+                                });
+                            } else {
+                                groupHTML += `${spaces}    分组内容\n`;
+                            }
+                            
+                            groupHTML += `${spaces}</${groupTag}>`;
+                            return groupHTML;
 
                         case 'input':
                             const inputTag = getTag('input', 'input');

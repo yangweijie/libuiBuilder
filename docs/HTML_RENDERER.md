@@ -218,6 +218,23 @@ $app->show();
 </tab>
 ```
 
+#### `<group>`
+分组容器（带有标题的容器）
+
+**属性：**
+- `title`: 分组标题
+- `margined`: 是否有边距，`"true"` 或 `"false"`
+
+**示例：**
+```html
+<group title="用户信息" margined="true">
+  <grid padded="true">
+    <label row="0" col="0">用户名:</label>
+    <input row="0" col="1" bind="username"/>
+  </grid>
+</group>
+```
+
 ### 控件
 
 #### `<label>`

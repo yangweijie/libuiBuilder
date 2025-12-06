@@ -197,6 +197,7 @@ class HtmlRenderer
             'hbox' => $this->renderHBox($element),
             'vbox' => $this->renderVBox($element),
             'tab' => $this->renderTab($element),
+            'group' => $this->renderGroup($element),
             
             // 标准 HTML 标签
             'label' => $this->renderLabel($element),
@@ -798,6 +799,32 @@ class HtmlRenderer
     private function renderCanvas(DOMElement $element): CanvasBuilder
     {
         return Builder::canvas();
+    }
+    
+    /**
+     * 渲染 <group> 元素
+     */
+    private function renderGroup(DOMElement $element): ComponentBuilder
+    {
+        $builder = Builder::group();
+        
+        // 标题
+        if ($title = $element->getAttribute('title')) {
+            $builder->title($title);
+        }
+        
+        // 边距
+        if ($element->getAttribute('margined') === 'true') {
+            $builder->margined(true);
+        }
+        
+        // 子元素
+        $children = $this->renderChildren($element);
+        if (!empty($children)) {
+            $builder->contains($children);
+        }
+        
+        return $builder;
     }
     
     /**

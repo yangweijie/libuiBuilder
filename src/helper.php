@@ -139,6 +139,7 @@ function table(array $config = []) { return Builder::table($config); }
 function canvas(array $config = []) { return Builder::canvas($config); }
 function separator() { return Builder::separator(); }
 function menu() { return Builder::menu(); }
+function group(array $config = []) { return Builder::group($config); }
 
 // 便捷方法
 function passwordEntry(array $config = []) { return Builder::passwordEntry($config); }

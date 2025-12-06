@@ -20,6 +20,7 @@ use Kingbes\Libui\View\Components\BoxBuilder;
 use Kingbes\Libui\View\Components\ButtonBuilder;
 use Kingbes\Libui\View\Components\LabelBuilder;
 use Kingbes\Libui\View\Components\EntryBuilder;
+use Kingbes\Libui\View\Components\GroupBuilder;
 
 /**
  * 视图构建器 - 所有组件的入口
@@ -175,6 +176,11 @@ class Builder
     public static function radio(array $config = []): RadioBuilder
     {
         return new RadioBuilder($config);
+    }
+
+    public static function group(array $config = []): GroupBuilder
+    {
+        return new GroupBuilder($config);
     }
 
     // ========== 链式调用辅助函数 ==========
@@ -421,5 +427,13 @@ class Builder
     public function newEditableCombobox(array $config = []): static
     {
         return $this->setCurrent(new ComboboxBuilder(array_merge($config, ['editable' => true])));
+    }
+
+    /**
+     * 创建分组控件并设为当前组件
+     */
+    public function newGroup(array $config = []): static
+    {
+        return $this->setCurrent(new GroupBuilder($config));
     }
 }

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<ui version="1.0">
+  <window title="HTML Group 测试" size="400,300" centered="true">
+    <vbox padded="true">
+      <!-- 用户信息分组 -->
+      <group title="用户信息" margined="true">
+        <grid padded="true">
+          <label row="0" col="0" align="end,center">用户名:</label>
+          <input row="0" col="1" bind="username" placeholder="请输入用户名" expand="horizontal"/>
+          
+          <label row="1" col="0" align="end,center">密码:</label>
+          <input row="1" col="1" type="password" bind="password" placeholder="请输入密码" expand="horizontal"/>
+        </grid>
+      </group>
+      
+      <!-- 操作分组 -->
+      <group title="操作" margined="true">
+        <hbox padded="true">
+          <button onclick="handleLogin">登录</button>
+          <button onclick="handleReset">重置</button>
+        </hbox>
+      </group>
+    </vbox>
+  </window>
+</ui>

@@ -38,15 +38,22 @@ $app = Builder::window()
     ->title('登录窗口')
     ->size(400, 300)
     ->contains([
-        Builder::grid()->padded(true)->form([
-            [
-                'label' => Builder::label()->text('用户名:'),
-                'control' => Builder::entry()
-                    ->id('usernameInput')
-                    ->bind('username')
-                    ->placeholder('请输入用户名')
-            ]
-        ])->append([
+        Builder::vbox()->padded(true)->contains([
+            // 使用 GroupBuilder 创建带标题的分组
+            Builder::group()
+                ->title('用户信息')
+                ->margined(true)
+                ->contains([
+                    Builder::grid()->padded(true)->form([
+                        [
+                            'label' => Builder::label()->text('用户名:'),
+                            'control' => Builder::entry()
+                                ->id('usernameInput')
+                                ->bind('username')
+                                ->placeholder('请输入用户名')
+                        ]
+                    ])
+                ]),
             Builder::button()
                 ->text('登录')
                 ->onClick(function($button, $state) {
@@ -65,21 +72,26 @@ $app->show();
 <!DOCTYPE html>
 <ui version="1.0">
   <window title="登录窗口" size="400,300" centered="true">
-    <grid padded="true">
-      <label row="0" col="0" align="end,center">用户名:</label>
-      <input 
-        id="usernameInput"
-        row="0" 
-        col="1" 
-        bind="username"
-        placeholder="请输入用户名"
-        expand="horizontal"
-      />
+    <vbox padded="true">
+      <!-- 使用 group 标签创建带标题的分组 -->
+      <group title="用户信息" margined="true">
+        <grid padded="true">
+          <label row="0" col="0" align="end,center">用户名:</label>
+          <input 
+            id="usernameInput"
+            row="0" 
+            col="1" 
+            bind="username"
+            placeholder="请输入用户名"
+            expand="horizontal"
+          />
+        </grid>
+      </group>
       
-      <button row="1" col="0" colspan="2" onclick="handleLogin">
+      <button row="0" col="0" onclick="handleLogin">
         登录
       </button>
-    </grid>
+    </vbox>
   </window>
 </ui>
 ```
@@ -156,10 +168,26 @@ open tools/preview.html
 ```
 
 **支持的标签：**
-- 容器: `<window>`, `<vbox>`, `<hbox>`, `<grid>`, `<tab>`
+- 容器: `<window>`, `<vbox>`, `<hbox>`, `<grid>`, `<tab>`, `<group>`
 - 控件: `<input>`, `<button>`, `<label>`, `<checkbox>`, `<radio>`
 - 选择: `<combobox>`, `<spinbox>`, `<slider>`, `<progressbar>`
 - 其他: `<separator>`, `<table>`, `<canvas>`
+
+### Group 容器
+
+使用 Group 创建带标题的分组容器：
+
+```html
+<group title="用户信息" margined="true">
+  <grid padded="true">
+    <label row="0" col="0">用户名:</label>
+    <input row="0" col="1" bind="username"/>
+    
+    <label row="1" col="0">密码:</label>
+    <input row="1" col="1" type="password" bind="password"/>
+  </grid>
+</group>
+```
 
 ### Grid 布局
 
@@ -271,6 +299,7 @@ $handlers = [
 - `BoxBuilder` - 水平/垂直盒子
 - `GridBuilder` - 网格布局
 - `TabBuilder` - 标签页
+- `GroupBuilder` - 分组容器（带有标题的容器）
 
 ### 基础控件
 - `LabelBuilder` - 文本标签
