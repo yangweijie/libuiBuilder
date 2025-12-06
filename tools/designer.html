@@ -681,6 +681,8 @@
                 this.componentIdCounter = 0;
                 this.draggedComponent = null;
                 this.htmlGenerationStyle = 'gui'; // 'gui' 或 'html'
+                this.updateCodePreviewTimeout = null; // 防抖定时器
+                this.updatingProperties = false; // 防止属性更新循环
                 this.init();
             }
 
@@ -1027,14 +1029,30 @@
                     // 渲染到父容器中
                     const parentEl = document.querySelector(`[data-component-id="${parentComponent.id}"]`);
                     if (parentEl) {
-                        // 找到容器的内容区域
-                        targetElement = parentEl.querySelector('.window-content') || 
-                                      parentEl.querySelector('.ui-box') || 
-                                      parentEl.querySelector('.ui-form') || 
-                                      parentEl.querySelector('.ui-grid') || 
-                                      parentEl.querySelector('.ui-tab') ||
-                                      parentEl.querySelector('.group-content') ||
-                                      parentEl.querySelector('.component-content');
+                        // 特殊处理Tab组件：需要将子组件渲染到正确的标签页中
+                        if (parentComponent.type === 'tab') {
+                            // 获取子组件应该属于哪个标签页
+                            const tabIndex = parseInt(component.props.tabIndex || '0');
+                            const tabPage = parentEl.querySelector(`.tabpage[data-tabpage-index="${tabIndex}"]`);
+                            if (tabPage) {
+                                targetElement = tabPage;
+                            } else {
+                                // 如果找不到对应的标签页，使用第一个标签页
+                                const firstTabPage = parentEl.querySelector('.tabpage');
+                                if (firstTabPage) {
+                                    targetElement = firstTabPage;
+                                }
+                            }
+                        } else {
+                            // 非Tab组件，使用原来的逻辑
+                            targetElement = parentEl.querySelector('.window-content') || 
+                                          parentEl.querySelector('.ui-box') || 
+                                          parentEl.querySelector('.ui-form') || 
+                                          parentEl.querySelector('.ui-grid') || 
+                                          parentEl.querySelector('.ui-tab') ||
+                                          parentEl.querySelector('.group-content') ||
+                                          parentEl.querySelector('.component-content');
+                        }
                     }
                 } else {
                     // 渲染到画布中
@@ -1123,6 +1141,10 @@
                             element.style.display = 'block';
                             element.style.width = '100%';
                         }
+                    } else if (parentComponent.type === 'tab') {
+                        // Tab组件中的子组件样式
+                        element.style.display = 'block';
+                        element.style.marginBottom = '4px';
                     }
                     
                     // 确保控制按钮在最上层
@@ -1335,13 +1357,41 @@
 
                     case 'tab':
                         const tabPadding = component.props.padded === 'true' ? '8px' : '0px';
+                        const tabs = component.props.tabs ? component.props.tabs.split(',') : ['标签页1', '标签页2'];
+                        const activeTab = parseInt(component.props.activeTab || '0');
+                        
+                        // 创建标签页按钮HTML
+                        let tabButtonsHTML = '';
+                        tabs.forEach((tab, index) => {
+                            const isActive = index === activeTab;
+                            const buttonStyle = isActive 
+                                ? 'padding: 4px 8px; border: none; background: #f8f9fa; border-bottom: 2px solid #0078d4; margin-right: 2px; cursor: pointer;'
+                                : 'padding: 4px 8px; border: none; background: #f8f9fa; margin-right: 2px; cursor: pointer;';
+                            tabButtonsHTML += `<button class="tab-button" data-tab-index="${index}" style="${buttonStyle}">${tab}</button>`;
+                        });
+                        
+                        // 创建标签页内容HTML
+                        let tabPagesHTML = '';
+                        tabs.forEach((tab, index) => {
+                            const isActive = index === activeTab;
+                            const displayStyle = isActive ? 'block' : 'none';
+                            tabPagesHTML += `
+                                <div class="tabpage" data-tabpage-index="${index}" title="${tab}" style="min-height: 150px; width: 100%; display: ${displayStyle}; position: relative; box-sizing: border-box;">
+                                    <div class="tabpage-placeholder" style="color: #999; font-style: italic; padding: 8px; display: ${isActive ? 'block' : 'none'};">
+                                        标签页内容
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
                         content.innerHTML = `
                             <div class="ui-tab" style="min-width: 300px; min-height: 200px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); padding: ${tabPadding}; width: 100%; position: relative; box-sizing: border-box;">
-                                <div style="border-bottom: 1px solid #ccc; margin-bottom: 8px;">
-                                    <button style="padding: 4px 8px; border: none; background: #f8f9fa; border-bottom: 2px solid #0078d4;">标签页1</button>
-                                    <button style="padding: 4px 8px; border: none; background: #f8f9fa;">标签页2</button>
+                                <div class="tab-header" style="border-bottom: 1px solid #ccc; margin-bottom: 8px;">
+                                    ${tabButtonsHTML}
                                 </div>
-                                Tab 容器
+                                <div class="tab-content">
+                                    ${tabPagesHTML}
+                                </div>
                             </div>
                         `;
                         break;
@@ -1587,6 +1637,10 @@
             }
 
             showProperties(component) {
+                // 防止循环更新
+                if (this.updatingProperties) return;
+                this.updatingProperties = true;
+                
                 const propertiesPanel = document.getElementById('propertiesPanel');
                 
                 let html = `
@@ -1630,6 +1684,11 @@
                         this.saveComponentProperties(component);
                     });
                 }
+                
+                // 重置更新标志
+                setTimeout(() => {
+                    this.updatingProperties = false;
+                }, 10);
             }
             
             getGridProperties(component) {
@@ -2070,9 +2129,21 @@
                 const propertyInputs = document.querySelectorAll('.property-input');
                 propertyInputs.forEach(input => {
                     input.addEventListener('input', (e) => {
+                        // 如果正在更新属性，跳过以防止循环
+                        if (this.updatingProperties) return;
+                        
                         const prop = e.target.dataset.prop;
                         const value = e.target.value;
                         component.props[prop] = value;
+                        
+                        // 特殊处理Tab组件的activeTab属性
+                        if (component.type === 'tab' && prop === 'activeTab') {
+                            // 立即切换标签页
+                            this.switchTabByIndex(component, parseInt(value));
+                            // 更新代码预览
+                            this.updateCodePreview();
+                            return;
+                        }
                         
                         // 检查是否是Grid布局属性
                         const isGridProp = ['row', 'col', 'rowspan', 'colspan', 'align'].includes(prop);
@@ -2100,6 +2171,42 @@
                 if (component.type === 'tab') {
                     this.setupTabEvents(component);
                 }
+            }
+            
+            // 根据索引切换标签页
+            switchTabByIndex(tabComponent, tabIndex) {
+                const tabElement = document.querySelector(`[data-component-id="${tabComponent.id}"]`);
+                if (!tabElement) return;
+                
+                const tabButtons = tabElement.querySelectorAll('.tab-button');
+                const tabPages = tabElement.querySelectorAll('.tabpage');
+                
+                // 切换标签页按钮样式
+                tabButtons.forEach(btn => {
+                    const btnIndex = parseInt(btn.dataset.tabIndex);
+                    if (btnIndex === tabIndex) {
+                        btn.style.borderBottom = '2px solid #0078d4';
+                    } else {
+                        btn.style.borderBottom = 'none';
+                    }
+                });
+                
+                // 切换标签页内容显示
+                tabPages.forEach(page => {
+                    const pageIndex = parseInt(page.dataset.tabpageIndex);
+                    if (pageIndex === tabIndex) {
+                        page.style.display = 'block';
+                        
+                        // 检查该标签页是否有组件，如果没有则显示占位符
+                        const hasComponents = this.getChildrenForTabPage(tabComponent, pageIndex).length > 0;
+                        const placeholder = page.querySelector('.tabpage-placeholder');
+                        if (placeholder) {
+                            placeholder.style.display = hasComponents ? 'none' : 'block';
+                        }
+                    } else {
+                        page.style.display = 'none';
+                    }
+                });
             }
             
             saveComponentProperties(component) {
@@ -2223,7 +2330,13 @@
                         component.props.tabs = tabs.join(',');
                         this.refreshComponent(component);
                         this.updateCodePreview();
-                        this.showProperties(component);
+                        // 避免递归调用showProperties，只更新标签页标题
+                        const tabButtons = document.querySelectorAll(`[data-component-id="${component.id}"] .tab-button`);
+                        tabButtons.forEach((btn, btnIndex) => {
+                            if (btnIndex === index) {
+                                btn.textContent = tabs[index];
+                            }
+                        });
                     });
                 });
                 
@@ -2234,16 +2347,54 @@
                         const index = parseInt(e.target.dataset.index);
                         let tabs = component.props.tabs ? component.props.tabs.split(',') : ['标签页1', '标签页2'];
                         if (tabs.length > 1) {
+                            // 先删除属于被删除标签页的所有子组件
+                            if (component.children && component.children.length > 0) {
+                                component.children = component.children.filter(child => {
+                                    const childTabIndex = parseInt(child.props.tabIndex || '0');
+                                    if (childTabIndex === index) {
+                                        // 从DOM中删除这个子组件
+                                        const childElement = document.querySelector(`[data-component-id="${child.id}"]`);
+                                        if (childElement) {
+                                            childElement.remove();
+                                        }
+                                        return false; // 从children数组中移除
+                                    }
+                                    return true; // 保留其他子组件
+                                });
+                            }
+                            
+                            // 删除标签页
                             tabs.splice(index, 1);
                             component.props.tabs = tabs.join(',');
+                            
+                            // 重新分配剩余子组件的tabIndex
+                            if (component.children && component.children.length > 0) {
+                                component.children.forEach(child => {
+                                    const childTabIndex = parseInt(child.props.tabIndex || '0');
+                                    if (childTabIndex > index) {
+                                        // 如果子组件的tabIndex大于被删除的标签页索引，则减1
+                                        child.props.tabIndex = (childTabIndex - 1).toString();
+                                    }
+                                });
+                            }
+                            
                             // 调整当前激活标签
                             const currentActive = parseInt(component.props.activeTab || '0');
                             if (currentActive >= tabs.length) {
                                 component.props.activeTab = (tabs.length - 1).toString();
+                            } else if (currentActive === index) {
+                                // 如果删除的是当前激活的标签页，保持激活状态（因为已经重新分配了索引）
+                                // 不需要改变activeTab，因为索引已经自动调整
                             }
+                            
                             this.refreshComponent(component);
                             this.updateCodePreview();
-                            this.showProperties(component);
+                            // 延迟刷新属性面板，避免递归
+                            setTimeout(() => {
+                                if (this.selectedComponent && this.selectedComponent.id === component.id) {
+                                    this.showProperties(component);
+                                }
+                            }, 10);
                         }
                     });
                 });
@@ -2256,7 +2407,10 @@
                         component.props.activeTab = index.toString();
                         this.refreshComponent(component);
                         this.updateCodePreview();
-                        this.showProperties(component);
+                        // 只更新激活按钮状态，避免递归调用showProperties
+                        document.querySelectorAll('.tab-activate').forEach((activateBtn, btnIndex) => {
+                            activateBtn.disabled = btnIndex === index;
+                        });
                     });
                 });
                 
@@ -2265,13 +2419,84 @@
                 if (addBtn) {
                     addBtn.addEventListener('click', () => {
                         const tabs = component.props.tabs ? component.props.tabs.split(',') : ['标签页1', '标签页2'];
-                        tabs.push(`标签页${tabs.length + 1}`);
+                        const newTabIndex = tabs.length;
+                        tabs.push(`标签页${newTabIndex + 1}`);
                         component.props.tabs = tabs.join(',');
+                        
+                        // 自动切换到新添加的标签页
+                        component.props.activeTab = newTabIndex.toString();
+                        
+                        // 重要：不要修改现有子组件的tabIndex，保持它们在原来的标签页中
+                        // 新添加的标签页默认是空的，只有后续拖拽的组件才会被添加到新标签页
+                        
                         this.refreshComponent(component);
                         this.updateCodePreview();
-                        this.showProperties(component);
+                        // 延迟刷新属性面板，避免递归
+                        setTimeout(() => {
+                            if (this.selectedComponent && this.selectedComponent.id === component.id) {
+                                this.showProperties(component);
+                            }
+                        }, 10);
                     });
                 }
+                
+                // 设置标签页切换事件
+                this.setupTabSwitching(component);
+            }
+            
+            setupTabSwitching(component) {
+                const tabElement = document.querySelector(`[data-component-id="${component.id}"]`);
+                if (!tabElement) return;
+                
+                const tabButtons = tabElement.querySelectorAll('.tab-button');
+                const tabPages = tabElement.querySelectorAll('.tabpage');
+                
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const tabIndex = parseInt(e.target.dataset.tabIndex);
+                        
+                        // 更新组件的activeTab属性
+                        component.props.activeTab = tabIndex.toString();
+                        
+                        // 切换标签页按钮样式
+                        tabButtons.forEach(btn => {
+                            const btnIndex = parseInt(btn.dataset.tabIndex);
+                            if (btnIndex === tabIndex) {
+                                btn.style.borderBottom = '2px solid #0078d4';
+                            } else {
+                                btn.style.borderBottom = 'none';
+                            }
+                        });
+                        
+                        // 切换标签页内容显示
+                        tabPages.forEach(page => {
+                            const pageIndex = parseInt(page.dataset.tabpageIndex);
+                            if (pageIndex === tabIndex) {
+                                page.style.display = 'block';
+                                
+                                // 检查该标签页是否有组件，如果没有则显示占位符
+                                const hasComponents = this.getChildrenForTabPage(component, pageIndex).length > 0;
+                                const placeholder = page.querySelector('.tabpage-placeholder');
+                                if (placeholder) {
+                                    placeholder.style.display = hasComponents ? 'none' : 'block';
+                                }
+                            } else {
+                                page.style.display = 'none';
+                            }
+                        });
+                        
+                        // 更新代码预览
+                        this.updateCodePreview();
+                        
+                        // 如果属性面板正在显示这个组件，只更新activeTab选择器，避免递归
+                        if (this.selectedComponent && this.selectedComponent.id === component.id) {
+                            const activeTabSelect = document.querySelector('[data-prop="activeTab"]');
+                            if (activeTabSelect) {
+                                activeTabSelect.value = tabIndex.toString();
+                            }
+                        }
+                    });
+                });
             }
 
             refreshComponent(component) {
@@ -2295,6 +2520,23 @@
                             this.renderComponent(child, component);
                             if (originalParent && originalParent !== component.id) {
                                 child.parent = originalParent;
+                            }
+                        });
+                    }
+                    
+                    // 如果是Tab组件，更新占位符显示状态
+                    if (component.type === 'tab') {
+                        const tabs = component.props.tabs ? component.props.tabs.split(',') : ['标签页1', '标签页2'];
+                        const activeTab = parseInt(component.props.activeTab || '0');
+                        
+                        tabs.forEach((tab, tabIndex) => {
+                            const tabPage = newContent.parentElement.querySelector(`.tabpage[data-tabpage-index="${tabIndex}"]`);
+                            if (tabPage) {
+                                const hasComponents = this.getChildrenForTabPage(component, tabIndex).length > 0;
+                                const placeholder = tabPage.querySelector('.tabpage-placeholder');
+                                if (placeholder) {
+                                    placeholder.style.display = (hasComponents || tabIndex !== activeTab) ? 'none' : 'block';
+                                }
                             }
                         });
                     }
@@ -2353,6 +2595,9 @@
             }
 
             deleteComponent(component) {
+                // 获取组件的父容器
+                const parentComponent = this.findParentComponent(component);
+                
                 // 从数据结构中删除
                 this.removeComponentFromTree(component);
                 
@@ -2360,6 +2605,28 @@
                 const element = document.querySelector(`[data-component-id="${component.id}"]`);
                 if (element) {
                     element.remove();
+                }
+                
+                // 如果是Tab容器中的组件，检查是否需要显示占位符
+                if (parentComponent && parentComponent.type === 'tab') {
+                    const tabIndex = parseInt(component.props.tabIndex || '0');
+                    const tabElement = document.querySelector(`[data-component-id="${parentComponent.id}"]`);
+                    if (tabElement) {
+                        const tabPage = tabElement.querySelector(`.tabpage[data-tabpage-index="${tabIndex}"]`);
+                        if (tabPage) {
+                            // 检查该标签页是否还有其他组件
+                            const hasComponents = this.getChildrenForTabPage(parentComponent, tabIndex).length > 0;
+                            if (!hasComponents) {
+                                // 如果没有其他组件，显示占位符
+                                const placeholder = tabPage.querySelector('.tabpage-placeholder');
+                                if (placeholder) {
+                                    // 检查该标签页是否是当前激活的标签页
+                                    const activeTab = parseInt(parentComponent.props.activeTab || '0');
+                                    placeholder.style.display = tabIndex === activeTab ? 'block' : 'none';
+                                }
+                            }
+                        }
+                    }
                 }
                 
                 this.updateCodePreview();
@@ -2416,16 +2683,24 @@
             }
 
             updateCodePreview() {
-                const codeContent = document.getElementById('codeContent');
-                const htmlCode = document.getElementById('htmlCode');
-                const html = this.generateHTML();
+                // 清除之前的定时器
+                if (this.updateCodePreviewTimeout) {
+                    clearTimeout(this.updateCodePreviewTimeout);
+                }
                 
-                if (codeContent) {
-                    codeContent.textContent = html;
-                }
-                if (htmlCode) {
-                    htmlCode.textContent = html;
-                }
+                // 设置新的定时器，实现防抖
+                this.updateCodePreviewTimeout = setTimeout(() => {
+                    const codeContent = document.getElementById('codeContent');
+                    const htmlCode = document.getElementById('htmlCode');
+                    const html = this.generateHTML();
+                    
+                    if (codeContent) {
+                        codeContent.textContent = html;
+                    }
+                    if (htmlCode) {
+                        htmlCode.textContent = html;
+                    }
+                }, 100); // 100ms 防抖延迟
             }
             
             getComponentAtPosition(clientX, clientY) {
@@ -2512,10 +2787,30 @@
                     component.props.row = nextPos.row.toString();
                     component.props.col = nextPos.col.toString();
                     component.props.stretchy = 'horizontal';
+                } else if (containerComponent.type === 'tab') {
+                    // Tab容器中，将组件添加到当前激活的标签页
+                    const activeTab = parseInt(containerComponent.props.activeTab || '0');
+                    component.props.tabIndex = activeTab.toString();
+                    component.props.stretchy = 'horizontal';
                 }
                 
                 // 添加到父容器的children数组
                 containerComponent.children.push(component);
+                
+                // 如果是Tab容器，隐藏对应标签页的占位符
+                if (containerComponent.type === 'tab') {
+                    const tabIndex = parseInt(component.props.tabIndex || '0');
+                    const tabElement = document.querySelector(`[data-component-id="${containerComponent.id}"]`);
+                    if (tabElement) {
+                        const tabPage = tabElement.querySelector(`.tabpage[data-tabpage-index="${tabIndex}"]`);
+                        if (tabPage) {
+                            const placeholder = tabPage.querySelector('.tabpage-placeholder');
+                            if (placeholder) {
+                                placeholder.style.display = 'none';
+                            }
+                        }
+                    }
+                }
                 
                 // 渲染组件到容器中
                 this.renderComponent(component, containerComponent);
@@ -2792,14 +3087,27 @@
                             
                             tabHTML += '>\n';
                             
-                            // 递归生成子组件
-                            if (component.children && component.children.length > 0) {
-                                component.children.forEach(child => {
-                                    tabHTML += generateComponentHTML(child, indent + 1) + '\n';
-                                });
-                            } else {
-                                tabHTML += `${spaces}    Tab 内容\n`;
-                            }
+                            // 生成标签页
+                            const tabs = component.props.tabs ? component.props.tabs.split(',') : ['标签页1', '标签页2'];
+                            const activeTab = parseInt(component.props.activeTab || '0');
+                            
+                            tabs.forEach((tab, tabIndex) => {
+                                tabHTML += `${spaces}    <tabpage title="${tab}">\n`;
+                                
+                                // 查找属于这个标签页的子组件
+                                const tabChildren = self.getChildrenForTabPage(component, tabIndex);
+                                if (tabChildren.length > 0) {
+                                    tabChildren.forEach(child => {
+                                        tabHTML += generateComponentHTML(child, indent + 2) + '\n';
+                                    });
+                                } else {
+                                    // 如果没有子组件，生成占位符label
+                                    const labelTag = getTag('label', 'label');
+                                    tabHTML += `${spaces}        <${labelTag}>标签页内容</${labelTag}>\n`;
+                                }
+                                
+                                tabHTML += `${spaces}    </tabpage>\n`;
+                            });
                             
                             tabHTML += `${spaces}</${tabTag}>`;
                             return tabHTML;
@@ -3082,6 +3390,19 @@
                 newWindow.document.write(html);
                 newWindow.document.close();
             }
+            
+            // 获取属于指定标签页的子组件
+            getChildrenForTabPage(tabComponent, tabIndex) {
+                if (!tabComponent.children || tabComponent.children.length === 0) {
+                    return [];
+                }
+                
+                return tabComponent.children.filter(child => {
+                    // 检查子组件是否有tabIndex属性
+                    const childTabIndex = parseInt(child.props.tabIndex || '0');
+                    return childTabIndex === tabIndex;
+                });
+            }
         }
 
         // 全局函数
@@ -3140,10 +3461,13 @@
             document.getElementById('toggleCodeBtn').addEventListener('click', toggleCodePreview);
             document.getElementById('expandCodeBtn').addEventListener('click', toggleCodePreview);
             
-            // 自动更新代码预览
+            // 自动更新代码预览 - 使用更长的间隔减少性能影响
             setInterval(() => {
-                designer.updateCodePreview();
-            }, 500);
+                // 只有在用户没有主动操作时才自动更新
+                if (!designer.updatingProperties) {
+                    designer.updateCodePreview();
+                }
+            }, 1000); // 增加到1秒间隔
         });
         
         // 辅助方法：为Grid容器中的组件计算下一个可用位置
