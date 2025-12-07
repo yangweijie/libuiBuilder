@@ -72,26 +72,6 @@ function clearAllSortIndicators($table, $numColumns = 5) {
     }
 }
 
-// 获取当前页数据
-function getCurrentPageData($filteredData, $currentPage, $pageSize) {
-    $start = ($currentPage - 1) * $pageSize;
-    $currentPageData = array_slice($filteredData, $start, $pageSize);
-    
-    // 转换为表格需要的格式
-    $tableData = [];
-    foreach ($currentPageData as $item) {
-        $tableData[] = [
-            $item['id'],
-            $item['name'],
-            $item['email'],
-            $item['department'],
-            $item['salary']
-        ];
-    }
-    
-    return $tableData;
-}
-
 // 创建模型处理器
 $modelHandler = Table::modelHandler(
     5, // 5列
@@ -122,6 +102,7 @@ $table = Table::create($model, -1);
 
 // 添加列
 Table::appendTextColumn($table, "ID", 0, false);
+Table::setColumnWidth($table, 0, 38);
 Table::appendTextColumn($table, "Name", 1, false);
 Table::appendTextColumn($table, "Email", 2, false);
 Table::appendTextColumn($table, "Department", 3, false);
