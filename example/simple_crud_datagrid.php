@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Kingbes\Libui\App;
+use Kingbes\Libui\SortIndicator;
 use Kingbes\Libui\Window;
 use Kingbes\Libui\Control;
 use Kingbes\Libui\Box;
@@ -33,9 +34,43 @@ $allData = $sampleData;
 $filteredData = $sampleData;
 $currentPage = 1;
 $pageSize = 10;
-$sortColumn = 0;
-$sortOrder = 'asc';
+$sortColumn = -1; // -1表示没有排序
+$sortOrder = 'none'; // 'asc', 'desc', 'none'
 $selectedRow = -1; // -1表示没有选中行
+
+// 排序辅助函数
+function sortData(&$data, $column, $order) {
+    if ($column < 0 || $order === 'none') {
+        return; // 没有排序要求
+    }
+    
+    $columnNames = ['id', 'name', 'email', 'department', 'salary'];
+    if (!isset($columnNames[$column])) {
+        return; // 列索引无效
+    }
+    
+    $sortKey = $columnNames[$column];
+    
+    usort($data, function($a, $b) use ($sortKey, $order) {
+        $valA = $a[$sortKey];
+        $valB = $b[$sortKey];
+        
+        if (is_numeric($valA) && is_numeric($valB)) {
+            $result = $valA <=> $valB;
+        } else {
+            $result = strcasecmp($valA, $valB);
+        }
+        
+        return $order === 'asc' ? $result : -$result;
+    });
+}
+
+// 清空所有列的排序指示器
+function clearAllSortIndicators($table, $numColumns = 5) {
+    for ($i = 0; $i < $numColumns; $i++) {
+        Table::setHeaderSortIndicator($table, $i, SortIndicator::None);
+    }
+}
 
 // 获取当前页数据
 function getCurrentPageData($filteredData, $currentPage, $pageSize) {
@@ -115,6 +150,7 @@ $clearBtn = Button::create("Clear");
 $newBtn = Button::create("New");
 $editBtn = Button::create("Edit");
 $deleteBtn = Button::create("Delete");
+$clearSortBtn = Button::create("Clear Sort");
 
 // 默认禁用编辑和删除按钮
 // 注意：实际禁用功能需要特定API，这里通过逻辑控制
@@ -139,6 +175,7 @@ Box::append($filterBox, $clearBtn, false);
 Box::append($buttonBox, $newBtn, false);
 Box::append($buttonBox, $editBtn, false);
 Box::append($buttonBox, $deleteBtn, false);
+Box::append($buttonBox, $clearSortBtn, false);
 
 // 分页布局
 Box::append($paginationBox, $prevBtn, false);
@@ -174,6 +211,88 @@ $refreshTable = function() use ($model, &$filteredData, &$currentPage, $pageSize
     
     echo "Table refreshed. Current page: {$currentPage}, Total pages: {$totalPages}, Rows in current page: {$rowCount}\n";
 };
+
+// 设置表头点击事件
+Table::onHeaderClicked($table, function($t, $column) use (&$allData, &$filteredData, &$sortColumn, &$sortOrder, &$currentPage, $pageSize, $model, $refreshTable) {
+    echo "Header clicked: column {$column}\n";
+    
+    // 获取当前列的排序状态
+    $currentIndicator = Table::headerSortIndicator($t, $column);
+    echo "Current sort indicator: " . $currentIndicator->value . "\n";
+    
+    // 清空所有列的排序指示器
+    clearAllSortIndicators($t);
+    
+    // 确定新的排序顺序
+    if ($currentIndicator === SortIndicator::Ascending) {
+        // 如果当前是升序，则改为降序
+        $newOrder = 'desc';
+        Table::setHeaderSortIndicator($t, $column, SortIndicator::Descending);
+        echo "Setting column {$column} to descending\n";
+    } else {
+        // 如果当前是降序或无排序，则改为升序
+        $newOrder = 'asc';
+        Table::setHeaderSortIndicator($t, $column, SortIndicator::Ascending);
+        echo "Setting column {$column} to ascending\n";
+    }
+    
+    // 更新排序状态
+    $sortColumn = $column;
+    $sortOrder = $newOrder;
+    
+    // 对 allData 和 filteredData 进行排序
+    sortData($allData, $column, $newOrder);
+    sortData($filteredData, $column, $newOrder);
+    
+    // 重置到第一页并刷新表格
+    $currentPage = 1;
+    $refreshTable();
+    
+    echo "Sorting applied: column={$column}, order={$newOrder}\n";
+});
+
+// 清空排序按钮事件
+Button::onClicked($clearSortBtn, function() use ($table, &$allData, &$filteredData, &$sortColumn, &$sortOrder, &$currentPage, $pageSize, $model, $refreshTable) {
+    echo "Clear sort button clicked\n";
+    
+    // 重置排序状态
+    $sortColumn = -1;
+    $sortOrder = 'none';
+    
+    // 清空所有列的排序指示器
+    clearAllSortIndicators($table);
+    
+    // 恢复原始数据顺序（按ID排序）
+    usort($allData, function($a, $b) {
+        return $a['id'] <=> $b['id'];
+    });
+    
+    // 同样恢复filteredData的顺序（如果存在过滤，需要保持过滤结果但恢复内部顺序）
+    if (count($allData) === count($filteredData)) {
+        // 如果没有过滤，直接使用allData的顺序
+        $filteredData = $allData;
+    } else {
+        // 如果有过滤，需要根据allData的原始顺序重新排序filteredData
+        $filteredIds = [];
+        foreach ($filteredData as $item) {
+            $filteredIds[$item['id']] = $item;
+        }
+        
+        $newFilteredData = [];
+        foreach ($allData as $item) {
+            if (isset($filteredIds[$item['id']])) {
+                $newFilteredData[] = $item;
+            }
+        }
+        $filteredData = $newFilteredData;
+    }
+    
+    // 重置到第一页并刷新表格
+    $currentPage = 1;
+    $refreshTable();
+    
+    echo "Sort cleared. Data restored to original order.\n";
+});
 
 // New按钮事件
 Button::onClicked($newBtn, function() use (&$allData, &$filteredData, &$currentPage, $pageSize, $sortColumn, $sortOrder, $model, $refreshTable) {
@@ -290,6 +409,8 @@ Button::onClicked($newBtn, function() use (&$allData, &$filteredData, &$currentP
 
     Control::show($newWindow);
 });
+
+
 
 // Edit按钮事件
 Button::onClicked($editBtn, function() use (&$allData, &$filteredData, &$selectedRow, &$currentPage, $pageSize, $model, $refreshTable) {
@@ -511,6 +632,7 @@ Button::onClicked($searchBtn, function() use ($filterEntry, &$filteredData, $all
             }
             return false;
         });
+        $filteredData = array_values($filteredData);
     }
     
     // 重置到第一页
@@ -518,9 +640,7 @@ Button::onClicked($searchBtn, function() use ($filterEntry, &$filteredData, $all
     
     // 确保当前页不超过总页数
     $totalPages = ceil(count($filteredData) / $pageSize);
-    if ($totalPages == 0) {
-        $currentPage = 1; // 如果没有结果，保持在第一页
-    } else if ($currentPage > $totalPages) {
+    if ($currentPage > $totalPages) {
         $currentPage = $totalPages; // 如果当前页超过总页数，跳转到最后一页
     }
     
