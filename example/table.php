@@ -3,6 +3,7 @@
 require dirname(__DIR__) . "/vendor/autoload.php";
 
 use Kingbes\Libui\App;
+use Kingbes\Libui\SortIndicator;
 use Kingbes\Libui\Window;
 use Kingbes\Libui\Control;
 use Kingbes\Libui\Table;
@@ -94,6 +95,20 @@ Table::appendCheckboxTextColumn($table, "选择列", 4, true, 1, false);
 Table::appendProgressBarColumn($table, "进度", 5);
 // 追加图片
 Table::appendImageColumn($table, "图片", 6, true);
+
+Table::onHeaderClicked($table, function ($table, $column) {
+    echo "点击表头 {$column}" ;
+    $sortInfo = Table::headerSortIndicator($table, $column);
+    var_dump($sortInfo->value);
+    switch ($sortInfo->value){
+        case SortIndicator::Ascending->value:
+            Table::setHeaderSortIndicator($table, $column, SortIndicator::Descending);
+            break;
+        default:
+            Table::setHeaderSortIndicator($table, $column, SortIndicator::Ascending);
+            break;
+    }
+});
 
 Window::setChild($window, $table); // 设置窗口子元素
 
