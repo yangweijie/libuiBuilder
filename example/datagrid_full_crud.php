@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 use Kingbes\Libui\App;
 use Kingbes\Libui\View\Builder;
-use Kingbes\Libui\View\Components\DataGrid;
+use Kingbes\Libui\View\Components\DataGridBuilder;
 
 App::init();
 
@@ -383,7 +383,7 @@ $window = Builder::window()
                     ]),
                 
                 // 数据表格
-                (new DataGrid())
+                (new DataGridBuilder())
                     ->id('mainDataGrid')
                     ->headers(['ID', 'Name', 'Email', 'Department', 'Salary'])
                     ->data($sampleData)

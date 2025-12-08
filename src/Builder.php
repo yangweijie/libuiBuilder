@@ -15,6 +15,7 @@ use Kingbes\Libui\View\Components\SeparatorBuilder;
 use Kingbes\Libui\View\Components\SliderBuilder;
 use Kingbes\Libui\View\Components\SpinboxBuilder;
 use Kingbes\Libui\View\Components\TableBuilder;
+use Kingbes\Libui\View\Components\DataGridBuilder;
 use Kingbes\Libui\View\Components\WindowBuilder;
 use Kingbes\Libui\View\Components\BoxBuilder;
 use Kingbes\Libui\View\Components\ButtonBuilder;
@@ -119,6 +120,11 @@ class Builder
     public static function table(array $config = []): TableBuilder
     {
         return new TableBuilder($config);
+    }
+
+    public static function dataGrid(array $config = []): DataGridBuilder
+    {
+        return new DataGridBuilder($config);
     }
 
     public static function menu(): MenuBuilder
@@ -357,6 +363,14 @@ class Builder
     public function newTable(array $config = []): static
     {
         return $this->setCurrent(new TableBuilder($config));
+    }
+
+    /**
+     * 创建数据网格并设为当前组件
+     */
+    public function newDataGrid(array $config = []): static
+    {
+        return $this->setCurrent(new DataGridBuilder($config));
     }
 
     /**

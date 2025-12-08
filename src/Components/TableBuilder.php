@@ -56,18 +56,33 @@ class TableBuilder extends ComponentBuilder
         $numColumns = count($headers);
         $numRows = count($this->displayData);
         
-        // 创建表格模型处理器
+        // 创建表格模型处理器 - 使用实际数据的行数，避免空白行和滚动条
+        $maxRows = max($numRows, 1); // 至少1行，避免空表格
+        
         $this->tableHandler = LibuiTable::modelHandler(
             $numColumns,
             TableValueType::String, // 默认使用字符串类型
-            $numRows,
+            $maxRows,
             function($handler, $row, $column) use ($headers) {
-                if (isset($this->displayData[$row])) {
-                    $rowData = $this->displayData[$row];
-                    // 将列索引转换为列头名称，然后获取对应的值
-                    $headerName = $headers[$column] ?? null;
-                    if ($headerName !== null && isset($rowData[$headerName])) {
-                        $value = $rowData[$headerName];
+                // 从当前配置获取最新数据，而不是使用创建时的副本
+                $currentData = $this->getConfig('data', []);
+                $options = $this->getConfig('options', []);
+                
+                // 如果当前有排序，则应用排序
+                if ($this->sortColumn !== null && $options['sortable']) {
+                    $currentData = $this->sortDataByColumnAndDirection(
+                        $currentData, 
+                        $headers, 
+                        $this->sortColumn, 
+                        $this->sortDirection
+                    );
+                }
+                
+                if (isset($currentData[$row])) {
+                    $rowData = $currentData[$row];
+                    // 使用列索引直接访问数据，因为数据是索引数组
+                    if (isset($rowData[$column])) {
+                        $value = $rowData[$column];
                         // 确保值是字符串
                         return LibuiTable::createValueStr((string) $value);
                     }
@@ -145,6 +160,17 @@ class TableBuilder extends ComponentBuilder
      */
     public function data(array $data): self
     {
+        // 保存原始数据并更新显示数据
+        $this->originalData = $data;
+        
+        // 如果当前有排序，则应用排序
+        $headers = $this->getConfig('headers', []);
+        if ($this->sortColumn !== null && $this->getConfig('options', [])['sortable']) {
+            $this->displayData = $this->sortDataByColumnAndDirection($this->originalData, $headers, $this->sortColumn, $this->sortDirection);
+        } else {
+            $this->displayData = $data;
+        }
+        
         return $this->setConfig('data', $data);
     }
 
@@ -309,16 +335,30 @@ class TableBuilder extends ComponentBuilder
     /**
      * 刷新表格显示
      */
-    public function refreshTable(): void
+    public function refreshTable($pageSize = null): void
     {
         if ($this->tableModel && $this->handle) {
-            // 使用模型更新函数通知UI更新所有行
-            $totalRows = count($this->displayData);
-            if ($totalRows > 0) {
-                // 通知模型行已更改
-                for ($i = 0; $i < $totalRows; $i++) {
-                    LibuiTable::modelRowChanged($this->tableModel, $i);
-                }
+            // 重新获取配置的数据
+            $data = $this->getConfig('data', []);
+            $headers = $this->getConfig('headers', []);
+            $options = $this->getConfig('options', []);
+            
+            // 更新原始数据和显示数据
+            $this->originalData = $data;
+            
+            // 如果当前有排序，则应用排序
+            if ($this->sortColumn !== null && $options['sortable']) {
+                $this->displayData = $this->sortDataByColumnAndDirection($this->originalData, $headers, $this->sortColumn, $this->sortDirection);
+            } else {
+                $this->displayData = $data;
+            }
+            
+            // 对于 libui，我们不能动态更改模型的行数，所以我们需要确保
+            // 模型处理器总是使用最新的数据
+            // 通知所有行已更改（使用当前 displayData 的大小）
+            $totalRows = is_null($pageSize) ? count($this->displayData) : $pageSize;
+            for ($i = 0; $i < $totalRows; $i++) {
+                LibuiTable::modelRowChanged($this->tableModel, $i);
             }
         }
     }
