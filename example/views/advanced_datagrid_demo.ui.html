@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<ui version="1.0">
+    <window title="Advanced DataGrid Demo" width="900" height="600" margined="1">
+        <vbox padded="1">
+            <!-- 过滤栏 -->
+            <hbox vertical="0" padded="1">
+                <label>Filter:</label>
+                <input type="text" ref="employeeGrid_filterInput" />
+                <button onclick="filter">Search</button>
+                <button onclick="clearFilter">Clear</button>
+            </hbox>
+
+            <!-- 排序控制 -->
+            <hbox vertical="0" padded="1">
+                <label>Sort by Column:</label>
+                <spinbox bind="employeeGrid_sortColumnIndex" min="0" max="4" />
+                <button onclick="sort">Toggle Sort</button>
+            </hbox>
+
+            <!-- 数据表格 -->
+            <table
+                id="table"
+                bind="employeeGrid_paged"
+                stretchy="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Salary</th>
+                    </tr>
+                </thead>
+            </table>
+
+            <!-- 分页控制 -->
+            <hbox padded="1">
+                <button onclick="prevPage">Previous</button>
+                <label ref="employeeGrid_pageInfo">Page 1</label>
+                <button onclick="nextPage">Next</button>
+                <button onclick="refresh">Refresh</button>
+            </hbox>
+
+            <!-- 操作按钮 -->
+            <hbox padded="1">
+                <button onclick="addRow">Add Row</button>
+            </hbox>
+        </vbox>
+    </window>
+</ui>

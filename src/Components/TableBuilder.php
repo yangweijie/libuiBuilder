@@ -3,424 +3,391 @@
 namespace Kingbes\Libui\View\Components;
 
 use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\View\State\StateManager;
-use Kingbes\Libui\Table;
+use Kingbes\Libui\Table as LibuiTable;
 use Kingbes\Libui\TableValueType;
-use Closure;
+use Kingbes\Libui\SortIndicator;
+use Kingbes\Libui\TableSelectionMode;
 use FFI\CData;
 
 class TableBuilder extends ComponentBuilder
 {
-    private array $data = [];
-    private array $columns = [];
-    // 持有 FFI 回调以避免 PHP 回收闭包导致回调指针失效
-    private array $ffiCallbacks = [];
-    // 可选文件日志路径（为空则不写）
-    private string $debugLogFile = '';
-    private $model = null; // 保存表格模型引用
-    // 保存原始 uiTableModelHandler CData，防止被 GC 回收
-    private $cHandler = null;
-    private $dataRef = null; // 数据引用，用于回调函数
-    private int $selectedRow = -1; // 当前选中的行索引
+    public $tableModel = null;
+    public $tableHandler = null;
+    public array $originalData = [];  // 保存原始数据用于排序
+    public array $displayData = [];   // 当前显示的数据
+    public ?int $sortColumn = null;   // 当前排序列
+    public ?string $sortDirection = null; // 当前排序方向 ('asc' 或 'desc')
+
+    public function getSortEum(): SortIndicator
+    {
+        return $this->sortDirection == 'asc'? SortIndicator::Ascending:SortIndicator::Descending;
+    }
 
     protected function getDefaultConfig(): array
     {
         return [
-            'columns' => [],
+            'headers' => [],
             'data' => [],
-            'selectionMode' => 'single', // single, multiple, none
-            'onRowSelected' => null,
-            'onCellChanged' => null,
-            'editable' => false,
-            'sortable' => true,
-            'stretchy' => true,
+            'options' => [
+                'sortable' => false,
+                'multiSelect' => false,
+                'headerVisible' => true,
+                'columnWidths' => []
+            ],
+            'eventHandlers' => []
         ];
     }
 
     protected function createNativeControl(): CData
     {
-        $this->columns = $this->getConfig('columns');
-        // Set debug log file for ffi callbacks (helps capture callback invocation in GUI mode)
-        $this->debugLogFile = sys_get_temp_dir() . '/libui_table_builder.log';
-        @file_put_contents($this->debugLogFile, "\n--- createNativeControl at " . date('c') . " ---\n", FILE_APPEND);
+        $headers = $this->getConfig('headers', []);
+        $data = $this->getConfig('data', []);
+        $options = array_merge($this->getDefaultConfig()['options'], $this->getConfig('options', []));
 
-        // 检查是否绑定了状态，如果有则优先使用状态管理器中的数据
-        if ($this->boundState) {
-            $stateManager = StateManager::instance();
-            $stateData = $stateManager->get($this->boundState);
-            if ($stateData !== null && is_array($stateData)) {
-                $this->data = $stateData;
-            } else {
-                $this->data = $this->getConfig('data');
-            }
-        } else {
-            $this->data = $this->getConfig('data');
+        // 保存原始数据
+        $this->originalData = $data;
+
+        // 如果需要排序，对数据进行排序
+        $this->displayData = $data;
+        if ($options['sortable'] && $this->sortColumn !== null) {
+            $this->displayData = $this->sortDataByColumnAndDirection($this->originalData, $headers, $this->sortColumn, $this->sortDirection);
         }
 
-        // 创建数据引用，回调函数将使用这个引用
-        $this->dataRef = &$this->data;
-
-        // 创建表格模型处理程序 - 将回调保存在 $this->ffiCallbacks 以防止被 GC 回收
-        $this->ffiCallbacks['NumColumns'] = function ($h, $m) {
-            return count($this->columns);
-        };
-
-        $this->ffiCallbacks['ColumnType'] = function ($h, $m, $i) {
-            // 所有列默认字符串类型
-            return TableValueType::String->value;
-        };
-
-        $this->ffiCallbacks['NumRows'] = function ($h, $m) {
-            // 使用数据引用的当前行数
-            return is_array($this->dataRef) ? count($this->dataRef) : 0;
-        };
-
-        // 使用类方法作为回调，生成持久的 Closure 引用
-        $this->ffiCallbacks['CellValue'] =
-
-            Closure::fromCallable([$this, 'ffiCellValue']);
-
-        // SetCellValue 使用类方法
-        $this->ffiCallbacks['SetCellValue'] =
-            Closure::fromCallable([$this, 'ffiSetCellValue']);
-
-        // 直接传入已持有的闭包，保证签名与 modelHandler 期望一致
-        $modelHandler = Table::modelHandler(
-            count($this->columns),
-            TableValueType::String,
-            is_array($this->dataRef) ? count($this->dataRef) : 0,
-            $this->ffiCallbacks['CellValue'],
-            $this->ffiCallbacks['SetCellValue']
+        $numColumns = count($headers);
+        $numRows = count($this->displayData);
+        
+        // 创建表格模型处理器 - 使用实际数据的行数，避免空白行和滚动条
+        $maxRows = max($numRows, 1); // 至少1行，避免空表格
+        
+        $this->tableHandler = LibuiTable::modelHandler(
+            $numColumns,
+            TableValueType::String, // 默认使用字符串类型
+            $maxRows,
+            function($handler, $row, $column) use ($headers) {
+                // 从当前配置获取最新数据，而不是使用创建时的副本
+                $currentData = $this->getConfig('data', []);
+                $options = $this->getConfig('options', []);
+                
+                // 如果当前有排序，则应用排序
+                if ($this->sortColumn !== null && $options['sortable']) {
+                    $currentData = $this->sortDataByColumnAndDirection(
+                        $currentData, 
+                        $headers, 
+                        $this->sortColumn, 
+                        $this->sortDirection
+                    );
+                }
+                
+                if (isset($currentData[$row])) {
+                    $rowData = $currentData[$row];
+                    // 使用列索引直接访问数据，因为数据是索引数组
+                    if (isset($rowData[$column])) {
+                        $value = $rowData[$column];
+                        // 确保值是字符串
+                        return LibuiTable::createValueStr((string) $value);
+                    }
+                }
+                return LibuiTable::createValueStr('');
+            }
         );
 
-        // 保存原始 handler CData 防止被回收，然后创建表格模型并保存引用
-        $this->cHandler = $modelHandler;
-        $this->model = Table::createModel($this->cHandler);
+        // 创建表格模型
+        $this->tableModel = LibuiTable::createModel($this->tableHandler);
+        
+        // 创建表格控件
+        $tableControl = LibuiTable::create($this->tableModel, -1); // -1 表示不使用行背景颜色列
+        
+        // 添加列到表格控件（不是模型）
+        foreach ($headers as $index => $header) {
+            LibuiTable::appendTextColumn($tableControl, $header, $index, false);
+        }
 
-        // 创建表格控件 - 行背景颜色列设为-1（无颜色列）
-        $table = Table::create($this->model, -1);
-        // 保存原生控件句柄，供 applyConfig 等后续调用使用
-        $this->handle = $table;
-
-        return $table;
+        return $tableControl;
     }
 
     protected function applyConfig(): void
     {
-        // 添加列
-        foreach ($this->columns as $index => $column) {
-            $columnConfig = is_string($column) ? ['title' => $column] : $column;
-            $this->addTableColumn($index, $columnConfig);
+        if (!$this->handle) {
+            return;
         }
-
+        
+        $options = array_merge($this->getDefaultConfig()['options'], $this->getConfig('options', []));
+        $eventHandlers = $this->getConfig('eventHandlers', []);
+        
+        // 设置表头可见性
+        // 注意：uiTableSetHeaderVisible 函数在当前 libui 版本中可能不可用
+        // 暂时注释掉，等待 libui 更新或找到替代方案
+         if (isset($options['headerVisible'])) {
+             LibuiTable::setHeaderVisible($this->handle, $options['headerVisible']);
+         }
+        
         // 设置选择模式
-        $selectionMode = $this->getConfig('selectionMode');
-        // Table::setSelectionMode($this->handle, $selectionMode);
-
-        // 绑定事件
-        if ($onRowSelected = $this->getConfig('onRowSelected')) {
-            // Table::onRowSelected($this->handle, $onRowSelected);
+        $selectionMode = $options['multiSelect'] ? 
+            TableSelectionMode::ZeroOrMany : TableSelectionMode::One;
+        LibuiTable::setSelectionMode($this->handle, $selectionMode);
+        
+        // 设置列宽度
+        foreach ($options['columnWidths'] as $columnIndex => $width) {
+            LibuiTable::setColumnWidth($this->handle, $columnIndex, $width);
+        }
+        
+        // 添加事件监听
+        foreach ($eventHandlers as $event => $handler) {
+            if ($event === 'onRowClicked') {
+                LibuiTable::onRowClicked($this->handle, function($table, $row) use ($handler) {
+                    $handler($this, $row); // 传递组件实例而不是原生控件
+                });
+            } elseif ($event === 'onRowDoubleClicked') {
+                LibuiTable::onRowDoubleClicked($this->handle, function($table, $row) use ($handler) {
+                    $handler($this, $row);
+                });
+            } elseif ($event === 'onSelectionChanged') {
+                LibuiTable::onSelectionChanged($this->handle, function($table) use ($handler) {
+                    $handler($this);
+                });
+            } elseif ($event === 'onHeaderClicked') {
+                LibuiTable::onHeaderClicked($this->handle, function($table, $column) use ($handler, $options) {
+                    $this->handleHeaderClick($column, $options['sortable']);
+                    $handler($this, $column, $this->sortColumn, $this->sortDirection);
+                });
+            }
         }
     }
 
-    private function addTableColumn(int $index, array $config): void
+    /**
+     * 设置表头
+     */
+    public function headers(array $headers): self
     {
-        $title = $config['title'] ?? "Column $index";
-        $type = $config['type'] ?? 'text';
-        $editable = $config['editable'] ?? $this->getConfig('editable');
-
-        switch ($type) {
-            case 'text':
-                Table::appendTextColumn($this->handle, $title, $index, $editable ? 1 : -1);
-                break;
-            case 'image':
-                Table::appendImageColumn($this->handle, $title, $index);
-                break;
-            case 'checkbox':
-                Table::appendCheckboxColumn($this->handle, $title, $index, $editable ? 1 : -1);
-                break;
-            case 'progress':
-                Table::appendProgressBarColumn($this->handle, $title, $index);
-                break;
-            case 'button':
-                Table::appendButtonColumn($this->handle, $title, $index, $editable ? 1 : -1);
-                break;
-        }
+        return $this->setConfig('headers', $headers);
     }
 
-    // 获取单元格值的回调
-    public function getCellValue(CData $model, int $row, int $column): CData
+    /**
+     * 设置表格数据
+     */
+    public function data(array $data): self
     {
-        if (!isset($this->data[$row][$column])) {
-            return Table::createValueStr('');
-        }
-
-        $value = $this->data[$row][$column];
-
-        if (is_string($value)) {
-            return Table::createValueStr($value);
-        } elseif (is_int($value)) {
-            return Table::createValueInt($value);
-        } elseif (is_bool($value)) {
-            return Table::createValueInt($value ? 1 : 0);
+        // 保存原始数据并更新显示数据
+        $this->originalData = $data;
+        
+        // 如果当前有排序，则应用排序
+        $headers = $this->getConfig('headers', []);
+        if ($this->sortColumn !== null && $this->getConfig('options', [])['sortable']) {
+            $this->displayData = $this->sortDataByColumnAndDirection($this->originalData, $headers, $this->sortColumn, $this->sortDirection);
         } else {
-            return Table::createValueStr((string)$value);
+            $this->displayData = $data;
         }
-    }
-    
-    // 使用数据引用的获取单元格值回调
-    public function getCellValueWithRef(CData $model, int $row, int $column): CData
-    {
-        // 调试日志：打印行列信息以便排查崩溃来源
-        // 注意：在 GUI 线程中频繁打印可能会影响性能，仅用于调试
-        echo "getCellValueWithRef called: row={$row}, col={$column}, dataRows=" . count($this->dataRef) . "\n";
-        if (!isset($this->dataRef[$row][$column])) {
-            echo "  -> cell not set, returning empty string\n";
-            return Table::createValueStr('');
-        }
-
-        $value = $this->dataRef[$row][$column];
-
-        if (is_string($value)) {
-            return Table::createValueStr($value);
-        } elseif (is_int($value)) {
-            return Table::createValueInt($value);
-        } elseif (is_bool($value)) {
-            return Table::createValueInt($value ? 1 : 0);
-        } else {
-            return Table::createValueStr((string)$value);
-        }
-    }
-
-    // 设置单元格值的回调
-    public function setCellValue(CData $model, int $row, int $column, CData $value): void
-    {
-        $type = Table::getValueType($value);
-
-        switch ($type) {
-            case TableValueType::String:
-                $this->data[$row][$column] = Table::valueStr($value);
-                break;
-            case TableValueType::Int:
-                $this->data[$row][$column] = Table::valueInt($value);
-                break;
-        }
-
-        if ($onCellChanged = $this->getConfig('onCellChanged')) {
-            $onCellChanged($row, $column, $this->data[$row][$column]);
-        }
-    }
-
-    // 链式配置方法
-    public function columns(array $columns): static
-    {
-        return $this->setConfig('columns', $columns);
-    }
-
-    public function data(array $data): static
-    {
+        
         return $this->setConfig('data', $data);
     }
 
-    public function onRowSelected(callable $callback): static
+    /**
+     * 设置表格选项
+     */
+    public function options(array $options): self
     {
-        return $this->setConfig('onRowSelected', $callback);
-    }
-
-    public function editable(bool $editable = true): static
-    {
-        return $this->setConfig('editable', $editable);
-    }
-    
-    public function bind(string $key): static
-    {
-        // 使用 ComponentBuilder 的绑定逻辑，这会设置 $this->boundState 并注册 StateManager 监听
-        parent::bind($key);
-        return $this;
+        $currentOptions = $this->getConfig('options', []);
+        $mergedOptions = array_merge($currentOptions, $options);
+        return $this->setConfig('options', $mergedOptions);
     }
 
     /**
-     * 更新表格数据并刷新显示
+     * 添加事件处理器
      */
-    public function refreshData(): void
+    public function onEvent(string $event, callable $handler): self
     {
-        // 数据通过引用自动更新，无需手动刷新
-        echo "表格数据已更新，共 " . count($this->data) . " 行\n";
+        $eventHandlers = $this->getConfig('eventHandlers', []);
+        $eventHandlers[$event] = $handler;
+        return $this->setConfig('eventHandlers', $eventHandlers);
     }
-    
+
     /**
-     * 实现setValue方法以支持数据绑定（使用增量更新）
+     * 更新表格数据
      */
-    public function setValue($value): void
+    public function updateData(array $data): void
     {
-        if (is_array($value)) {
-            $oldData = $this->data;
-            $oldCount = count($oldData);
-            $newCount = count($value);
-            
-            echo "表格setValue: 旧数据{$oldCount}行, 新数据{$newCount}行\n";
-            
-            if ($newCount === $oldCount) {
-                // 数量相同，检查是否有数据更新
-                for ($i = 0; $i < $newCount; $i++) {
-                    if (isset($oldData[$i]) && $oldData[$i] !== $value[$i]) {
-                        // 数据不同，调用updateRow
-                        $this->updateRow($i, $value[$i]);
-                    }
-                }
-            } elseif ($newCount > $oldCount) {
-                // 新增行 - 先更新数据数组，再插入行
-                $this->data = $value;
-                $this->dataRef = &$this->data;
-                $this->setConfig('data', $value);
-                
-                for ($i = $oldCount; $i < $newCount; $i++) {
-                    $this->insertRow($i, $value[$i]);
-                }
-            } else {
-                // 删除行（从后往前删）- 先删除行，再更新数据数组
-                for ($i = $oldCount - 1; $i >= $newCount; $i--) {
-                    $this->deleteRow($i);
-                }
-                
-                $this->data = $value;
-                $this->dataRef = &$this->data;
-                $this->setConfig('data', $value);
-            }
-            
-            // 最后更新数据数组（确保一致性）
-            $this->data = $value;
-            $this->dataRef = &$this->data;
-            $this->setConfig('data', $value);
-        }
-    }
-    
-    /**
-     * 插入新行
-     */
-    public function insertRow(int $index, array $rowData): void
-    {
-        // 只更新UI显示，不修改数据数组
-        Table::modelRowInserted($this->model, $index);
-        echo "插入行 {$index}: " . json_encode($rowData) . "\n";
-    }
-    
-    /**
-     * 更新行数据
-     */
-    public function updateRow(int $index, array $rowData): void
-    {
-        // 只更新UI显示，不修改数据数组
-        Table::modelRowChanged($this->model, $index);
-        echo "更新行 {$index}: " . json_encode($rowData) . "\n";
-    }
-    
-    /**
-     * 删除行
-     */
-    public function deleteRow(int $index): void
-    {
-        // 只更新UI显示，不修改数据数组
-        Table::modelRowDeleted($this->model, $index);
-        echo "删除行 {$index}\n";
-    }
-    
-    /**
-     * 设置选中行
-     */
-    public function setSelectedRow(int $index): void
-    {
-        // 从StateManager获取最新数据长度
-        $stateManager = StateManager::instance();
-        $tableData = $stateManager->get('tableData', []);
-        $dataCount = count($tableData);
+        $this->setConfig('data', $data);
         
-        if ($index >= 0 && $index < $dataCount) {
-            $this->selectedRow = $index;
-        }
+        // 注意：ui库的模型不能简单地更新，需要重新创建模型
+        // 这是一个高级功能，可能需要在实际应用中实现模型更新方法
     }
-    
+
     /**
-     * 获取选中行
+     * 获取表格选择
      */
-    public function getSelectedRow(): int
+    public function getSelection()
     {
-        return $this->selectedRow;
-    }
-    
-    /**
-     * 获取选中行的数据
-     */
-    public function getSelectedRowData(): ?array
-    {
-        // 从StateManager获取最新数据，确保同步
-        $stateManager = StateManager::instance();
-        $tableData = $stateManager->get('tableData', []);
-        
-        if ($this->selectedRow >= 0 && $this->selectedRow < count($tableData)) {
-            return $tableData[$this->selectedRow];
+        if ($this->handle) {
+            return LibuiTable::getSelection($this->handle);
         }
-        
         return null;
     }
+
+    /**
+     * 设置表格选择
+     */
+    public function setSelection($selection): void
+    {
+        if ($this->handle) {
+            LibuiTable::setSelection($this->handle, $selection);
+        }
+    }
+
+    /**
+     * 获取表格选择模式
+     */
+    public function getSelectionMode(): TableSelectionMode
+    {
+        if ($this->handle) {
+            return LibuiTable::selectionMode($this->handle);
+        }
+        return TableSelectionMode::None;
+    }
+
+    function clearAllSortIndicators($table, $numColumns = 5): void
+    {
+        for ($i = 0; $i < $numColumns; $i++) {
+            LibuiTable::setHeaderSortIndicator($table, $i, SortIndicator::None);
+        }
+    }
+
+    /**
+     * 处理表头点击事件（用于排序）
+     */
+    private function handleHeaderClick(int $column, bool $sortable): void
+    {
+        if (!$sortable) {
+            return;
+        }
+
+        $headers = $this->getConfig('headers', []);
+        if (!isset($headers[$column])) {
+            return;
+        }
+
+        $this->clearAllSortIndicators($this->handle, count($headers));
+
+        // 如果点击了同一列，则切换排序方向，否则按升序开始
+        if ($this->sortColumn === $column) {
+            if ($this->sortDirection === 'asc') {
+                $this->sortDirection = 'desc';
+            } else {
+                $this->sortDirection = 'asc';
+            }
+        } else {
+            $this->sortColumn = $column;
+            $this->sortDirection = 'asc';
+        }
+
+        // 设置排序指示器
+        LibuiTable::setHeaderSortIndicator($this->handle, $column, $this->getSortEum());
+        
+        // 自动排序并刷新表格
+        $this->sortData();
+        $this->refreshTable();
+    }
+
+    /**
+     * 对数据进行排序（根据当前设置的排序列和方向）
+     */
+    public function sortData(): void
+    {
+        if ($this->sortColumn === null || $this->sortDirection === null) {
+            $this->displayData = $this->originalData;
+            return;
+        }
+
+        $headers = $this->getConfig('headers', []);
+        if (!isset($headers[$this->sortColumn])) {
+            return;
+        }
+
+        $this->displayData = $this->sortDataByColumnAndDirection($this->originalData, $headers, $this->sortColumn, $this->sortDirection);
+    }
     
     /**
-     * 确保选中行索引有效
+     * 按指定列和方向对数据进行排序
      */
-    public function validateSelectedRow(): void
+    private function sortDataByColumnAndDirection(array $data, array $headers, int $column, string $direction): array
     {
-        // 从StateManager获取最新数据长度
-        $stateManager = StateManager::instance();
-        $tableData = $stateManager->get('tableData', []);
-        
-        if ($this->selectedRow >= count($tableData)) {
-            $this->selectedRow = -1; // 重置选择
+        if (!isset($headers[$column])) {
+            return $data;
+        }
+
+        $sortColumnHeader = $headers[$column];
+
+        $sortedData = $data;
+        usort($sortedData, function ($a, $b) use ($sortColumnHeader, $direction) {
+            $valA = $a[$sortColumnHeader] ?? '';
+            $valB = $b[$sortColumnHeader] ?? '';
+
+            // 尝试将值转换为数字进行比较
+            $numericA = is_numeric($valA) ? floatval($valA) : 0;
+            $numericB = is_numeric($valB) ? floatval($valB) : 0;
+
+            // 如果两个值都是数字，则按数字比较，否则按字符串比较
+            if (is_numeric($valA) && is_numeric($valB)) {
+                $result = $numericA <=> $numericB;
+            } else {
+                $result = strcasecmp((string)$valA, (string)$valB);
+            }
+
+            // 如果是降序，则反转结果
+            return $direction === 'desc' ? -$result : $result;
+        });
+
+        return $sortedData;
+    }
+
+    /**
+     * 刷新表格显示
+     */
+    public function refreshTable($pageSize = null): void
+    {
+        if ($this->tableModel && $this->handle) {
+            // 重新获取配置的数据
+            $data = $this->getConfig('data', []);
+            $headers = $this->getConfig('headers', []);
+            $options = $this->getConfig('options', []);
+            
+            // 更新原始数据和显示数据
+            $this->originalData = $data;
+            
+            // 如果当前有排序，则应用排序
+            if ($this->sortColumn !== null && $options['sortable']) {
+                $this->displayData = $this->sortDataByColumnAndDirection($this->originalData, $headers, $this->sortColumn, $this->sortDirection);
+            } else {
+                $this->displayData = $data;
+            }
+            
+            // 对于 libui，我们不能动态更改模型的行数，所以我们需要确保
+            // 模型处理器总是使用最新的数据
+            // 通知所有行已更改（使用当前 displayData 的大小）
+            $totalRows = is_null($pageSize) ? count($this->displayData) : $pageSize;
+            for ($i = 0; $i < $totalRows; $i++) {
+                LibuiTable::modelRowChanged($this->tableModel, $i);
+            }
         }
     }
 
-    // 实际传给 FFI 的回调实现：签名与 modelHandler 中调用一致
-    // modelHandler 会以 ($handler, $row, $column) 调用我们的 CellValue
-    public function ffiCellValue($handler, $row, $column)
+    /**
+     * 设置表格标题排序指示器
+     */
+    public function setHeaderSortIndicator(int $column, SortIndicator $direction): void
     {
-        // 不直接 echo，改为可选文件日志以避免 GUI 线程干扰
-        if ($this->debugLogFile) {
-            @file_put_contents($this->debugLogFile, "[ffi CellValue] row={$row}, col={$column}, dataRows=" . (is_array($this->dataRef) ? count($this->dataRef) : 0) . "\n", FILE_APPEND);
+        if ($this->handle) {
+            LibuiTable::setHeaderSortIndicator($this->handle, $column, $direction);
         }
-
-        if (!is_int($row) || !is_int($column) || $row < 0 || $column < 0) {
-            return Table::createValueStr('');
-        }
-        if (!is_array($this->dataRef) || $row >= count($this->dataRef)) {
-            return Table::createValueStr('');
-        }
-        if (!isset($this->dataRef[$row][$column])) {
-            return Table::createValueStr('');
-        }
-        $val = $this->dataRef[$row][$column];
-        if (is_string($val)) return Table::createValueStr($val);
-        if (is_int($val)) return Table::createValueInt($val);
-        if (is_bool($val)) return Table::createValueInt($val ? 1 : 0);
-        return Table::createValueStr((string)$val);
     }
 
-    // modelHandler 会以 ($handler, $row, $column, $v) 调用我们的 SetCellValue
-    public function ffiSetCellValue($handler, $row, $column, $v)
+    /**
+     * 获取表格标题排序指示器
+     */
+    public function getHeaderSortIndicator(int $column): SortIndicator
     {
-        if ($this->debugLogFile) {
-            @file_put_contents($this->debugLogFile, "[ffi SetCellValue] row={$row}, col={$column}\n", FILE_APPEND);
+        if ($this->handle) {
+            return LibuiTable::headerSortIndicator($this->handle, $column);
         }
-        if (!is_int($row) || !is_int($column) || $row < 0 || $column < 0) return;
-        if (!is_array($this->data)) return;
-        $type = Table::getValueType($v);
-        switch ($type) {
-            case TableValueType::String:
-                $this->data[$row][$column] = Table::valueStr($v);
-                break;
-            case TableValueType::Int:
-                $this->data[$row][$column] = Table::valueInt($v);
-                break;
-            default:
-                $this->data[$row][$column] = '';
-        }
+        return SortIndicator::None;
     }
 }

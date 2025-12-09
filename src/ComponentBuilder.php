@@ -2,6 +2,7 @@
 
 namespace Kingbes\Libui\View;
 
+use InvalidArgumentException;
 use Kingbes\Libui\View\State\StateManager;
 use Kingbes\Libui\View\State\ComponentRef;
 use Kingbes\Libui\Control;
@@ -58,10 +59,10 @@ abstract class ComponentBuilder
      */
     public function addChild(ComponentBuilder $child): static
     {
-        echo "ComponentBuilder::addChild called for " . get_class($this) . " -> " . get_class($child) . "\n";
-        echo "  Before add - children hash: " . spl_object_hash($this) . "\n";
-        echo "  Before add - children array: " . (isset($this->children) ? "exists" : "not exists") . "\n";
-        echo "  Before add - children count: " . (isset($this->children) ? count($this->children) : "N/A") . "\n";
+//        echo "ComponentBuilder::addChild called for " . get_class($this) . " -> " . get_class($child) . "\n";
+//        echo "  Before add - children hash: " . spl_object_hash($this) . "\n";
+//        echo "  Before add - children array: " . (isset($this->children) ? "exists" : "not exists") . "\n";
+//        echo "  Before add - children count: " . (isset($this->children) ? count($this->children) : "N/A") . "\n";
         
         if (!$this->canHaveChildren()) {
             throw new InvalidArgumentException(static::class . ' cannot have children');
@@ -69,10 +70,10 @@ abstract class ComponentBuilder
 
         $this->children[] = $child;
         $child->parent = $this;
-        
-        echo "  After add - children count: " . count($this->children) . "\n";
-        echo "  After add - children[0] class: " . get_class($this->children[0]) . "\n";
-        
+//
+//        echo "  After add - children count: " . count($this->children) . "\n";
+//        echo "  After add - children[0] class: " . get_class($this->children[0]) . "\n";
+//
         return $this;
     }
 
@@ -178,6 +179,7 @@ abstract class ComponentBuilder
                 $handler($this, ...$args);
             }
         }
+
 
         // 如果绑定了状态，自动更新状态
         if ($this->boundState && $event === 'change') {

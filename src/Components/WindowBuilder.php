@@ -82,6 +82,12 @@ class WindowBuilder extends ComponentBuilder
         App::main();
     }
 
+    public function showBuilt(): void
+    {
+        Control::show($this->handle);
+        App::main();
+    }
+
     // 链式配置方法
     public function title(string $title): static
     {

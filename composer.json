@@ -6,7 +6,8 @@
     "ext-dom": "*",
     "ext-ffi": "*",
     "ext-libxml": "*",
-    "kingbes/libui": "*"
+    "kingbes/libui": "*",
+    "ffi/var-dumper": "1.0.x-dev"
   },
   "license": "MIT",
   "autoload": {
