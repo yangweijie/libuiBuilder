@@ -70,15 +70,24 @@ $paginationBox = Builder::hbox()
         $nextBtn,
     ]);
 
-// 创建一个简单的表格（不使用复杂的数据绑定，避免段错误）
+// 创建简单的表格数据（只显示前10条）
+$tableData = [];
+for ($i = 0; $i < 10; $i++) {
+    $item = $sampleData[$i];
+    $tableData[] = [
+        $item['id'],
+        $item['name'],
+        $item['email'],
+        $item['department'],
+        $item['salary']
+    ];
+}
+
+// 创建表格
 $table = Builder::table()
-    ->columns([
-        ['title' => 'ID', 'type' => 'text'],
-        ['title' => 'Name', 'type' => 'text'],
-        ['title' => 'Email', 'type' => 'text'],
-        ['title' => 'Department', 'type' => 'text'],
-        ['title' => 'Salary', 'type' => 'text'],
-    ]);
+    ->headers(['ID', 'Name', 'Email', 'Department', 'Salary'])
+    ->options(['headerVisible'=>false])
+    ->data($tableData);
 
 // 主容器
 $mainContainer = Builder::vbox()

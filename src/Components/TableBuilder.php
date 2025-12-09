@@ -114,6 +114,13 @@ class TableBuilder extends ComponentBuilder
         $options = array_merge($this->getDefaultConfig()['options'], $this->getConfig('options', []));
         $eventHandlers = $this->getConfig('eventHandlers', []);
         
+        // 设置表头可见性
+        // 注意：uiTableSetHeaderVisible 函数在当前 libui 版本中可能不可用
+        // 暂时注释掉，等待 libui 更新或找到替代方案
+         if (isset($options['headerVisible'])) {
+             LibuiTable::setHeaderVisible($this->handle, $options['headerVisible']);
+         }
+        
         // 设置选择模式
         $selectionMode = $options['multiSelect'] ? 
             TableSelectionMode::ZeroOrMany : TableSelectionMode::One;

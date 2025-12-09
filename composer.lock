@@ -73,23 +73,30 @@
         },
         {
             "name": "kingbes/libui",
-            "version": "v0.1.6",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/KingBes/php-libui.git",
+                "reference": "f82301f500b9d0f39ffabc5ac849aec1ccdf1d51"
+            },
             "dist": {
                 "type": "zip",
-                "url": "https://mirrors.cloud.tencent.com/repository/composer/kingbes/libui/v0.1.6/kingbes-libui-v0.1.6.zip",
-                "reference": "1337100a861a40e4de0f05870a29936a567c4391",
+                "url": "https://api.github.com/repos/KingBes/php-libui/zipball/f82301f500b9d0f39ffabc5ac849aec1ccdf1d51",
+                "reference": "f82301f500b9d0f39ffabc5ac849aec1ccdf1d51",
                 "shasum": ""
             },
             "require": {
                 "ext-ffi": "*",
                 "php": ">=8.2"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
                     "Kingbes\\Libui\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -108,9 +115,9 @@
             ],
             "support": {
                 "issues": "https://github.com/KingBes/php-libui/issues",
-                "source": "https://github.com/KingBes/php-libui/tree/v0.1.6"
+                "source": "https://github.com/KingBes/php-libui/tree/main"
             },
-            "time": "2025-11-27T02:23:37+00:00"
+            "time": "2025-12-08T01:22:37+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
