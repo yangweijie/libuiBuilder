@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "867f294c397c8af2de57e6e2bcefc815",
+    "content-hash": "00ed9c7c131badb0327e32d9f644fcc7",
     "packages": [
         {
             "name": "ffi/var-dumper",
@@ -73,7 +73,7 @@
         },
         {
             "name": "kingbes/libui",
-            "version": "dev-main",
+            "version": "v0.1.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KingBes/php-libui.git",
@@ -89,7 +89,6 @@
                 "ext-ffi": "*",
                 "php": ">=8.2"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -115,7 +114,7 @@
             ],
             "support": {
                 "issues": "https://github.com/KingBes/php-libui/issues",
-                "source": "https://github.com/KingBes/php-libui/tree/main"
+                "source": "https://github.com/KingBes/php-libui/tree/v0.1.9"
             },
             "time": "2025-12-08T01:22:37+00:00"
         },

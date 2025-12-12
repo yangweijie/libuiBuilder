@@ -3,7 +3,7 @@ use Kingbes\Libui\App;
 use Kingbes\Libui\View\HtmlRenderer;
 use Kingbes\Libui\View\State\StateManager;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 App::init();
 

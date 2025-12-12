@@ -2,9 +2,15 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use FFI\CData;
-use Kingbes\Libui\Grid;
+use Exception;
+use Kingbes\Libui\Table as LibuiTable;
+use Kingbes\Libui\TableValueType;
+use Kingbes\Libui\SortIndicator;
+use Kingbes\Libui\TableSelectionMode;
+use Kingbes\Libui\Align;
 use Kingbes\Libui\View\ComponentBuilder;
+use Kingbes\Libui\Grid;
+use FFI\CData;
 
 class GridBuilder extends ComponentBuilder
 {
@@ -36,23 +42,130 @@ class GridBuilder extends ComponentBuilder
 
     protected function buildChildren(): void
     {
-        foreach ($this->gridItems as $item) {
-            // 现在从对象获取最终配置
+        // 首先处理通过place()方法添加的gridItems
+        foreach ($this->gridItems as $index => $item) {
             $config = $item->getConfig();
-            $childHandle = $config['component']->build();
+            
+            try {
+                $childHandle = $config['component']->build();
 
-            Grid::append(
-                $this->handle,
-                $childHandle,
-                $config['left'],
-                $config['top'],
-                $config['xspan'],
-                $config['yspan'],
-                $config['hexpand'] ? 1 : 0,
-                $config['halign']->value,  // halign 需要 ->value （int）
-                $config['vexpand'] ? 1 : 0,
-                $config['valign']  // valign 需要枚举对象（Align）
-            );
+                Grid::append(
+                    $this->handle,
+                    $childHandle,
+                    $config['left'],      // left (col)
+                    $config['top'],       // top (row)
+                    $config['xspan'],     // xspan (colspan)
+                    $config['yspan'],     // yspan (rowspan)
+                    $config['hexpand'] ? 1 : 0,  // hexpand
+                    $config['halign']->value,     // halign (int)
+                    $config['vexpand'] ? 1 : 0,  // vexpand
+                    $config['valign']            // valign (Align object)
+                );
+            } catch (Exception $e) {
+                echo "[GridBuilder] Error building gridItem: " . $e->getMessage() . "\n";
+            }
+        }
+        
+        // 然后处理通过contains()方法添加的children
+        if (isset($this->children)) {
+            foreach ($this->children as $index => $child) {
+                $componentType = get_class($child);
+                $componentType = substr($componentType, strrpos($componentType, '\\') + 1);
+                
+                echo "[GridBuilder] Building child $index: $componentType\n";
+                
+                try {
+                    $childHandle = $child->build();
+                    echo "[GridBuilder] Child built successfully\n";
+
+                    // 从子组件的config中读取Grid定位信息
+                    $row = $child->getConfig('row', $index);
+                    $col = $child->getConfig('col', $index);
+                    $colspan = $child->getConfig('colspan', 1);
+                    $rowspan = $child->getConfig('rowspan', 1);
+                    
+                    // 处理expand参数（可以是字符串或布尔值）
+                    $expandConfig = $child->getConfig('expand', null);
+                    $hexpand = 0;
+                    $vexpand = 0;
+                    
+                    if (is_string($expandConfig)) {
+                        // 字符串格式: 'both', 'horizontal', 'vertical'
+                        if ($expandConfig === 'both') {
+                            $hexpand = 1;
+                            $vexpand = 1;
+                        } elseif ($expandConfig === 'horizontal') {
+                            $hexpand = 1;
+                        } elseif ($expandConfig === 'vertical') {
+                            $vexpand = 1;
+                        }
+                    } elseif (is_bool($expandConfig)) {
+                        // 布尔格式: true表示双向扩展
+                        if ($expandConfig) {
+                            $hexpand = 1;
+                            $vexpand = 1;
+                        }
+                    }
+                    
+                    // 如果没有显式设置expand，根据组件类型自动设置
+                    if ($expandConfig === null) {
+                        if ($componentType === 'TableBuilder') {
+                            $hexpand = 1;
+                            $vexpand = 1;
+                            echo "[GridBuilder] Auto-setting table to expand both directions\n";
+                        } elseif ($componentType === 'ButtonBuilder') {
+                            $hexpand = 1;
+                            echo "[GridBuilder] Auto-setting button to expand horizontally\n";
+                        }
+                    }
+                    
+                    // 处理align参数
+                    $alignConfig = $child->getConfig('align', null);
+                    $halign = Align::Fill;
+                    $valign = Align::Fill;
+                    
+                    // Label、Separator和Button默认垂直居中，避免填充整行
+                    if ($componentType === 'LabelBuilder' || $componentType === 'SeparatorBuilder' || $componentType === 'ButtonBuilder') {
+                        $valign = Align::Center;
+                    }
+                    
+                    // 如果用户显式设置了align，使用用户设置（覆盖默认值）
+                    if (is_string($alignConfig)) {
+                        $alignMap = [
+                            'fill' => Align::Fill,
+                            'start' => Align::Start,
+                            'center' => Align::Center,
+                            'end' => Align::End,
+                            'left' => Align::Fill,  // Label的默认值，不影响 valign
+                            'right' => Align::End,
+                        ];
+                        $halign = $alignMap[$alignConfig] ?? Align::Fill;
+                        // 只有在显式设置了布局关键词时才覆盖 valign
+                        if (in_array($alignConfig, ['fill', 'start', 'center', 'end'])) {
+                            $valign = $alignMap[$alignConfig];
+                        }
+                    }
+                    
+                    echo "[GridBuilder] Positioning: row=$row, col=$col, colspan=$colspan, rowspan=$rowspan, hexpand=$hexpand, vexpand=$vexpand, halign={$halign->name}, valign={$valign->name}\n";
+
+                    Grid::append(
+                        $this->handle,
+                        $childHandle,
+                        $col,             // left (col) - 从配置读取
+                        $row,             // top (row) - 从配置读取
+                        $colspan,         // xspan (colspan) - 从配置读取
+                        $rowspan,         // yspan (rowspan) - 从配置读取
+                        $hexpand,         // hexpand
+                        $halign->value,   // halign (int)
+                        $vexpand,         // vexpand
+                        $valign           // valign (Align object)
+                    );
+                    
+                    echo "[GridBuilder] Child appended to grid\n";
+                } catch (Exception $e) {
+                    echo "[GridBuilder] Error building child: " . $e->getMessage() . "\n";
+                }
+            }
         }
     }
 

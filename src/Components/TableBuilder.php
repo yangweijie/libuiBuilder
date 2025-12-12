@@ -8,6 +8,7 @@ use Kingbes\Libui\TableValueType;
 use Kingbes\Libui\SortIndicator;
 use Kingbes\Libui\TableSelectionMode;
 use FFI\CData;
+use Kingbes\Libui\View\State\StateManager;
 
 class TableBuilder extends ComponentBuilder
 {
@@ -44,6 +45,22 @@ class TableBuilder extends ComponentBuilder
         $data = $this->getConfig('data', []);
         $options = array_merge($this->getDefaultConfig()['options'], $this->getConfig('options', []));
 
+        // 如果绑定了状态，尝试从状态管理器获取数据
+        if ($this->boundState && empty($data)) {
+            $stateData = StateManager::instance()->get($this->boundState, []);
+            if (is_array($stateData) && !empty($stateData)) {
+                $data = $stateData;
+                $this->setConfig('data', $data);
+            }
+        }
+        
+        // 如果之前通过setValue设置了数据，使用那个数据
+        if (empty($data) && !empty($this->displayData)) {
+            $data = $this->displayData;
+            $this->setConfig('data', $data);
+            echo "[TableBuilder] Using pre-set data from setValue: " . count($data) . " rows\n";
+        }
+
         // 保存原始数据
         $this->originalData = $data;
 
@@ -56,40 +73,29 @@ class TableBuilder extends ComponentBuilder
         $numColumns = count($headers);
         $numRows = count($this->displayData);
         
-        // 创建表格模型处理器 - 使用实际数据的行数，避免空白行和滚动条
-        $maxRows = max($numRows, 1); // 至少1行，避免空表格
+        // 创建表格模型处理器 - 预留足够空间避免重新创建模型
+        // 使用较大值以容纳未来可能增加的行
+        $maxRows = max($numRows * 2, 100, 1); // 至少100行，或当前行数的两倍
+        
+        // 创建表格模型处理器 - 使用实际行数
+        // 将数据直接传递到闭包中，避免 $this 引用问题
+        $tableData = $this->displayData;
         
         $this->tableHandler = LibuiTable::modelHandler(
             $numColumns,
             TableValueType::String, // 默认使用字符串类型
-            $maxRows,
-            function($handler, $row, $column) use ($headers) {
-                // 从当前配置获取最新数据，而不是使用创建时的副本
-                $currentData = $this->getConfig('data', []);
-                $options = $this->getConfig('options', []);
-                
-                // 如果当前有排序，则应用排序
-                if ($this->sortColumn !== null && $options['sortable']) {
-                    $currentData = $this->sortDataByColumnAndDirection(
-                        $currentData, 
-                        $headers, 
-                        $this->sortColumn, 
-                        $this->sortDirection
-                    );
-                }
-                
-                if (isset($currentData[$row])) {
-                    $rowData = $currentData[$row];
-                    // 使用列索引直接访问数据，因为数据是索引数组
-                    if (isset($rowData[$column])) {
-                        $value = $rowData[$column];
-                        // 确保值是字符串
-                        return LibuiTable::createValueStr((string) $value);
-                    }
+            $numRows, // 使用实际行数
+            function($handler, $row, $column) use ($tableData) {
+                if (isset($tableData[$row][$column])) {
+                    $value = $tableData[$row][$column];
+                    return LibuiTable::createValueStr((string) $value);
                 }
                 return LibuiTable::createValueStr('');
-            }
+            },
+            null // 设置回调 - 暂时为null
         );
+        
+        echo "[TableBuilder] Model handler created\n";
 
         // 创建表格模型
         $this->tableModel = LibuiTable::createModel($this->tableHandler);
@@ -102,6 +108,7 @@ class TableBuilder extends ComponentBuilder
             LibuiTable::appendTextColumn($tableControl, $header, $index, false);
         }
 
+        echo "[TableBuilder] Table created with " . count($data) . " rows and " . count($headers) . " columns\n";
         return $tableControl;
     }
 
@@ -115,8 +122,6 @@ class TableBuilder extends ComponentBuilder
         $eventHandlers = $this->getConfig('eventHandlers', []);
         
         // 设置表头可见性
-        // 注意：uiTableSetHeaderVisible 函数在当前 libui 版本中可能不可用
-        // 暂时注释掉，等待 libui 更新或找到替代方案
          if (isset($options['headerVisible'])) {
              LibuiTable::setHeaderVisible($this->handle, $options['headerVisible']);
          }
@@ -167,6 +172,8 @@ class TableBuilder extends ComponentBuilder
      */
     public function data(array $data): self
     {
+        echo "[TableBuilder] data() called with " . count($data) . " rows\n";
+        
         // 保存原始数据并更新显示数据
         $this->originalData = $data;
         
@@ -178,7 +185,9 @@ class TableBuilder extends ComponentBuilder
             $this->displayData = $data;
         }
         
-        return $this->setConfig('data', $data);
+        // 调用setValue来触发数据更新
+        $this->setValue($data);
+        return $this;
     }
 
     /**
@@ -210,6 +219,83 @@ class TableBuilder extends ComponentBuilder
         
         // 注意：ui库的模型不能简单地更新，需要重新创建模型
         // 这是一个高级功能，可能需要在实际应用中实现模型更新方法
+    }
+    
+    /**
+     * 重写 setValue 方法以支持数据绑定
+     */
+    public function setValue($value): void
+    {
+        if (is_array($value)) {
+            echo "[TableBuilder] setValue called with " . count($value) . " rows\n";
+            if ($this->id) {
+                echo "[TableBuilder {$this->id}] Updating data\n";
+            }
+            
+            // 总是设置配置数据，即使表格还未创建
+            $this->setConfig('data', $value);
+            $this->originalData = $value;
+            $this->displayData = $value;
+            
+            // 如果表格已经创建，刷新显示
+            if ($this->tableModel && $this->handle) {
+                echo "[TableBuilder] Table is created, refreshing with data\n";
+                $this->refreshTableWithData($value);
+                
+                // 强制通知所有行已更改
+                for ($i = 0; $i < count($value); $i++) {
+                    LibuiTable::modelRowChanged($this->tableModel, $i);
+                }
+                echo "[TableBuilder] Notified " . count($value) . " rows changed\n";
+            } else {
+                echo "[TableBuilder] Table not created yet, data stored for later use\n";
+            }
+        } else {
+            parent::setValue($value);
+        }
+    }
+    
+    /**
+     * 刷新表格显示数据
+     */
+    private function refreshTableWithData(array $data): void
+    {
+        $oldData = $this->originalData;
+        $oldRowCount = count($oldData);
+        $newRowCount = count($data);
+        
+        echo "[TableBuilder] Refreshing table, old rows: $oldRowCount, new rows: $newRowCount\n";
+        
+        if ($newRowCount > $oldRowCount) {
+            // 行数增加 - 通知新增的行
+            echo "[TableBuilder] Rows increased from $oldRowCount to $newRowCount\n";
+            for ($i = $oldRowCount; $i < $newRowCount; $i++) {
+                LibuiTable::modelRowInserted($this->tableModel, $i);
+                echo "[TableBuilder] Notified row inserted at index $i\n";
+            }
+            // 仍然需要通知现有行可能已更改
+            for ($i = 0; $i < $oldRowCount; $i++) {
+                LibuiTable::modelRowChanged($this->tableModel, $i);
+            }
+        } elseif ($newRowCount < $oldRowCount) {
+            // 行数减少 - 通知删除的行
+            echo "[TableBuilder] Rows decreased from $oldRowCount to $newRowCount\n";
+            // 从后往前删除，避免索引问题
+            for ($i = $oldRowCount - 1; $i >= $newRowCount; $i--) {
+                LibuiTable::modelRowDeleted($this->tableModel, $i);
+                echo "[TableBuilder] Notified row deleted at index $i\n";
+            }
+            // 通知剩余的行可能已更改
+            for ($i = 0; $i < $newRowCount; $i++) {
+                LibuiTable::modelRowChanged($this->tableModel, $i);
+            }
+        } else {
+            // 行数不变，只通知行已更改
+            echo "[TableBuilder] Row count unchanged: $newRowCount rows\n";
+            $this->refreshTable();
+        }
+        
+        echo "[TableBuilder] Table refresh completed\n";
     }
 
     /**
@@ -340,7 +426,7 @@ class TableBuilder extends ComponentBuilder
     }
 
     /**
-     * 刷新表格显示
+     * 刷新表格显示数据
      */
     public function refreshTable($pageSize = null): void
     {
@@ -360,14 +446,37 @@ class TableBuilder extends ComponentBuilder
                 $this->displayData = $data;
             }
             
-            // 对于 libui，我们不能动态更改模型的行数，所以我们需要确保
-            // 模型处理器总是使用最新的数据
             // 通知所有行已更改（使用当前 displayData 的大小）
             $totalRows = is_null($pageSize) ? count($this->displayData) : $pageSize;
+            echo "[TableBuilder] Refreshing " . $totalRows . " rows\n";
             for ($i = 0; $i < $totalRows; $i++) {
                 LibuiTable::modelRowChanged($this->tableModel, $i);
             }
+        } else {
+            echo "[TableBuilder] Cannot refresh: tableModel or handle not available\n";
         }
+    }
+    
+    /**
+     * 强制刷新表格数据（用于调试）
+     */
+    public function forceRefresh(): void
+    {
+        echo "[TableBuilder] Force refresh called\n";
+        if ($this->tableModel && $this->handle) {
+            $data = $this->getConfig('data', []);
+            $totalRows = count($data);
+            
+            // 强制通知所有行已更改
+            for ($i = 0; $i < $totalRows; $i++) {
+                LibuiTable::modelRowChanged($this->tableModel, $i);
+            }
+            echo "[TableBuilder] Force refresh completed for " . $totalRows . " rows\n";
+        }
+    }
+
+    public function afterRowInsert($index){
+        LibuiTable::modelRowInserted($this->tableModel, $index);
     }
 
     /**
