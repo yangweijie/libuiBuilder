@@ -2,6 +2,7 @@
 
 namespace Kingbes\Libui\View\Components;
 
+use Exception;
 use Kingbes\Libui\Group;
 use Kingbes\Libui\View\ComponentBuilder;
 use FFI\CData;
@@ -71,13 +72,17 @@ class GroupBuilder extends ComponentBuilder
     /**
      * 设置分组内容
      */
-    public function contains($content): static
+    public function contains($children): static
     {
-        if (!is_array($content)) {
-            $content = [$content];
+        if(is_array($children)) {
+            if(count($children) > 1){
+                throw new Exception('Group 容器只能有一个子组件');
+            }
+        }else{
+            $children = [$children];
         }
-        
-        $this->children = $content;
+
+        $this->children = $children;
         return $this;
     }
 }
