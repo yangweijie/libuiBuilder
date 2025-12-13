@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Kingbes\Libui\App;
 use Kingbes\Libui\View\HtmlRenderer;
@@ -138,5 +138,5 @@ $stateManager->watch('display', function($newValue) {
 });
 
 // 从 HTML 渲染
-$app = HtmlRenderer::render(__DIR__ . '/views/calculator.ui.html', $handlers);
+$app = HtmlRenderer::render(__DIR__ . '/../views/calculator.ui.html', $handlers);
 $app->show();

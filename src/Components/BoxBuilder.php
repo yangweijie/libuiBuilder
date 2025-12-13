@@ -46,6 +46,16 @@ class BoxBuilder extends ComponentBuilder
         foreach ($this->children as $child) {
             $childHandle = $child->build();
             $stretchy = $child->getConfig('stretchy', $this->getConfig('stretchy'));
+            
+            // 自动为Checkbox和Radio设置stretchy
+            $componentType = get_class($child);
+            $componentType = substr($componentType, strrpos($componentType, '\\') + 1);
+            
+            if ($componentType === 'CheckboxBuilder' || $componentType === 'RadioBuilder') {
+                $stretchy = $child->getConfig('stretchy', true); // 默认为stretchy
+                echo "[BoxBuilder] Auto-setting {$componentType} to stretchy=true\n";
+            }
+            
             Box::append($this->handle, $childHandle, $stretchy);
         }
     }

@@ -55,6 +55,14 @@ abstract class ComponentBuilder
     }
 
     /**
+     * 获取子组件数组
+     */
+    public function getChildren(): array
+    {
+        return $this->children ?? [];
+    }
+
+    /**
      * 添加单个子组件
      */
     public function addChild(ComponentBuilder $child): static

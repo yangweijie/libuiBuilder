@@ -8,8 +8,8 @@
  * - 定时器模拟长时间任务
  */
 
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../src/helper.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../src/helper.php';
 
 use Kingbes\Libui\App;
 use Kingbes\Libui\View\Builder;

@@ -4,7 +4,7 @@ use Kingbes\Libui\App;
 use Kingbes\Libui\View\Builder;
 use Kingbes\Libui\View\State\StateManager;
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 
 App::init();
@@ -105,7 +105,6 @@ $app = Builder::window()
                             StateManager::instance()->getComponent('passwordInput')?->setValue('');
                         }),
                 ]),
-
                 Builder::label()
                     ->id('statusLabel')
                     ->text('请输入登录信息'),
@@ -142,83 +141,80 @@ $app = Builder::window()
                             // 打开添加用户对话框
                             echo "打开添加用户对话框\n";
                         }),
-                ]),
+                    Builder::table()
+                        ->id('userTable')
+                        ->columns(['ID', '姓名', '邮箱'])
+                        ->bind('userList')  // 绑定到用户列表状态
+                        ->onRowSelected(function($row, $component) {
+                            $users = StateManager::instance()->get('userList');
+                            $selectedUser = $users[$row] ?? null;
+                            if ($selectedUser) {
+                                echo "选中用户: {$selectedUser['name']}";
 
-                Builder::table()
-                    ->id('userTable')
-                    ->columns(['ID', '姓名', '邮箱'])
-                    ->bind('userList')  // 绑定到用户列表状态
-                    ->onRowSelected(function($row, $component) {
-                        $users = StateManager::instance()->get('userList');
-                        $selectedUser = $users[$row] ?? null;
-                        if ($selectedUser) {
-                            echo "选中用户: {$selectedUser['name']}
-";
+                                // 填充编辑表单
+                                StateManager::instance()->getComponent('editNameInput')?->setValue($selectedUser['name']);
+                                StateManager::instance()->getComponent('editEmailInput')?->setValue($selectedUser['email']);
+                                StateManager::instance()->set('selectedUserId', $selectedUser['id']);
+                            }
+                        }),
 
-                            // 填充编辑表单
-                            StateManager::instance()->getComponent('editNameInput')?->setValue($selectedUser['name']);
-                            StateManager::instance()->getComponent('editEmailInput')?->setValue($selectedUser['email']);
-                            StateManager::instance()->set('selectedUserId', $selectedUser['id']);
-                        }
-                    }),
+                    // 编辑区域
+                    Builder::separator(),
 
-                // 编辑区域
-                Builder::separator(),
+                    Builder::grid()->form([
+                        [
+                            'label' => Builder::label()->text('编辑姓名:'),
+                            'control' => Builder::entry()->id('editNameInput')
+                        ],
+                        [
+                            'label' => Builder::label()->text('编辑邮箱:'),
+                            'control' => Builder::entry()->id('editEmailInput')
+                        ],
+                    ])->append([
+                        Builder::hbox()->contains([
+                            Builder::button()
+                                ->text('保存修改')
+                                ->onClick(function($button, $stateManager) {
+                                    $userId = $stateManager->get('selectedUserId');
+                                    $newName = StateManager::instance()->getComponent('editNameInput')?->getValue();
+                                    $newEmail = StateManager::instance()->getComponent('editEmailInput')?->getValue();
 
-                Builder::grid()->form([
-                    [
-                        'label' => Builder::label()->text('编辑姓名:'),
-                        'control' => Builder::entry()->id('editNameInput')
-                    ],
-                    [
-                        'label' => Builder::label()->text('编辑邮箱:'),
-                        'control' => Builder::entry()->id('editEmailInput')
-                    ],
-                ])->append([
-                    Builder::hbox()->contains([
-                        Builder::button()
-                            ->text('保存修改')
-                            ->onClick(function($button, $stateManager) {
-                                $userId = $stateManager->get('selectedUserId');
-                                $newName = StateManager::instance()->getComponent('editNameInput')?->getValue();
-                                $newEmail = StateManager::instance()->getComponent('editEmailInput')?->getValue();
-
-                                if ($userId && $newName && $newEmail) {
-                                    // 更新用户数据
-                                    $users = $stateManager->get('userList');
-                                    foreach ($users as &$user) {
-                                        if ($user['id'] === $userId) {
-                                            $user['name'] = $newName;
-                                            $user['email'] = $newEmail;
-                                            break;
+                                    if ($userId && $newName && $newEmail) {
+                                        // 更新用户数据
+                                        $users = $stateManager->get('userList');
+                                        foreach ($users as &$user) {
+                                            if ($user['id'] === $userId) {
+                                                $user['name'] = $newName;
+                                                $user['email'] = $newEmail;
+                                                break;
+                                            }
                                         }
+
+                                        // 更新状态，表格会自动刷新
+                                        $stateManager->set('userList', $users);
+                                        echo "用户信息已更新\n";
                                     }
+                                }),
 
-                                    // 更新状态，表格会自动刷新
-                                    $stateManager->set('userList', $users);
-                                    echo "用户信息已更新\n";
-                                }
-                            }),
-
-                        Builder::button()
-                            ->text('删除用户')
-                            ->onClick(function($button, $stateManager) {
-                                $userId = $stateManager->get('selectedUserId');
-                                if ($userId) {
-                                    $users = $stateManager->get('userList');
-                                    $users = array_filter($users, fn($user) => $user['id'] !== $userId);
-                                    $stateManager->set('userList', array_values($users));
-                                    echo "用户已删除\n";
-                                }
-                            }),
-                    ])
+                            Builder::button()
+                                ->text('删除用户')
+                                ->onClick(function($button, $stateManager) {
+                                    $userId = $stateManager->get('selectedUserId');
+                                    if ($userId) {
+                                        $users = $stateManager->get('userList');
+                                        $users = array_filter($users, fn($user) => $user['id'] !== $userId);
+                                        $stateManager->set('userList', array_values($users));
+                                        echo "用户已删除\n";
+                                    }
+                                }),
+                        ])
+                    ]),
                 ]),
             ],
         ])->id('mainTabs')
             ->onTabSelected(function($tab) {
                 echo "切换到标签页: Tab event received
 ";
-
             }),
     ]);
 

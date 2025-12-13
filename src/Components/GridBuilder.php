@@ -42,13 +42,193 @@ class GridBuilder extends ComponentBuilder
     {
         // 处理通过place()或contains()方法添加的所有children
         if (isset($this->children)) {
-            foreach ($this->children as $index => $child) {
-                $componentType = get_class($child);
-                $componentType = substr($componentType, strrpos($componentType, '\\') + 1);
-
-                echo "[GridBuilder] Building child $index: $componentType\n";
-
-                try {
+            echo "[GridBuilder] Total children to process: " . count($this->children) . "\n";
+            
+                        foreach ($this->children as $index => $child) {
+            
+                            $componentType = get_class($child);
+            
+                            $componentType = substr($componentType, strrpos($componentType, '\\') + 1);
+            
+            
+            
+                            echo "[GridBuilder] Building child $index: $componentType\n";
+            
+                            
+            
+                            // 添加组件详情日志
+            
+                            if (method_exists($child, 'getChildren')) {
+            
+                                $childChildren = $child->getChildren();
+            
+                                if (!empty($childChildren)) {
+            
+                                    echo "[GridBuilder] Child has " . count($childChildren) . " nested children\n";
+            
+                                    foreach ($childChildren as $nestedIndex => $nestedChild) {
+            
+                                        $nestedType = get_class($nestedChild);
+            
+                                        $nestedType = substr($nestedType, strrpos($nestedType, '\\') + 1);
+            
+                                        echo "[GridBuilder]   Nested child $nestedIndex: $nestedType\n";
+            
+                                    }
+            
+                                }
+            
+                            }
+            
+            
+            
+                            // 检查是否是容器组件，如果是则递归处理其子组件
+            
+                            if ($componentType === 'GroupBuilder' || $componentType === 'BoxBuilder') {
+            
+                                echo "[GridBuilder] Processing container: $componentType\n";
+            
+                                
+            
+                                // 获取容器的子组件
+            
+                                $containerChildren = method_exists($child, 'getChildren') ? $child->getChildren() : [];
+            
+                                
+            
+                                if (!empty($containerChildren)) {
+            
+                                    echo "[GridBuilder] Processing " . count($containerChildren) . " children from container\n";
+            
+                                    
+            
+                                    foreach ($containerChildren as $containerIndex => $containerChild) {
+            
+                                        $containerChildType = get_class($containerChild);
+            
+                                        $containerChildType = substr($containerChildType, strrpos($containerChildType, '\\') + 1);
+            
+                                        
+            
+                                        echo "[GridBuilder] Building container child $containerIndex: $containerChildType\n";
+            
+                                        
+            
+                                        try {
+            
+                                            $containerChildHandle = $containerChild->build();
+            
+                                            echo "[GridBuilder] Container child built successfully\n";
+            
+            
+            
+                                            // 为容器内的子组件设置默认的 Grid 位置
+            
+                                            // 如果子组件已经有位置信息则使用，否则使用当前索引
+            
+                                            $row = $containerChild->getConfig('row', $index + $containerIndex);
+            
+                                            $col = $containerChild->getConfig('col', 0);
+            
+                                            $colspan = $containerChild->getConfig('colspan', 12); // 容器内组件通常占满宽度
+            
+                                            $rowspan = $containerChild->getConfig('rowspan', 1);
+            
+            
+            
+                                            // 自动设置扩展属性
+            
+                                            $hexpand = 0;
+            
+                                            $vexpand = 0;
+            
+                                            
+            
+                                            if ($containerChildType === 'CheckboxBuilder' || $containerChildType === 'RadioBuilder') {
+            
+                                                $hexpand = 1;
+            
+                                                echo "[GridBuilder] Auto-setting {$containerChildType} to expand horizontally\n";
+            
+                                            } elseif ($containerChildType === 'MultilineEntryBuilder') {
+            
+                                                $hexpand = 1;
+            
+                                                $vexpand = 1;
+            
+                                                echo "[GridBuilder] Auto-setting multiline entry to expand both directions\n";
+            
+                                            } elseif ($containerChildType === 'ButtonBuilder') {
+            
+                                                $hexpand = 1;
+            
+                                                echo "[GridBuilder] Auto-setting button to expand horizontally\n";
+            
+                                            }
+            
+            
+            
+                                            // 设置对齐方式
+            
+                                            $halign = \Kingbes\Libui\Align::Fill;
+            
+                                            $valign = \Kingbes\Libui\Align::Center;
+            
+            
+            
+                                            echo "[GridBuilder] Positioning container child: row=$row, col=$col, colspan=$colspan, rowspan=$rowspan, hexpand=$hexpand, vexpand=$vexpand\n";
+            
+            
+            
+                                            \Kingbes\Libui\Grid::append(
+            
+                                                $this->handle,
+            
+                                                $containerChildHandle,
+            
+                                                $col,
+            
+                                                $row,
+            
+                                                $colspan,
+            
+                                                $rowspan,
+            
+                                                $hexpand,
+            
+                                                $halign->value,
+            
+                                                $vexpand,
+            
+                                                $valign
+            
+                                            );
+            
+            
+            
+                                            echo "[GridBuilder] Container child appended to grid\n";
+            
+                                        } catch (\Exception $e) {
+            
+                                            echo "[GridBuilder] Error building container child: " . $e->getMessage() . "\n";
+            
+                                        }
+            
+                                    }
+            
+                                }
+            
+                                
+            
+                                // 跳过常规处理，因为我们已经处理了容器内的子组件
+            
+                                continue;
+            
+                            }
+            
+            
+            
+                            try {
                     $childHandle = $child->build();
                     echo "[GridBuilder] Child built successfully\n";
 
@@ -90,6 +270,16 @@ class GridBuilder extends ComponentBuilder
                         } elseif ($componentType === 'ButtonBuilder') {
                             $hexpand = 1;
                             echo "[GridBuilder] Auto-setting button to expand horizontally\n";
+                        } elseif ($componentType === 'MultilineEntryBuilder') {
+                            $hexpand = 1;
+                            $vexpand = 1;
+                            echo "[GridBuilder] Auto-setting multiline entry to expand both directions\n";
+                        } elseif ($componentType === 'CheckboxBuilder') {
+                            $hexpand = 1;
+                            echo "[GridBuilder] Auto-setting checkbox to expand horizontally\n";
+                        } elseif ($componentType === 'RadioBuilder') {
+                            $hexpand = 1;
+                            echo "[GridBuilder] Auto-setting radio to expand horizontally\n";
                         }
                     }
 
@@ -99,7 +289,10 @@ class GridBuilder extends ComponentBuilder
                     $valign = Align::Fill;
 
                     // Label、Separator和Button默认垂直居中，避免填充整行
+                    // MultilineEntryBuilder也垂直居中，除非它有rowspan > 1
                     if ($componentType === 'LabelBuilder' || $componentType === 'SeparatorBuilder' || $componentType === 'ButtonBuilder') {
+                        $valign = Align::Center;
+                    } elseif ($componentType === 'MultilineEntryBuilder' && $rowspan <= 1) {
                         $valign = Align::Center;
                     }
 
@@ -341,9 +534,10 @@ class GridBuilder extends ComponentBuilder
 
 
 
-                return $this;
+                                return $this;
 
 
 
-            }
-}
+                            }
+
+                }

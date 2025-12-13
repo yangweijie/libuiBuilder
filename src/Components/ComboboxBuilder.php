@@ -78,11 +78,13 @@ class ComboboxBuilder extends ComponentBuilder
 
                 // 用户回调
                 if ($onSelected = $this->getConfig('onSelected')) {
-                    $onSelected($newIndex, $selectedItem, $this);
+                    $itemText = is_array($selectedItem) ? $selectedItem['text'] ?? $selectedItem['value'] : $selectedItem;
+                    $onSelected($newIndex, $itemText, $this);
                 }
 
                 if ($onChange = $this->getConfig('onChange')) {
-                    $onChange($newIndex, $selectedItem, $this);
+                    $itemText = is_array($selectedItem) ? $selectedItem['text'] ?? $selectedItem['value'] : $selectedItem;
+                    $onChange($newIndex, $itemText, $this);
                 }
             });
         } else {
@@ -97,11 +99,13 @@ class ComboboxBuilder extends ComponentBuilder
 
                 // 用户回调
                 if ($onSelected = $this->getConfig('onSelected')) {
-                    $onSelected($newIndex, $selectedItem, $this);
+                    $itemText = is_array($selectedItem) ? $selectedItem['text'] ?? $selectedItem['value'] : $selectedItem;
+                    $onSelected($newIndex, $itemText, $this);
                 }
 
                 if ($onChange = $this->getConfig('onChange')) {
-                    $onChange($newIndex, $selectedItem, $this);
+                    $itemText = is_array($selectedItem) ? $selectedItem['text'] ?? $selectedItem['value'] : $selectedItem;
+                    $onChange($newIndex, $itemText, $this);
                 }
             });
         }

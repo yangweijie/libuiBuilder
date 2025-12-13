@@ -43,7 +43,10 @@ class RadioBuilder extends ComponentBuilder
             $this->emit('change', $newSelected);
 
             if ($onSelected = $this->getConfig('onSelected')) {
-                $onSelected($newSelected, $this);
+                $items = $this->getConfig('items', []);
+                $item = $items[$newSelected] ?? null;
+                $itemText = is_array($item) ? $item['text'] : $item;
+                $onSelected($newSelected, $itemText, $this);
             }
         });
     }
@@ -63,7 +66,8 @@ class RadioBuilder extends ComponentBuilder
 
     public function items(array $items): static
     {
-        return $this->setConfig('items', $items);
+        $this->setConfig('items', $items);
+        return $this;
     }
 
     public function addItem(string $text, $value = null): static

@@ -9,8 +9,8 @@
  * - 表单提交处理
  */
 
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../src/helper.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../src/helper.php';
 
 use Kingbes\Libui\App;
 use Kingbes\Libui\View\Builder;
@@ -208,10 +208,7 @@ $app = Builder::window()
                 Builder::checkbox()
                     ->id('agreeCheckbox')
                     ->text('我同意用户协议和隐私政策')
-                    ->onToggle(function($checked, $component) use ($state) {
-                        $state->set('formData.agreed', $checked);
-                        checkFormValidity($state);
-                    }),
+                    ->bind('formData.agreed') ,
                 
                 Builder::separator(),
                 

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <ui version="1.0">
-<window title="HTML 标签别名演示" size="600,500">
+<window title="HTML 标签别名演示" size="600,800">
     <grid padded="true">
         <!-- 标题 -->
         <label row="0" col="0" colspan="2" align="center">标准 HTML 标签别名演示</label>
@@ -42,39 +42,39 @@
         <hr row="11" col="1"/>
         
         <label row="12" col="0">&lt;textarea&gt;</label>
-        <textarea row="12" col="1" placeholder="多行文本输入..." rows="3"></textarea>
+        <textarea row="12" col="1" rowspan="3" placeholder="多行文本输入..."></textarea>
         
-        <separator row="13" col="0" colspan="2"/>
+        <separator row="15" col="0" colspan="2"/>
         
         <!-- 完整表单示例 -->
-        <label row="14" col="0" colspan="2" align="center">完整表单示例</label>
+        <label row="16" col="0" colspan="2" align="center">完整表单示例</label>
         
-        <label row="15" col="0">姓名:</label>
-        <input row="15" col="1" placeholder="请输入姓名"/>
+        <label row="17" col="0">姓名:</label>
+        <input row="17" col="1" placeholder="请输入姓名"/>
         
-        <label row="16" col="0">年龄:</label>
-        <input type="number" row="16" col="1" min="18" max="100" value="25"/>
+        <label row="18" col="0">年龄:</label>
+        <input type="number" row="18" col="1" min="18" max="100" value="25"/>
         
-        <label row="17" col="0">技能水平:</label>
-        <input type="range" row="17" col="1" min="1" max="5" value="3"/>
+        <label row="19" col="0">技能水平:</label>
+        <input type="range" row="19" col="1" min="1" max="5" value="3"/>
         
-        <label row="18" col="0">部门:</label>
-        <select row="18" col="1">
+        <label row="20" col="0">部门:</label>
+        <select row="20" col="1">
             <option>技术部</option>
             <option>市场部</option>
             <option>人事部</option>
         </select>
         
-        <label row="19" col="0">任务进度:</label>
-        <progress row="19" col="1" value="60" max="100">60%</progress>
+        <label row="21" col="0">任务进度:</label>
+        <progress row="21" col="1" value="60" max="100">60%</progress>
         
-        <label row="20" col="0">备注:</label>
-        <textarea row="20" col="1" placeholder="请输入备注信息..." rows="2"></textarea>
+        <label row="22" col="0">备注:</label>
+        <textarea row="22" col="1" placeholder="请输入备注信息..."></textarea>
         
-        <separator row="21" col="0" colspan="2"/>
+        <separator row="23" col="0" colspan="2"/>
         
         <!-- 操作按钮 -->
-        <hbox row="22" col="0" colspan="2" padded="true">
+        <hbox row="24" col="0" colspan="2" padded="true">
             <button onclick="handleSubmit">提交</button>
             <button onclick="handleReset">重置</button>
             <button onclick="handleClose">关闭</button>
