@@ -31,7 +31,7 @@ abstract class ComponentBuilder
     /**
      * 获取默认配置
      */
-    abstract protected function getDefaultConfig(): array;
+    abstract public function getDefaultConfig(): array;
 
     /**
      * 创建原生控件实例
@@ -114,7 +114,7 @@ abstract class ComponentBuilder
     /**
      * 获取配置值
      */
-    protected function getConfig(string $key, $default = null)
+    public function getConfig(string $key, $default = null)
     {
         return $this->config[$key] ?? $default;
     }
@@ -147,6 +147,8 @@ abstract class ComponentBuilder
         $this->id = $id;
         $this->ref = new ComponentRef($id, $this);
         StateManager::instance()->registerComponent($id, $this->ref);
+        // 同步写入配置，方便测试和外部读取
+        $this->setConfig('id', $id);
         return $this;
     }
 
@@ -156,6 +158,8 @@ abstract class ComponentBuilder
     public function bind(string $stateKey): static
     {
         $this->boundState = $stateKey;
+        // 记录绑定信息到配置以便测试读取
+        $this->setConfig('bind', $stateKey);
 
         // 监听状态变化并自动更新组件
         StateManager::instance()->watch($stateKey, function($newValue) {

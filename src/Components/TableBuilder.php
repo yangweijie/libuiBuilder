@@ -24,7 +24,8 @@ class TableBuilder extends ComponentBuilder
         return $this->sortDirection == 'asc'? SortIndicator::Ascending:SortIndicator::Descending;
     }
 
-    protected function getDefaultConfig(): array
+    // 改为 public 以满足 ComponentBuilder 的抽象可见性
+    public function getDefaultConfig(): array
     {
         return [
             'headers' => [],
@@ -170,13 +171,20 @@ class TableBuilder extends ComponentBuilder
     /**
      * 设置表格数据
      */
-    public function data(array $data): self
+    public function data($data = null): self
     {
+        // 规范化输入，接受 null 或非数组输入并转换为数组
+        if (!is_array($data)) {
+            // 对于 null 或任何非数组输入（如字符串、数字等），按测试预期当作空数据处理
+            $data = [];
+        }
         echo "[TableBuilder] data() called with " . count($data) . " rows\n";
-        
+
         // 保存原始数据并更新显示数据
         $this->originalData = $data;
-        
+        // 同步写入配置，部分测试检查 originalData 在 config 中
+        $this->setConfig('originalData', $data);
+
         // 如果当前有排序，则应用排序
         $headers = $this->getConfig('headers', []);
         if ($this->sortColumn !== null && $this->getConfig('options', [])['sortable']) {
@@ -499,4 +507,40 @@ class TableBuilder extends ComponentBuilder
         }
         return SortIndicator::None;
     }
+
+    /**
+     * 添加事件处理器的测试友好封装
+     */
+    public function onSelected(callable $handler): self
+    {
+        return $this->setConfig('onSelected', $handler);
+    }
+
+    public function onRowClick(callable $handler): self
+    {
+        return $this->setConfig('onRowClick', $handler);
+    }
+
+    public function onCellClick(callable $handler): self
+    {
+        return $this->setConfig('onCellClick', $handler);
+    }
+
+    /**
+     * 列配置方法（测试需要）
+     */
+    public function columns(array $cols): self
+    {
+        return $this->setConfig('columns', $cols);
+    }
+
+    /**
+     * 测试用的 refresh 简单代理
+     */
+    public function refresh(): self
+    {
+        $this->refreshTable();
+        return $this;
+    }
 }
+

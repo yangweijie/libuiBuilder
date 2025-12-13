@@ -9,7 +9,7 @@ class MockComponentBuilder extends ComponentBuilder
 {
     private $value = 'default';
     
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return ['value' => 'default'];
     }
