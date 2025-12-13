@@ -202,6 +202,7 @@ class HtmlRenderer
             // 标准 HTML 标签
             'label' => $this->renderLabel($element),
             'input' => $this->renderInput($element),
+            'entry' => $this->renderInput($element),  // entry 是 input 的别名
             'button' => $this->renderButton($element),
             'table' => $this->renderTable($element),
             'canvas' => $this->renderCanvas($element),
@@ -336,19 +337,31 @@ class HtmlRenderer
             $rowspan = (int)($child->getAttribute('rowspan') ?: 1);
             $colspan = (int)($child->getAttribute('colspan') ?: 1);
             
+            // 将布局信息保存到子组件的config中，供buildChildren使用
+            $childBuilder->setConfig('row', $row);
+            $childBuilder->setConfig('col', $col);
+            $childBuilder->setConfig('rowspan', $rowspan);
+            $childBuilder->setConfig('colspan', $colspan);
+            
             // 放置到 Grid
             $gridItem = $builder->place($childBuilder, $row, $col, $rowspan, $colspan);
             
             // 同时将组件添加到children数组以支持getComponentById
             $builder->addChild($childBuilder);
             
-            // 对齐方式
+            // 对齐方式 - 同时处理place()和contains()两种方式
             if ($align = $child->getAttribute('align')) {
                 $alignParts = array_map('trim', explode(',', $align));
-                $gridItem->align(
-                    $alignParts[0] ?? 'fill',
-                    $alignParts[1] ?? ($alignParts[0] ?? 'fill')
-                );
+                $horizontalAlign = $alignParts[0] ?? 'fill';
+                $verticalAlign = $alignParts[1] ?? $horizontalAlign;
+
+                // 对于place()方式：通过gridItem设置对齐
+                $gridItem->align($horizontalAlign, $verticalAlign);
+
+                // 对于contains()方式：通过setConfig设置对齐，供buildChildren读取
+                $childBuilder->setConfig('align', implode(',', [$horizontalAlign, $verticalAlign]));
+
+                echo "[HtmlRenderer] 设置对齐属性: horizontal=$horizontalAlign, vertical=$verticalAlign\n";
             }
             
             // 扩展属性

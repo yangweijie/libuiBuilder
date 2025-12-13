@@ -19,6 +19,7 @@ App::init();
 
 $state = StateManager::instance();
 $state->set('clickCount', 0);
+$state->set('buttonValue', '点击次数: 0');
 
 // 定义事件处理器
 $handlers = [
@@ -29,25 +30,15 @@ $handlers = [
     'handleCounterClick' => function($button, $state) {
         $count = $state->get('clickCount') + 1;
         $state->set('clickCount', $count);
+        $state->set('buttonValue', "点击次数: {$count}");
         
         echo "计数器: {$count}\n";
-        
-        // 更新按钮文本
-        $counterBtn = StateManager::instance()->getComponent('counterBtn');
-        if ($counterBtn) {
-            $counterBtn->setValue("点击次数: {$count}");
-        }
     },
     
     'handleReset' => function($button, $state) {
         $state->set('clickCount', 0);
+        $state->set('buttonValue', '点击次数: 0');
         echo "计数器已重置\n";
-        
-        // 更新计数器按钮
-        $counterBtn = StateManager::instance()->getComponent('counterBtn');
-        if ($counterBtn) {
-            $counterBtn->setValue('点击次数: 0');
-        }
     },
     
     'handleQuit' => function($button) {
@@ -58,4 +49,3 @@ $handlers = [
 // 渲染 HTML 模板
 $app = HtmlRenderer::render(__DIR__ . '/../views/basic_button.ui.html', $handlers);
 $app->show();
-App::main();

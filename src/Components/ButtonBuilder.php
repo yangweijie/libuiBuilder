@@ -45,4 +45,15 @@ class ButtonBuilder extends ComponentBuilder
     {
         return $this->setConfig('onClick', $callback);
     }
+
+    /**
+     * 设置组件值 - 子类实现
+     */
+    public function setValue($value): void
+    {
+        $this->setConfig('value', $value);
+        if($this->handle){
+            Button::setText($this->handle, $value);
+        }
+    }
 }
