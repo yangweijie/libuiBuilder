@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<ui version="1.0">
+<window title="响应式网格布局 - HTML 模板" size="800,600">
+    <grid padded="true">
+        <!-- 标题 -->
+        <label row="0" col="0" colspan="12" align="center">12列响应式网格演示</label>
+        <separator row="1" col="0" colspan="12"/>
+        
+        <!-- 说明文本 -->
+        <label row="2" col="0" colspan="12">这是一个12列网格系统，组件按比例分配宽度</label>
+        
+        <!-- 第一组：6+6 布局 -->
+        <label row="3" col="0" colspan="6">左侧 - 6列</label>
+        <label row="3" col="6" colspan="6">右侧 - 6列</label>
+        
+        <!-- 第二组：4+4+4 布局 -->
+        <label row="4" col="0" colspan="4">左侧 - 4列</label>
+        <label row="4" col="4" colspan="4">中间 - 4列</label>
+        <label row="4" col="8" colspan="4">右侧 - 4列</label>
+        
+        <!-- 第三组：3+6+3 布局 -->
+        <label row="5" col="0" colspan="3">左侧 - 3列</label>
+        <label row="5" col="3" colspan="6">中间 - 6列</label>
+        <label row="5" col="9" colspan="3">右侧 - 3列</label>
+        
+        <!-- 第四组：2+3+4+3 布局 -->
+        <label row="6" col="0" colspan="2">2列</label>
+        <label row="6" col="2" colspan="3">3列</label>
+        <label row="6" col="5" colspan="4">4列</label>
+        <label row="6" col="9" colspan="3">3列</label>
+        
+        <!-- 第五组：按钮组 3+4+5 布局 -->
+        <button row="7" col="0" colspan="3" onclick="handleSmallBtn">小按钮</button>
+        <button row="7" col="3" colspan="4" onclick="handleMediumBtn">中等按钮</button>
+        <button row="7" col="7" colspan="5" onclick="handleLargeBtn">大按钮</button>
+        
+        <separator row="8" col="0" colspan="12"/>
+        
+        <!-- 输入控件演示 -->
+        <label row="9" col="0" colspan="3">姓名:</label>
+        <input row="9" col="3" colspan="9" placeholder="请输入姓名"/>
+        
+        <label row="10" col="0" colspan="3">邮箱:</label>
+        <input row="10" col="3" colspan="9" placeholder="请输入邮箱"/>
+        
+        <label row="11" col="0" colspan="3">密码:</label>
+        <input type="password" row="11" col="3" colspan="9" placeholder="请输入密码"/>
+        
+        <separator row="12" col="0" colspan="12"/>
+        
+        <!-- 底部按钮组 -->
+        <label row="13" col="0" colspan="12">按钮组演示:</label>
+        <button row="14" col="0" colspan="4" onclick="handleSave">保存</button>
+        <button row="14" col="4" colspan="4" onclick="handleCancel">取消</button>
+        <button row="14" col="8" colspan="4" onclick="handleQuit">退出</button>
+    </grid>
+</window>
+</ui>

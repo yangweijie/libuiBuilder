@@ -83,7 +83,7 @@ class ResponsiveGridBuilder
 
             // 为不同类型的组件设置合适的对齐方式
             $componentClass = get_class($item['component']);
-            $componentType = substr($componentClass, strrpos($componentClass, '') + 1);
+            $componentType = substr($componentClass, strrpos($componentClass, '\\') + 1);
             
             if (strpos($componentClass, 'Button') !== false) {
                 // 按钮使用居中对齐，不拉伸填满整个网格单元格

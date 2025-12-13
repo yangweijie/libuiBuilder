@@ -20,9 +20,9 @@
 ### 02_layouts - 布局系统示例
 **学习各种布局方式**
 
-- **`responseGrid.php`** - 响应式网格布局示例
-- **`full.php`** - 完整布局演示 (Builder API)
-- **`htmlFull.php`** - 完整布局演示 (HTML 模板)
+- **`builder_responsive_grid.php`** - 响应式网格布局示例 (Builder API)
+- **`html_responsive_grid.php`** - 响应式网格布局示例 (HTML 模板)
+- **`README.md`** - 布局系统说明文档
 
 ### 03_components - 组件示例
 **深入学习各种 GUI 组件**
@@ -54,7 +54,7 @@
 1. **开始**: `01_basics/builder_basic_button.php` - 学习基础按钮和事件
 2. **对比**: `01_basics/html_basic_button.php` - 了解两种开发模式
 3. **扩展**: `01_basics/html_tag_aliases.php` - 学习 HTML 模板特性
-4. **布局**: `02_layouts/responseGrid.php` - 学习响应式布局
+4. **布局**: `02_layouts/builder_responsive_grid.php` - 学习响应式布局
 
 ### 进阶路径  
 1. **组件**: `03_components/builder_form_validation.php` - 学习表单处理
@@ -79,11 +79,16 @@ php example/01_basics/html_basic_button.php
 
 ### 指定目录运行
 ```bash
-# 运行所有基础示例
+# 运行基础示例
 cd example/01_basics
 php builder_basic_button.php
 php html_basic_button.php
 php html_tag_aliases.php
+
+# 运行布局示例
+cd example/02_layouts
+php builder_responsive_grid.php
+php html_responsive_grid.php
 ```
 
 ### 交互式运行

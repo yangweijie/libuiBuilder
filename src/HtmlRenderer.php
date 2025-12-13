@@ -343,11 +343,8 @@ class HtmlRenderer
             $childBuilder->setConfig('rowspan', $rowspan);
             $childBuilder->setConfig('colspan', $colspan);
             
-            // 放置到 Grid
+            // 放置到 Grid（place()方法现在会自动添加到children数组）
             $gridItem = $builder->place($childBuilder, $row, $col, $rowspan, $colspan);
-            
-            // 同时将组件添加到children数组以支持getComponentById
-            $builder->addChild($childBuilder);
             
             // 对齐方式 - 同时处理place()和contains()两种方式
             if ($align = $child->getAttribute('align')) {
