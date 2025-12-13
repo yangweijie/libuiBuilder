@@ -20,9 +20,13 @@ show_menu() {
     echo "3) 只运行基础测试"
     echo "4) 只运行 StateManager 测试"
     echo "5) 只运行 HtmlRenderer 测试"
-    echo "6) 显示测试覆盖率"
-    echo "7) 生成 HTML 覆盖率报告"
-    echo "8) 列出所有测试用例"
+    echo "6) 运行 Builder 组件测试"
+    echo "7) 运行 Helper 函数测试"
+    echo "8) 运行 TableBuilder 测试"
+    echo "9) 运行 ComponentRef 测试"
+    echo "10) 显示测试覆盖率"
+    echo "11) 生成 HTML 覆盖率报告"
+    echo "12) 列出所有测试用例"
     echo "0) 退出"
     echo ""
 }
@@ -53,6 +57,30 @@ generate_html_coverage() {
     echo "🌐 打开 coverage-report/dashboard.html 查看详细报告"
 }
 
+# 运行 Builder 组件测试
+run_builder_tests() {
+    echo "🏗️ 运行 Builder 组件测试..."
+    ./vendor/bin/pest tests/BuilderComponentsTest.php
+}
+
+# 运行 Helper 函数测试
+run_helper_tests() {
+    echo "🔧 运行 Helper 函数测试..."
+    ./vendor/bin/pest tests/HelperFunctionsTest.php tests/HelperBuilderFunctionsTest.php
+}
+
+# 运行 TableBuilder 测试
+run_tablebuilder_tests() {
+    echo "📊 运行 TableBuilder 测试..."
+    ./vendor/bin/pest tests/TableBuilderTest.php
+}
+
+# 运行 ComponentRef 测试
+run_componentref_tests() {
+    echo "🔗 运行 ComponentRef 测试..."
+    ./vendor/bin/pest tests/ComponentRefTest.php
+}
+
 # 列出所有测试
 list_tests() {
     echo "📋 所有测试用例："
@@ -62,7 +90,7 @@ list_tests() {
 # 主循环
 while true; do
     show_menu
-    read -p "请输入选择 (0-8): " choice
+    read -p "请输入选择 (0-12): " choice
     
     case $choice in
         1)
@@ -84,12 +112,24 @@ while true; do
             ./vendor/bin/pest tests/HtmlRendererBasicTest.php
             ;;
         6)
-            show_coverage
+            run_builder_tests
             ;;
         7)
-            generate_html_coverage
+            run_helper_tests
             ;;
         8)
+            run_tablebuilder_tests
+            ;;
+        9)
+            run_componentref_tests
+            ;;
+        10)
+            show_coverage
+            ;;
+        11)
+            generate_html_coverage
+            ;;
+        12)
             list_tests
             ;;
         0)
