@@ -42,5 +42,5 @@ $handlers = [
 ];
 
 // 渲染 HTML 模板
-$app = HtmlRenderer::render(__DIR__ . '/views/html_tag_aliases.ui.html', $handlers);
+$app = HtmlRenderer::render(__DIR__ . '/../views/html_tag_aliases.ui.html', $handlers);
 $app->show();
