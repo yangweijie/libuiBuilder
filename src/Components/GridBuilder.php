@@ -42,31 +42,7 @@ class GridBuilder extends ComponentBuilder
 
     protected function buildChildren(): void
     {
-        // 首先处理通过place()方法添加的gridItems
-        foreach ($this->gridItems as $index => $item) {
-            $config = $item->getConfig();
-            
-            try {
-                $childHandle = $config['component']->build();
-
-                Grid::append(
-                    $this->handle,
-                    $childHandle,
-                    $config['left'],      // left (col)
-                    $config['top'],       // top (row)
-                    $config['xspan'],     // xspan (colspan)
-                    $config['yspan'],     // yspan (rowspan)
-                    $config['hexpand'] ? 1 : 0,  // hexpand
-                    $config['halign']->value,     // halign (int)
-                    $config['vexpand'] ? 1 : 0,  // vexpand
-                    $config['valign']            // valign (Align object)
-                );
-            } catch (Exception $e) {
-                echo "[GridBuilder] Error building gridItem: " . $e->getMessage() . "\n";
-            }
-        }
-        
-        // 然后处理通过contains()方法添加的children
+        // 只处理通过contains()方法添加的children，避免重复添加
         if (isset($this->children)) {
             foreach ($this->children as $index => $child) {
                 $componentType = get_class($child);
@@ -167,6 +143,9 @@ class GridBuilder extends ComponentBuilder
                 }
             }
         }
+        
+// 注意：不再处理gridItems，避免重复添加组件
+        // 如果需要使用place()方法，应该将组件也添加到children数组中
     }
 
     // 添加组件到网格的核心方法
