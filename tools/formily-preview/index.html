@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>libuiBuilder Formily 预览工具</title>
+    
+    <!-- 引入 libuiBuilder 样式 -->
+    <link rel="stylesheet" href="/css/libui-styles.css">
+    
+    <!-- 主题样式将通过 JavaScript 动态注入 -->
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+    
+    <!-- 开发环境提示 -->
+    <script type="module">
+      if (import.meta.env.DEV) {
+        console.log('🚀 libuiBuilder Formily 预览工具 - 开发模式')
+        console.log('📁 项目根目录:', import.meta.env.BASE_URL)
+        console.log('🔧 构建工具: Vite')
+        console.log('⚡ 前端框架: Vue 3 + Formily')
+      }
+    </script>
+  </body>
+</html>

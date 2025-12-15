@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<body>
+<window title="测试窗口 - HTML 模板" size="400,300">
+    <grid padded="true">
+        <!-- 标题 -->
+        <label row="0" col="0" colspan="2" align="center">HTML 解析器测试</label>
+        <separator row="1" col="0" colspan="2"></separator>
+        
+        <!-- 输入控件 -->
+        <label row="2" col="0">用户名:</label>
+        <input row="2" col="1" type="text" placeholder="请输入用户名" bind="username"></input>
+        
+        <label row="3" col="0">密码:</label>
+        <input row="3" col="1" type="password" placeholder="请输入密码" bind="password"></input>
+        
+        <label row="4" col="0">记住我:</label>
+        <checkbox row="4" col="1" bind="rememberMe">下次自动登录</checkbox>
+        
+        <!-- 按钮 -->
+        <button row="5" col="0" colspan="2" onclick="handleLogin">登录</button>
+    </grid>
+</window>
+</body>
+</html>

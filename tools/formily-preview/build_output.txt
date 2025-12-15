@@ -1,0 +1,7 @@
+﻿
+> libui-builder-preview@1.0.0 build
+> vue-tsc && vite build
+
+error TS2688: Cannot find type definition file for 'node'.
+  The file is in the program because:
+    Entry point of type library 'node' specified in compilerOptions

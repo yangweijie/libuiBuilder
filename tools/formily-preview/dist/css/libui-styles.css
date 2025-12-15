@@ -1,0 +1,576 @@
+/* libuiBuilder 组件样式库 */
+
+/* 基础样式重置 */
+.ui-window,
+.ui-grid,
+.ui-vbox,
+.ui-hbox,
+.ui-label,
+.ui-input,
+.ui-button,
+.ui-checkbox,
+.ui-radio,
+.ui-separator,
+.ui-combobox,
+.ui-spinbox,
+.ui-slider,
+.ui-progressbar,
+.ui-textarea,
+.ui-table {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Window 组件 */
+.ui-window {
+  background: var(--window-bg, #ffffff);
+  border: 1px solid var(--window-border, #bdc3c7);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.ui-window-titlebar {
+  background: var(--titlebar-bg, linear-gradient(to bottom, #ecf0f1, #bdc3c7));
+  color: var(--titlebar-text, #2c3e50);
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  border-bottom: 1px solid var(--window-border, #bdc3c7);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ui-window-content {
+  padding: 16px;
+}
+
+/* Grid 布局 */
+.ui-grid {
+  display: grid;
+  width: 100%;
+}
+
+.ui-grid.padded {
+  gap: 8px;
+}
+
+/* Box 布局 */
+.ui-vbox {
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-hbox {
+  display: flex;
+  flex-direction: row;
+}
+
+.ui-vbox.padded > *,
+.ui-hbox.padded > * {
+  margin: 4px;
+}
+
+/* Label 组件 */
+.ui-label {
+  color: var(--text-primary, #2c3e50);
+  font-size: 13px;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Input 组件 */
+.ui-input {
+  padding: 8px 12px;
+  border: 1px solid var(--input-border, #bdc3c7);
+  border-radius: 4px;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-primary, #2c3e50);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 150px;
+}
+
+.ui-input:focus {
+  border-color: var(--input-focus, #3498db);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.ui-input[readonly] {
+  background: var(--preview-bg, #ecf0f1);
+  cursor: not-allowed;
+}
+
+.ui-input[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Button 组件 */
+.ui-button {
+  padding: 8px 16px;
+  background: var(--button-bg, #3498db);
+  color: var(--titlebar-text, #ffffff);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s;
+  min-width: 50px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.ui-button:hover {
+  background: var(--button-hover, #2980b9);
+}
+
+.ui-button:active {
+  background: var(--button-active, #21618c);
+}
+
+.ui-button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Checkbox 组件 */
+.ui-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+  color: var(--text-primary, #2c3e50);
+  font-size: 13px;
+}
+
+.ui-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.ui-checkbox[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Radio 组件 */
+.ui-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.ui-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text-primary, #2c3e50);
+  font-size: 13px;
+}
+
+.ui-radio input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.ui-radio[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Separator 组件 */
+.ui-separator-horizontal {
+  height: 1px;
+  background: var(--input-border, #bdc3c7);
+  margin: 12px 0;
+  border: none;
+}
+
+.ui-separator-vertical {
+  width: 1px;
+  background: var(--input-border, #bdc3c7);
+  margin: 0 12px;
+  border: none;
+}
+
+/* Combobox 组件 */
+.ui-combobox {
+  padding: 8px 12px;
+  border: 1px solid var(--input-border, #bdc3c7);
+  border-radius: 4px;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-primary, #2c3e50);
+  font-size: 13px;
+  outline: none;
+  min-width: 150px;
+  cursor: pointer;
+}
+
+.ui-combobox:focus {
+  border-color: var(--input-focus, #3498db);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Spinbox 组件 */
+.ui-spinbox {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--input-border, #bdc3c7);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--input-bg, #ffffff);
+}
+
+.ui-spinbox input {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary, #2c3e50);
+  font-size: 13px;
+  text-align: center;
+  min-width: 60px;
+}
+
+.ui-spinbox button {
+  padding: 8px 12px;
+  background: var(--button-bg, #3498db);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  min-width: 30px;
+}
+
+.ui-spinbox button:hover {
+  background: var(--button-hover, #2980b9);
+}
+
+/* Slider 组件 */
+.ui-slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.ui-slider input[type="range"] {
+  flex: 1;
+  height: 4px;
+  background: var(--input-border, #bdc3c7);
+  border-radius: 2px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.ui-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--button-bg, #3498db);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.ui-slider input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--button-bg, #3498db);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.ui-slider-value {
+  min-width: 40px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-secondary, #7f8c8d);
+}
+
+/* ProgressBar 组件 */
+.ui-progressbar {
+  height: 20px;
+  background: var(--preview-bg, #ecf0f1);
+  border: 1px solid var(--input-border, #bdc3c7);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ui-progressbar-fill {
+  height: 100%;
+  background: linear-gradient(to right, #3498db, #2ecc71);
+  transition: width 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-progressbar-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/* Textarea 组件 */
+.ui-textarea {
+  padding: 8px 12px;
+  border: 1px solid var(--input-border, #bdc3c7);
+  border-radius: 4px;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-primary, #2c3e50);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  min-width: 200px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ui-textarea:focus {
+  border-color: var(--input-focus, #3498db);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.ui-textarea[readonly] {
+  background: var(--preview-bg, #ecf0f1);
+  cursor: not-allowed;
+}
+
+.ui-textarea[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Table 组件 */
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--window-bg, #ffffff);
+  border: 1px solid var(--input-border, #bdc3c7);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ui-table thead {
+  background: linear-gradient(to bottom, var(--preview-bg, #ecf0f1), var(--input-border, #d5dbdb));
+}
+
+.ui-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary, #2c3e50);
+  border-bottom: 2px solid var(--input-border, #bdc3c7);
+}
+
+.ui-table td {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--text-primary, #2c3e50);
+  border-bottom: 1px solid var(--preview-bg, #ecf0f1);
+}
+
+.ui-table tbody tr:hover {
+  background: var(--preview-bg, #f8f9fa);
+}
+
+.ui-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ui-table-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary, #95a5a6);
+  font-style: italic;
+}
+
+/* 状态绑定指示器 */
+.binding-indicator {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background: #2ecc71;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: help;
+}
+
+.component-wrapper {
+  position: relative;
+}
+
+/* 对齐方式 */
+.align-fill { justify-self: stretch; align-self: stretch; }
+.align-start { justify-self: start; align-self: start; }
+.align-center { justify-self: center; align-self: center; }
+.align-end { justify-self: end; align-self: end; }
+
+.align-h-fill { justify-self: stretch; }
+.align-h-start { justify-self: start; }
+.align-h-center { justify-self: center; }
+.align-h-end { justify-self: end; }
+
+.align-v-fill { align-self: stretch; }
+.align-v-start { align-self: start; }
+.align-v-center { align-self: center; }
+.align-v-end { align-self: end; }
+
+/* 扩展控制 */
+.expand-horizontal {
+  width: 100%;
+  min-width: 0;
+}
+
+.expand-vertical {
+  height: 100%;
+  min-height: 0;
+}
+
+.expand-both {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* 错误状态 */
+.ui-error {
+  border-color: #e74c3c !important;
+}
+
+.ui-error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 成功状态 */
+.ui-success {
+  border-color: #2ecc71 !important;
+}
+
+.ui-success-message {
+  color: #2ecc71;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 警告状态 */
+.ui-warning {
+  border-color: #f39c12 !important;
+}
+
+.ui-warning-message {
+  color: #f39c12;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 信息状态 */
+.ui-info {
+  border-color: #3498db !important;
+}
+
+.ui-info-message {
+  color: #3498db;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 加载状态 */
+.ui-loading {
+  position: relative;
+  opacity: 0.7;
+}
+
+.ui-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--input-border, #bdc3c7);
+  border-top-color: var(--button-bg, #3498db);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .ui-window {
+    border-radius: 0;
+    border: none;
+  }
+  
+  .ui-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .ui-hbox {
+    flex-direction: column;
+  }
+  
+  .ui-input,
+  .ui-combobox,
+  .ui-spinbox,
+  .ui-textarea {
+    min-width: 100%;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .ui-window {
+    border: none;
+    box-shadow: none;
+  }
+  
+  .ui-button,
+  .ui-checkbox input,
+  .ui-radio input,
+  .ui-slider input,
+  .ui-progressbar-fill {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
