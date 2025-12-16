@@ -19,32 +19,46 @@ libuiBuilder 是一个基于 PHP 的 GUI 应用开发框架，通过 Builder 模
 - 🧪 完整测试 - Pest 测试框架覆盖
 - 🎨 可视化设计 - Web-based designer for drag-and-drop UI creation
 - ⌨️ 便捷函数 - Helper functions for faster development
+- 📋 表格组件 - 功能丰富的表格组件，支持多种列类型
+- 🗂️ 表单模板 - 快速创建表单的模板系统
+- 🎭 标签页组件 - 支持多标签页界面设计
 
 ## 技术栈
 
+### 后端技术
 - **语言**: PHP 8+
 - **GUI 框架**: kingbes/libui (基于 libui)
 - **测试框架**: Pest
 - **依赖管理**: Composer
 - **扩展依赖**: ext-ffi, ext-dom, ext-libxml
-- **前端工具**: HTML/CSS/JavaScript (for visualization designer)
+
+### 前端工具
+- **基础技术**: HTML/CSS/JavaScript
+- **样式框架**: libui-ng-complete.css (跨平台样式库)
 - **浏览器自动化**: Puppeteer (for end-to-end testing)
+- **可视化工具**: 原生 JavaScript 实现的设计器和预览工具
 
 ## 项目结构
 
 ```
 libuiBuilder/
-├── composer.json           # 项目依赖配置
+├── composer.json           # PHP 项目依赖配置
 ├── package.json            # 前端工具依赖配置
-├── src/                    # 核心源代码
-│   ├── Builder.php         # 视图构建器入口
-│   ├── HtmlRenderer.php    # HTML 模板渲染器
+├── pest.php               # Pest 测试配置
+├── run_tests.sh           # Unix/Linux 测试运行脚本
+├── run_tests.ps1          # PowerShell 测试运行脚本
+├── LICENSE                # MIT 许可证文件
+├── README.md              # 项目说明文档
+├── IFLOW.md               # iFlow CLI 上下文文件
+├── src/                   # 核心源代码
+│   ├── Builder.php        # 视图构建器入口
+│   ├── HtmlRenderer.php   # HTML 模板渲染器
 │   ├── ComponentBuilder.php # 组件构建器基类
 │   ├── ResponsiveGridBuilder.php # 响应式网格布局
-│   ├── helper.php          # 便捷函数库
-│   ├── Builder/            # 构建器扩展
+│   ├── helper.php         # 便捷函数库
+│   ├── Builder/           # 构建器扩展
 │   │   └── TabBuilder.php
-│   ├── Components/         # GUI 组件实现
+│   ├── Components/        # GUI 组件实现
 │   │   ├── WindowBuilder.php
 │   │   ├── GridBuilder.php
 │   │   ├── BoxBuilder.php
@@ -65,44 +79,57 @@ libuiBuilder/
 │   │   ├── SpinboxBuilder.php
 │   │   ├── SubMenuBuilder.php
 │   │   ├── TableBuilder.php
+│   │   ├── TabBuilder.php
 │   │   └── DrawContext.php
-│   ├── State/              # 状态管理
+│   ├── Data/              # 数据处理组件
+│   ├── State/             # 状态管理
 │   │   ├── StateManager.php
 │   │   └── ComponentRef.php
-│   ├── Templates/          # 内置模板
+│   ├── Templates/         # 内置模板
 │   │   ├── FormTemplate.php
 │   │   └── ResponsiveGrid.php
-│   └── Validation/         # 表单验证
-├── example/                # 示例代码
-│   ├── htmlFull.php        # HTML 模板完整示例
-│   ├── htmlLogin.php       # HTML 模板登录示例
-│   ├── simple.php          # Builder API 简单示例
-│   ├── calculator.php      # 计算器示例
-│   ├── calculator_html.php # HTML计算器示例
-│   ├── calculator_html_simple.php # 简化计算器示例
-│   ├── eventAndState.php   # 事件和状态管理示例
-│   ├── simple_table_demo.php # 简单表格示例
-│   ├── table_demo.php      # 表格示例
-│   ├── complex_table_demo.php # 复杂表格示例
-│   ├── dynamic_table_demo.php # 动态表格示例
-│   ├── working_table_demo.php # 工作表格示例
-│   ├── form_table.php      # 表单表格示例
-│   ├── form_table_builder.php # 表单构建器示例
-│   ├── form_table_builder_html.php # HTML表单构建器示例
-│   ├── builder_helpers_demo.php # 构建器助手演示
-│   ├── helper_shortcuts_demo.php # 助手函数演示
-│   ├── responseGrid.php    # 响应式网格示例
-│   ├── full.php            # 完整示例
-│   ├── standard_html_demo.php # 标准HTML演示
-│   └── views/              # HTML 模板文件
-├── tools/                  # 开发工具
-│   ├── designer.html       # 可视化设计器主页面
+│   └── Validation/        # 表单验证
+├── example/               # 示例代码（按复杂度分类）
+│   ├── README.md          # 示例说明文档
+│   ├── libui.png          # 示例截图
+│   ├── 01_basics/         # 基础示例
+│   │   ├── simple.php
+│   │   └── htmlLogin.php
+│   ├── 02_layouts/        # 布局示例
+│   │   ├── calculator.php
+│   │   ├── calculator_html.php
+│   │   ├── calculator_html_simple.php
+│   │   └── responseGrid.php
+│   ├── 03_components/     # 组件示例
+│   │   ├── htmlFull.php
+│   │   ├── eventAndState.php
+│   │   ├── builder_helpers_demo.php
+│   │   └── helper_shortcuts_demo.php
+│   ├── 04_advanced/       # 高级示例
+│   │   ├── simple_table_demo.php
+│   │   ├── table_demo.php
+│   │   ├── complex_table_demo.php
+│   │   ├── dynamic_table_demo.php
+│   │   ├── working_table_demo.php
+│   │   ├── form_table.php
+│   │   ├── form_table_builder.php
+│   │   └── form_table_builder_html.php
+│   ├── 05_applications/   # 完整应用示例
+│   │   ├── full.php
+│   │   └── standard_html_demo.php
+│   └── views/             # HTML 模板文件
+├── tools/                 # 开发工具
+│   ├── README.md          # 工具说明文档
+│   ├── QUICKSTART.md      # 快速开始指南
+│   ├── designer.html      # 可视化设计器主页面
 │   ├── designer.css        # 设计器样式
 │   ├── designer.js         # 设计器逻辑
 │   ├── libui-ng-complete.css # 跨平台样式库
-│   ├── preview.html        # 预览工具
-│   └── README.md           # 工具说明文档
-├── tests/                  # 测试文件
+│   ├── preview.html       # 预览工具
+│   └── modules/           # 工具模块
+├── tests/                 # 测试文件
+│   ├── README.md          # 测试说明文档
+│   ├── Pest.php           # Pest 测试配置
 │   ├── BasicTest.php
 │   ├── BuilderComponentsTest.php
 │   ├── BuilderHelperTest.php
@@ -112,44 +139,95 @@ libuiBuilder/
 │   ├── HtmlRendererBasicTest.php
 │   ├── HtmlRendererExtendedTest.php
 │   ├── StateHelperTest.php
-│   └── StateManagerBasicTest.php
-├── docs/                   # 文档
-│   └── HTML_RENDERER.md    # HTML渲染器文档
-├── run_tests.sh            # 测试运行脚本
-└── vendor/                 # Composer 依赖
+│   ├── StateManagerBasicTest.php
+│   ├── TableBuilderTest.php
+│   └── Integration/       # 集成测试
+├── docs/                  # 文档
+│   ├── HTML_RENDERER.md   # HTML渲染器文档
+│   └── TableBuilder.md    # 表格组件文档
+├── coverage-report/       # 测试覆盖率报告
+├── logs/                  # 日志目录
+└── vendor/                # Composer 依赖
 ```
 
-## 构建和运行
+## 快速开始
+
+### 环境要求
+
+- PHP 8.0 或更高版本
+- Composer
+- 扩展：ext-ffi, ext-dom, ext-libxml
+- 现代浏览器（用于可视化工具）
 
 ### 安装依赖
 
 ```bash
+# 安装 PHP 依赖
 composer install
-npm install  # For visualization tools
+
+# 安装前端工具（可选，用于开发工具）
+npm install
 ```
 
-### 运行示例
+### 运行第一个示例
 
 ```bash
-# HTML 模板完整示例
-php example/htmlFull.php
+# 基础示例
+php example/01_basics/simple.php
 
-# HTML 模板登录示例
-php example/htmlLogin.php
-
-# Builder API 简单示例
-php example/simple.php
+# HTML 模板示例
+php example/01_basics/htmlLogin.php
 
 # 计算器示例
-php example/calculator.php
-php example/calculator_html.php
-
-# 表格示例
-php example/table_demo.php
-
-# 响应式网格示例
-php example/responseGrid.php
+php example/02_layouts/calculator.php
 ```
+
+## 开发工具
+
+### 可视化设计器
+
+基于 Web 的可视化界面设计器，提供拖拽式组件布局功能：
+
+**启动方式：**
+```bash
+# 在浏览器中打开设计器
+open tools/designer.html
+# 或者
+start tools/designer.html  # Windows
+```
+
+**主要功能：**
+- 🎨 拖拽式组件布局
+- 👀 实时预览
+- ⚙️ 属性编辑面板
+- 📋 代码生成（HTML 格式）
+- 🎭 平台样式切换
+- 📐 Grid 布局支持
+- 🗂️ 组件树管理
+
+**使用步骤：**
+1. 打开 `tools/designer.html`
+2. 从左侧组件面板拖拽组件到设计区域
+3. 点击组件查看和编辑属性
+4. 实时预览界面效果
+5. 生成符合规范的 HTML 代码
+
+### 预览工具
+
+用于预览 `.ui.html` 模板文件的独立工具：
+
+```bash
+# 打开预览工具
+open tools/preview.html
+```
+
+**功能特性：**
+- 📁 文件选择器
+- 🔄 实时预览
+- 📱 响应式支持
+- 🎨 样式主题切换
+
+## 测试
 
 ### 运行测试
 
@@ -157,71 +235,70 @@ php example/responseGrid.php
 # 运行所有测试
 ./vendor/bin/pest
 
-# 运行特定测试
+# 运行特定测试文件
+./vendor/bin/pest tests/BasicTest.php
 ./vendor/bin/pest tests/HtmlRendererBasicTest.php
-./vendor/bin/pest tests/StateManagerBasicTest.php
-./vendor/bin/pest tests/BuilderComponentsTest.php
 
-# 使用测试运行脚本（交互式）
-bash run_tests.sh
-
-# 运行特定测试类型
-bash run_tests.sh 3 # 运行基础测试
-bash run_tests.sh 4 # 运行StateManager测试
-bash run_tests.sh 5 # 运行HtmlRenderer测试
-
-# 生成测试覆盖率报告
+# 生成覆盖率报告
 ./vendor/bin/pest --coverage
+
+# 生成 HTML 覆盖率报告
 ./vendor/bin/pest --coverage --coverage-html=coverage-report
 ```
 
-### 运行可视化设计器
+### 测试脚本
 
+**Unix/Linux/macOS:**
 ```bash
-# 打开可视化设计器（在浏览器中打开 tools/designer.html）
-open tools/designer.html
+# 交互式测试运行
+bash run_tests.sh
 
-# 或使用预览工具
-open tools/preview.html
+# 运行特定类型测试
+bash run_tests.sh 3  # 基础测试
+bash run_tests.sh 4  # StateManager 测试
+bash run_tests.sh 5  # HtmlRenderer 测试
 ```
 
-## 开发约定
+**Windows PowerShell:**
+```powershell
+# 交互式测试运行
+.\run_tests.ps1
 
-### 代码风格
+# 运行特定类型测试
+.\run_tests.ps1 3  # 基础测试
+.\run_tests.ps1 4  # StateManager 测试
+.\run_tests.ps1 5  # HtmlRenderer 测试
+```
 
-- 遵循 PSR-4 自动加载规范
-- 使用驼峰命名法（camelCase）
-- 类名使用 PascalCase
-- 方法名使用 camelCase
-- 私有属性使用下划线前缀
+## 示例指南
 
-### 组件开发规范
+### 学习路径
 
-1. 所有组件继承自 `ComponentBuilder` 基类
-2. 实现链式调用方法
-3. 提供便捷的工厂方法
-4. 支持事件绑定和数据绑定
+项目示例按难度分级，建议按以下顺序学习：
 
-### HTML 模板规范
+#### 1️⃣ 基础示例 (01_basics/)
+- `simple.php` - Builder API 基础用法
+- `htmlLogin.php` - HTML 模板登录界面
 
-1. 使用 `.ui.html` 扩展名
-2. 根元素必须是 `<window>`
-3. 支持 Grid 布局属性：`row`, `col`, `rowspan`, `colspan`
-4. 支持事件属性：`onclick`, `onchange`, `onselected`
-5. 支持数据绑定：`bind` 属性
+#### 2️⃣ 布局示例 (02_layouts/)
+- `calculator.php` - Builder API 计算器
+- `calculator_html.php` - HTML 模板计算器
+- `calculator_html_simple.php` - 简化版计算器
+- `responseGrid.php` - 响应式网格布局
 
-### 状态管理规范
+#### 3️⃣ 组件示例 (03_components/)
+- `htmlFull.php` - HTML 模板完整功能
+- `eventAndState.php` - 事件和状态管理
+- `builder_helpers_demo.php` - 构建器助手演示
+- `helper_shortcuts_demo.php` - 便捷函数演示
 
-1. 使用 `StateManager::instance()` 获取单例
-2. 通过 `set()` 和 `get()` 方法管理状态
-3. 使用 `watch()` 方法监听状态变化
-4. 通过 `ComponentRef` 访问组件实例
+#### 4️⃣ 高级示例 (04_advanced/)
+- 表格系列示例（simple、complex、dynamic、working）
+- 表单表格示例（form_table 系列）
 
-### 响应式设计规范
-
-1. 使用 `ResponsiveGridBuilder` 实现响应式布局
-2. 利用 `Templates\ResponsiveGrid::create()` 工厂方法
-3. 考虑控件类型设置合适的对齐和扩展方式
+#### 5️⃣ 应用示例 (05_applications/)
+- `full.php` - 完整功能演示
+- `standard_html_demo.php` - 标准 HTML 演示
 
 ## 核心概念
 
@@ -239,17 +316,17 @@ open tools/preview.html
 </window>
 ```
 
-### Grid 布局
+### Grid 布局系统
 
 精确的二维布局系统，支持：
-- 位置定位：`row`, `col`
-- 跨度控制：`rowspan`, `colspan`
-- 对齐方式：`align` (`fill`, `start`, `center`, `end`)
-- 扩展控制：`expand` (`true`, `horizontal`, `vertical`)
+- **位置定位**：`row`, `col`（从 0 开始）
+- **跨度控制**：`rowspan`, `colspan`
+- **对齐方式**：`align` (`fill`, `start`, `center`, `end`)
+- **扩展控制**：`expand` (`true`, `horizontal`, `vertical`)
 
 ### 响应式网格 (ResponsiveGridBuilder)
 
-自动适应可用空间的网格布局，可以设置总列数并以比例分配控件宽度：
+自动适应可用空间的网格布局：
 
 ```php
 use Kingbes\Libui\View\Templates\ResponsiveGrid;
@@ -265,6 +342,7 @@ $layout = ResponsiveGrid::create(12)  // 12列网格
 ### 状态管理
 
 响应式数据绑定系统：
+
 ```php
 $state = StateManager::instance();
 $state->set('username', '');
@@ -273,37 +351,27 @@ $state->watch('username', function($newValue) {
 });
 ```
 
-### 便捷函数 (Helper Functions)
+### 便捷函数
 
-项目提供了一系列便捷函数来简化开发：
+项目提供大量便捷函数来简化开发：
 
 ```php
-// 状态管理辅助函数
-state();                    // 获取状态管理器实例
+// 状态管理
+state();                    // 获取状态管理器
 state('key', 'value');     // 设置状态值
 state('key');              // 获取状态值
 watch('key', $callback);   // 监听状态变化
 
-// 组件构建快捷函数
-window(); vbox(); hbox(); grid(); tab();  // 容器组件
-button(); label(); entry(); checkbox(); combobox();  // 基础控件
-textarea(); spinbox(); slider(); radio();  // 输入控件
-progressBar(); table(); canvas();  // 其他控件
-separator(); menu(); passwordEntry();  // 特殊控件
+// 容器组件
+window(); vbox(); hbox(); grid(); tab();
 
-// 表单构建辅助函数
+// 基础控件
+button(); label(); entry(); checkbox(); combobox();
+textarea(); spinbox(); slider(); radio();
+
+// 表单辅助
 input('用户名', 'username', 'text', '请输入用户名');
-select('角色', 'role', ['管理员', '用户', '访客'], 'combobox');
-```
-
-### 事件系统
-
-```php
-$handlers = [
-    'handleLogin' => function($button, $state) {
-        echo "登录: " . $state->get('username') . "\n";
-    }
-];
+select('角色', 'role', ['管理员', '用户'], 'combobox');
 ```
 
 ## 支持的组件
@@ -329,181 +397,105 @@ $handlers = [
 - `SliderBuilder` - 滑动条
 - `ProgressBarBuilder` - 进度条
 
-### 其他控件
-- `SeparatorBuilder` - 分隔符
-- `TableBuilder` - 表格
+### 高级组件
+- `TableBuilder` - 表格（支持多种列类型）
 - `CanvasBuilder` - 画布
 - `MenuBuilder` - 菜单
-- `GroupBuilder` - 分组控件（带有标题的容器）
-- `DrawContext` - 绘图上下文
+- `SeparatorBuilder` - 分隔符
 
 ## 表格组件详解
 
 ### 功能特性
-- **多种列类型支持**：text（文本）、image（图片）、checkbox（复选框）、progress（进度条）、button（按钮）、imageText（图片+文本）
-- **数据管理**：可视化编辑表格数据，支持增加/删除行
-- **按钮自定义**：按钮列支持 "文本:值" 格式，如 "删除:delete"
-- **实时预览**：属性修改即时反映在预览区
-- **HTML代码生成**：生成语义化的表格HTML代码
+- **多种列类型**：text、image、checkbox、progress、button、imageText
+- **数据管理**：可视化编辑，支持增删行
+- **按钮自定义**：支持 "文本:值" 格式
+- **实时预览**：属性修改即时反映
+- **HTML 生成**：生成语义化表格代码
 
 ### 使用示例
 
-#### 基础表格
-```html
-<table columns="姓名,年龄,操作">
-    <thead>
-        <tr>
-            <th>姓名</th>
-            <th>年龄</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>张三</td>
-            <td>25</td>
-            <td><button value="edit">编辑</button></td>
-        </tr>
-        <tr>
-            <td>李四</td>
-            <td>30</td>
-            <td><button value="delete">删除</button></td>
-        </tr>
-    </tbody>
-</table>
-```
-
-#### 带列类型的表格
 ```html
 <table columns="姓名,状态,进度,操作" columnTypes="text,checkbox,progress,button">
-    <thead>
-        <tr>
-            <th>姓名</th>
-            <th>状态</th>
-            <th>进度</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>任务A</td>
-            <td><input type="checkbox" checked></td>
-            <td><progress value="75" max="100"></progress>
-            <td><button value="complete">完成</button></td>
-        </tr>
-    </tbody>
+  <thead>
+    <tr>
+      <th>姓名</th>
+      <th>状态</th>
+      <th>进度</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>任务A</td>
+      <td><input type="checkbox" checked></td>
+      <td><progress value="75" max="100"></progress>
+      <td><button value="complete">完成</button></td>
+    </tr>
+  </tbody>
 </table>
 ```
 
-### 列类型说明
+## 开发约定
 
-| 类型 | 说明 | 示例数据 | HTML输出 |
-|------|------|----------|----------|
-| text | 普通文本 | "示例文本" | `<td>示例文本</td>` |
-| image | 图片 | "image.png" | `<td><img src="image.png" alt="image.png"></td>` |
-| checkbox | 复选框 | "true"/"false" | `<td><input type="checkbox" checked></td>` |
-| progress | 进度条 | "75" | `<td><progress value="75" max="100"></progress>` |
-| button | 按钮 | "删除:delete" | `<td><button value="delete">删除</button></td>` |
-| imageText | 图片+文本 | "icon.png:设置" | `<td><img src="icon.png"> 设置</td>` |
+### 代码风格
+- 遵循 PSR-4 自动加载规范
+- 使用驼峰命名法（camelCase）
+- 类名使用 PascalCase
+- 私有属性使用下划线前缀
 
-### 按钮列格式
-按钮列支持两种格式：
-1. **简单文本**：直接显示按钮文本，值为空
-   - 示例：`删除` → `<button>删除</button>`
-2. **文本:值格式**：显示文本，设置value属性
-   - 示例：`删除:delete` → `<button value="delete">删除</button>`
+### 组件开发规范
+1. 继承自 `ComponentBuilder` 基类
+2. 实现链式调用方法
+3. 提供便捷的工厂方法
+4. 支持事件绑定和数据绑定
 
-### 可视化设计器中的表格操作
-1. **设置列标题**：在"列标题"输入框中输入，用逗号分隔
-2. **选择列类型**：每列可独立选择数据类型
-3. **编辑数据**：直接在数据表格中编辑单元格内容
-4. **管理行**：
-   - 点击"+ 添加行"添加新行
-   - 点击红色"删除"按钮删除行
-5. **实时预览**：所有修改即时反映在左侧预览区
-
-## 内置模板
-
-### FormTemplate - 表单模板
-提供快速创建表单的模板系统：
-
-```php
-use Kingbes\Libui\View\Templates\FormTemplate;
-
-$userForm = FormTemplate::create([
-    ['label' => '用户名', 'type' => 'text', 'placeholder' => '请输入用户名'],
-    ['label' => '密码', 'type' => 'password', 'placeholder' => '请输入密码'],
-    ['label' => '记住我', 'type' => 'checkbox', 'text' => '下次自动登录'],
-]);
-```
-
-### ResponsiveGrid - 响应式网格模板
-提供创建响应式布局的模板：
-
-```php
-use Kingbes\Libui\View\Templates\ResponsiveGrid;
-
-$layout = ResponsiveGrid::create(12)
-    ->col(Builder::label()->text('标题'), 12)
-    ->col(Builder::entry(), 6)
-    ->col(Builder::button()->text('提交'), 6)
-    ->build();
-```
-
-## 开发工具
-
-### 可视化设计器
-tools/ 目录包含一个基于 Web 的可视化界面设计器，支持：
-- 拖拽式组件布局
-- 实时预览
-- 属性编辑
-- 代码导出
-- 平台样式切换
-
-使用方法：
-1. 在浏览器中打开 `tools/designer.html`
-2. 从左侧组件面板拖拽组件到设计区域
-3. 点击组件编辑属性
-4. 生成符合 libuiBuilder 规范的 HTML 代码
-
-### 预览工具
-- `tools/preview.html` - 用于预览 `.ui.html` 模板文件
+### HTML 模板规范
+1. 使用 `.ui.html` 扩展名
+2. 根元素必须是 `<window>`
+3. 支持 Grid 布局属性
+4. 支持事件和数据绑定属性
 
 ## 最佳实践
 
 1. **优先使用 HTML 模板** - 更直观、易维护
 2. **使用 Grid 布局** - 避免深层嵌套的 Box
-3. **利用响应式网格** - 对于动态布局使用 ResponsiveGridBuilder
-4. **分离事件处理逻辑** - 使用专门的处理器类
+3. **利用响应式网格** - 动态布局使用 ResponsiveGridBuilder
+4. **分离事件处理** - 使用专门的处理器类
 5. **合理组织项目结构** - 分离模板、处理器和状态管理
-6. **利用模板复用** - 使用 `<template>` 和 `<use>` 标签
-7. **使用便捷函数** - 使用 helper.php 中的快捷函数提高开发效率
-8. **可视化设计** - 使用工具目录中的设计器创建界面
+6. **使用便捷函数** - 提高开发效率
+7. **利用可视化设计器** - 快速原型设计
 
 ## 调试技巧
 
 1. 使用 `StateManager::dump()` 查看状态
-2. 通过 `ComponentRef` 直接访问组件实例
-3. 查看 `example/` 目录中的示例代码
+2. 通过 `ComponentRef` 访问组件实例
+3. 查看示例代码学习最佳实践
 4. 运行测试确保功能正常
-5. 使用 `run_tests.sh` 脚本进行交互式测试
-6. 使用可视化设计器预览界面布局
+5. 使用可视化设计器预览布局
+6. 检查浏览器控制台输出（前端工具）
 
 ## 常见问题
 
-1. **确保安装了 ext-ffi, ext-dom, ext-libxml 扩展**
-2. **HTML 模板文件必须使用 `.ui.html` 扩展名**
-3. **事件处理器必须在渲染时传入**
-4. **Grid 布局中的行列索引从 0 开始**
-5. **使用 ResponsiveGridBuilder 时注意控件对齐方式**
-6. **在使用 helper 函数前确保已加载 src/helper.php**
+1. **扩展依赖**：确保安装了 ext-ffi, ext-dom, ext-libxml
+2. **模板扩展名**：HTML 模板必须使用 `.ui.html`
+3. **事件处理**：事件处理器必须在渲染时传入
+4. **Grid 索引**：行列索引从 0 开始
+5. **helper 函数**：使用前确保已加载 src/helper.php
+
+## 文档资源
+
+- [HTML 渲染器文档](docs/HTML_RENDERER.md)
+- [表格组件文档](docs/TableBuilder.md)
+- [工具快速开始](tools/QUICKSTART.md)
+- [工具使用说明](tools/README.md)
 
 ## 贡献指南
 
 1. Fork 项目
 2. 创建功能分支
 3. 编写测试
-4. 提交 Pull Request
+4. 确保测试通过
+5. 提交 Pull Request
 
 ## 许可证
 

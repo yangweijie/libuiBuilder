@@ -2001,6 +2001,23 @@
                     return ''; // 只有Grid子组件才显示Grid布局属性
                 }
                 
+                // 解析现有的对齐值
+                let horizontalAlign = 'fill';
+                let verticalAlign = 'fill';
+                
+                if (component.props.align) {
+                    if (component.props.align.includes(',')) {
+                        // 已有分离的对齐值
+                        const [h, v] = component.props.align.split(',');
+                        horizontalAlign = h.trim() || 'fill';
+                        verticalAlign = v.trim() || 'fill';
+                    } else {
+                        // 单个值，水平和垂直相同
+                        horizontalAlign = component.props.align;
+                        verticalAlign = component.props.align;
+                    }
+                }
+                
                 let html = `
                     <div class="property-group">
                         <h4>Grid布局属性</h4>
@@ -2021,12 +2038,21 @@
                             <input type="number" class="property-input" data-prop="colspan" value="${component.props.colspan || '1'}" min="1" max="10">
                         </div>
                         <div class="property-row">
-                            <label class="property-label">对齐 (align):</label>
-                            <select class="property-input" data-prop="align">
-                                <option value="fill" ${component.props.align === 'fill' ? 'selected' : ''}>fill (填充)</option>
-                                <option value="start" ${component.props.align === 'start' ? 'selected' : ''}>start (起始)</option>
-                                <option value="center" ${component.props.align === 'center' ? 'selected' : ''}>center (居中)</option>
-                                <option value="end" ${component.props.align === 'end' ? 'selected' : ''}>end (结束)</option>
+                            <label class="property-label">水平对齐:</label>
+                            <select class="property-input" data-prop="alignHorizontal">
+                                <option value="fill" ${horizontalAlign === 'fill' ? 'selected' : ''}>fill (填充)</option>
+                                <option value="start" ${horizontalAlign === 'start' ? 'selected' : ''}>start (起始)</option>
+                                <option value="center" ${horizontalAlign === 'center' ? 'selected' : ''}>center (居中)</option>
+                                <option value="end" ${horizontalAlign === 'end' ? 'selected' : ''}>end (结束)</option>
+                            </select>
+                        </div>
+                        <div class="property-row">
+                            <label class="property-label">垂直对齐:</label>
+                            <select class="property-input" data-prop="alignVertical">
+                                <option value="fill" ${verticalAlign === 'fill' ? 'selected' : ''}>fill (填充)</option>
+                                <option value="start" ${verticalAlign === 'start' ? 'selected' : ''}>start (起始)</option>
+                                <option value="center" ${verticalAlign === 'center' ? 'selected' : ''}>center (居中)</option>
+                                <option value="end" ${verticalAlign === 'end' ? 'selected' : ''}>end (结束)</option>
                             </select>
                         </div>
                     </div>
@@ -2499,9 +2525,31 @@
                         }
                         
                         // 检查是否是Grid布局属性
-                        const isGridProp = ['row', 'col', 'rowspan', 'colspan', 'align'].includes(prop);
+                        const isGridProp = ['row', 'col', 'rowspan', 'colspan', 'align', 'alignHorizontal', 'alignVertical'].includes(prop);
                         
                         if (isGridProp) {
+                            // 特殊处理水平对齐和垂直对齐
+                            if (prop === 'alignHorizontal' || prop === 'alignVertical') {
+                                // 获取当前的对齐值
+                                const currentAlign = component.props.align || 'fill,fill';
+                                let [hAlign, vAlign] = currentAlign.split(',');
+                                
+                                // 更新对应的对齐值
+                                if (prop === 'alignHorizontal') {
+                                    hAlign = value;
+                                } else if (prop === 'alignVertical') {
+                                    vAlign = value;
+                                }
+                                
+                                // 如果水平和垂直对齐相同，使用单个值
+                                if (hAlign === vAlign) {
+                                    component.props.align = hAlign;
+                                } else {
+                                    // 如果不同，使用逗号分隔的格式
+                                    component.props.align = `${hAlign},${vAlign}`;
+                                }
+                            }
+                            
                             // 如果是Grid布局属性，需要重新应用Grid样式
                             const element = document.querySelector(`[data-component-id="${component.id}"]`);
                             const parentComponent = this.findParentComponent(component);
@@ -3004,27 +3052,56 @@
                 element.style.gridArea = `${row + 1} / ${col + 1} / span ${rowspan} / span ${colspan}`;
                 
                 // 根据align属性设置对齐方式
-                const align = component.props.align || 'fill';
-                switch (align) {
+                const align = component.props.align || 'fill,fill';
+                let horizontalAlign = 'fill';
+                let verticalAlign = 'fill';
+                
+                // 解析对齐值
+                if (align.includes(',')) {
+                    // 分离水平和垂直对齐
+                    const [h, v] = align.split(',');
+                    horizontalAlign = h.trim() || 'fill';
+                    verticalAlign = v.trim() || 'fill';
+                } else {
+                    // 单个值，水平和垂直相同
+                    horizontalAlign = align;
+                    verticalAlign = align;
+                }
+                
+                // 设置水平对齐
+                switch (horizontalAlign) {
                     case 'fill':
-                        element.style.alignSelf = 'stretch';
                         element.style.justifySelf = 'stretch';
                         break;
                     case 'start':
-                        element.style.alignSelf = 'start';
                         element.style.justifySelf = 'start';
                         break;
                     case 'center':
-                        element.style.alignSelf = 'center';
                         element.style.justifySelf = 'center';
                         break;
                     case 'end':
-                        element.style.alignSelf = 'end';
                         element.style.justifySelf = 'end';
                         break;
                     default:
-                        element.style.alignSelf = 'stretch';
                         element.style.justifySelf = 'stretch';
+                }
+                
+                // 设置垂直对齐
+                switch (verticalAlign) {
+                    case 'fill':
+                        element.style.alignSelf = 'stretch';
+                        break;
+                    case 'start':
+                        element.style.alignSelf = 'start';
+                        break;
+                    case 'center':
+                        element.style.alignSelf = 'center';
+                        break;
+                    case 'end':
+                        element.style.alignSelf = 'end';
+                        break;
+                    default:
+                        element.style.alignSelf = 'stretch';
                 }
                 
                 // 当组件跨多列时，确保占据整行
@@ -3386,6 +3463,8 @@
                             result += ` colspan="${componentProps.colspan}"`;
                         }
                         if (componentProps.align !== undefined) {
+                            // 如果水平和垂直对齐相同，使用单个值
+                            // 如果不同，使用逗号分隔的格式
                             result += ` align="${componentProps.align}"`;
                         }
                         
