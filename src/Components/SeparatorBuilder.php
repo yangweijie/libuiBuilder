@@ -8,7 +8,7 @@ use FFI\CData;
 
 class SeparatorBuilder extends ComponentBuilder
 {
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return [
             'orientation' => 'horizontal', // horizontal, vertical

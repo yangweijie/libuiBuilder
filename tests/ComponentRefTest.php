@@ -5,7 +5,7 @@ use Kingbes\Libui\View\State\ComponentRef;
 use Kingbes\Libui\View\ComponentBuilder;
 
 // 创建一个简单的 Mock ComponentBuilder
-class MockComponentBuilder extends ComponentBuilder
+class ComponentRefTest extends ComponentBuilder
 {
     private $value = 'default';
     
@@ -50,7 +50,7 @@ beforeEach(function () {
 describe('ComponentRef 测试', function () {
     
     test('ComponentRef 基础功能', function () {
-        $mockComponent = new MockComponentBuilder();
+        $mockComponent = new ComponentRefTest();
         $componentRef = new ComponentRef('test-component', $mockComponent);
         
         expect($componentRef)->toBeInstanceOf(ComponentRef::class);
@@ -59,7 +59,7 @@ describe('ComponentRef 测试', function () {
     
     test('StateManager 注册和获取组件', function () {
         $stateManager = StateManager::instance();
-        $mockComponent = new MockComponentBuilder();
+        $mockComponent = new ComponentRefTest();
         $componentRef = new ComponentRef('test-component', $mockComponent);
         
         // 注册组件
@@ -83,8 +83,8 @@ describe('ComponentRef 测试', function () {
     test('覆盖已注册的组件', function () {
         $stateManager = StateManager::instance();
         
-        $mockComponent1 = new MockComponentBuilder();
-        $mockComponent2 = new MockComponentBuilder();
+        $mockComponent1 = new ComponentRefTest();
+        $mockComponent2 = new ComponentRefTest();
         $componentRef1 = new ComponentRef('test-component', $mockComponent1);
         $componentRef2 = new ComponentRef('test-component', $mockComponent2);
         
@@ -104,9 +104,9 @@ describe('ComponentRef 测试', function () {
         $stateManager = StateManager::instance();
         
         $components = [
-            'component1' => new ComponentRef('component1', new MockComponentBuilder()),
-            'component2' => new ComponentRef('component2', new MockComponentBuilder()),
-            'component3' => new ComponentRef('component3', new MockComponentBuilder())
+            'component1' => new ComponentRef('component1', new ComponentRefTest()),
+            'component2' => new ComponentRef('component2', new ComponentRefTest()),
+            'component3' => new ComponentRef('component3', new ComponentRefTest())
         ];
         
         // 注册所有组件
@@ -126,7 +126,7 @@ describe('ComponentRef 测试', function () {
         $testIds = ['simple', 'with-dash', 'with_underscore', 'WithNumbers123'];
         
         foreach ($testIds as $id) {
-            $componentRef = new ComponentRef($id, new MockComponentBuilder());
+            $componentRef = new ComponentRef($id, new ComponentRefTest());
             expect($componentRef->getId())->toBe($id);
         }
     });
@@ -139,7 +139,7 @@ describe('ComponentRef 测试', function () {
         $stateManager->set('test2', 'value2');
         
         // 注册组件
-        $mockComponent = new MockComponentBuilder();
+        $mockComponent = new ComponentRefTest();
         $componentRef = new ComponentRef('test-component', $mockComponent);
         $stateManager->registerComponent('test-component', $componentRef);
         

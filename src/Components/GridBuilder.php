@@ -14,7 +14,7 @@ use FFI\CData;
 
 class GridBuilder extends ComponentBuilder
 {
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return [
             'padded' => true,

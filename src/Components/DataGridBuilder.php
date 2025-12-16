@@ -53,7 +53,7 @@ class DataGridBuilder extends ComponentBuilder
         return true;
     }
 
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return [
             'headers' => [],

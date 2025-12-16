@@ -16,7 +16,7 @@ class BoxBuilder extends ComponentBuilder
         parent::__construct($config);
     }
 
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return [
             'padded' => true,

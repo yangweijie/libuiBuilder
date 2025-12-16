@@ -8,7 +8,7 @@ use FFI\CData;
 
 class MultilineEntryBuilder extends ComponentBuilder
 {
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return [
             'text' => '',

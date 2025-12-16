@@ -12,7 +12,7 @@ class CanvasBuilder extends ComponentBuilder
 {
     private array $drawCommands = [];
 
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return [
             'width' => 400,

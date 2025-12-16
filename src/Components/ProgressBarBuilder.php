@@ -8,7 +8,7 @@ use FFI\CData;
 
 class ProgressBarBuilder extends ComponentBuilder
 {
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return [
             'value' => 0,

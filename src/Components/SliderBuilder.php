@@ -8,7 +8,7 @@ use FFI\CData;
 
 class SliderBuilder extends ComponentBuilder
 {
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return [
             'min' => 0,

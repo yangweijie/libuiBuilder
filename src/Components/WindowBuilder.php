@@ -15,7 +15,7 @@ class WindowBuilder extends ComponentBuilder
         echo "WindowBuilder::__construct called\n";
         parent::__construct($config);
     }
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return [
             'title' => 'LibUI Application',
