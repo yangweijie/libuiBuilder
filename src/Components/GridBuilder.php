@@ -315,6 +315,15 @@ class GridBuilder extends ComponentBuilder
 
                     echo "[GridBuilder] Positioning: row=$row, col=$col, colspan=$colspan, rowspan=$rowspan, hexpand=$hexpand, vexpand=$vexpand, halign={$halign->name}, valign={$valign->name}\n";
 
+                    // 对于某些控件类型，如 VBox，当它们在 Grid 中时，需要特别注意其扩展行为
+                    // 特别是在 colspan 大于 1 的情况下，确保它们能够正确占用指定的列宽
+                    $effectiveHExpand = $hexpand;
+                    if ($componentType === 'BoxBuilder' && $colspan > 1 && $hexpand === 0) {
+                        // 对于占用多列的 Box 组件，自动启用水平扩展以填充列宽
+                        $effectiveHExpand = 1;
+                        echo "[GridBuilder] Auto-enabling horizontal expand for BoxBuilder with colspan > 1\n";
+                    }
+
                     Grid::append(
                         $this->handle,
                         $childHandle,
@@ -322,7 +331,7 @@ class GridBuilder extends ComponentBuilder
                         $row,             // top (row) - 从配置读取
                         $colspan,         // xspan (colspan) - 从配置读取
                         $rowspan,         // yspan (rowspan) - 从配置读取
-                        $hexpand,         // hexpand
+                        $effectiveHExpand, // hexpand - 可能被自动调整
                         $halign->value,   // halign (int)
                         $vexpand,         // vexpand
                         $valign           // valign (Align object)

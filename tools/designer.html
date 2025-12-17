@@ -1607,13 +1607,11 @@
                             ), 2);
                         }
                         
-                        // 计算合适的行高（每行61px）
-                        const rowHeight = 61;
-                        const gridTemplateRows = `repeat(${rowCount}, ${rowHeight}px)`;
-                        const minGridHeight = rowCount * rowHeight + (gridPadding ? parseInt(gridPadding) * 2 : 0);
+                        // 使用auto行高，让内容撑开Grid
+                        const gridTemplateRows = `repeat(${rowCount}, auto)`;
                         
                         content.innerHTML = `
-                            <div class="ui-grid" style="min-width: 200px; height: auto; min-height: ${minGridHeight}px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: ${gridTemplateRows}; gap: 8px; padding: ${gridPadding}; width: 100%; position: relative; box-sizing: border-box;" data-grid-id="${component.id}">
+                            <div class="ui-grid" style="min-width: 200px; height: auto; min-height: 150px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: ${gridTemplateRows}; gap: 8px; padding: ${gridPadding}; width: 100%; position: relative; box-sizing: border-box;" data-grid-id="${component.id}">
                                 <div class="container-placeholder" style="grid-area: 1 / 1 / span ${rowCount} / span 2; display: flex; align-items: center; justify-content: center; color: #0078d4; font-size: 14px; pointer-events: none;">
                                     Grid 布局容器
                                 </div>
@@ -3188,10 +3186,11 @@
                 if (children.length === 0) {
                     // 如果没有子组件，保持默认的2x2网格
                     gridElement.style.gridTemplateColumns = 'repeat(2, 1fr)';
-                    gridElement.style.gridTemplateRows = 'repeat(2, 61px)';
+                    gridElement.style.gridTemplateRows = 'repeat(2, auto)';
                     gridElement.style.minHeight = '150px';
+                    gridElement.style.height = 'auto';
                     containerContent.style.gridTemplateColumns = 'repeat(2, 1fr)';
-                    containerContent.style.gridTemplateRows = 'repeat(2, 61px)';
+                    containerContent.style.gridTemplateRows = 'repeat(2, auto)';
                     return;
                 }
                 
@@ -3213,18 +3212,32 @@
                 const rows = Math.max(1, maxRow);
                 const cols = Math.max(1, maxCol);
                 
-                // 计算合适的行高（每行61px）
-                const rowHeight = 61;
-                const gridPadding = gridElement.style.padding ? parseInt(gridElement.style.padding) : 8;
-                const gridTemplateRows = `repeat(${rows}, ${rowHeight}px)`;
-                const minGridHeight = rows * rowHeight + gridPadding * 2;
+                // 计算列宽比例：分析所有子组件的colspan，为每一列分配权重
+                const columnWeights = new Array(cols).fill(1);
                 
-                // 更新网格模板
-                const gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                children.forEach(child => {
+                    const col = parseInt(child.props.col || '0');
+                    const colspan = parseInt(child.props.colspan || '1');
+                    
+                    // 如果组件跨越多列，按比例分配权重
+                    if (colspan > 1) {
+                        const weightPerCol = colspan / colspan; // 每列权重为colspan值
+                        for (let i = col; i < col + colspan && i < cols; i++) {
+                            columnWeights[i] = Math.max(columnWeights[i], colspan);
+                        }
+                    }
+                });
+                
+                // 生成列模板：使用fr单位按权重分配
+                const gridTemplateColumns = columnWeights.map(w => `${w}fr`).join(' ');
+                
+                // 使用auto行高，让内容撑开Grid
+                const gridTemplateRows = `repeat(${rows}, auto)`;
+                const gridPadding = gridElement.style.padding ? parseInt(gridElement.style.padding) : 8;
                 
                 gridElement.style.gridTemplateColumns = gridTemplateColumns;
                 gridElement.style.gridTemplateRows = gridTemplateRows;
-                gridElement.style.minHeight = `${minGridHeight}px`;
+                gridElement.style.minHeight = '150px';
                 gridElement.style.height = 'auto';
                 
                 // 同时更新container-content的网格模板

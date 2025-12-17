@@ -74,14 +74,9 @@
         {
             "name": "kingbes/libui",
             "version": "v0.1.9",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/KingBes/php-libui.git",
-                "reference": "f82301f500b9d0f39ffabc5ac849aec1ccdf1d51"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KingBes/php-libui/zipball/f82301f500b9d0f39ffabc5ac849aec1ccdf1d51",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/kingbes/libui/v0.1.9/kingbes-libui-v0.1.9.zip",
                 "reference": "f82301f500b9d0f39ffabc5ac849aec1ccdf1d51",
                 "shasum": ""
             },
@@ -95,7 +90,6 @@
                     "Kingbes\\Libui\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -3247,5 +3241,5 @@
         "ext-libxml": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

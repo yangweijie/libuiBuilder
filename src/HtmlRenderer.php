@@ -377,6 +377,14 @@ class HtmlRenderer
                     $gridItem->expand($hExpand, $vExpand);
                 }
             }
+            
+            // 特别处理BoxBuilder（包括VBox和HBox）在Grid中占用多列的情况
+            $childTagName = strtolower($child->tagName);
+            if (($childTagName === 'vbox' || $childTagName === 'hbox') && $colspan > 1 && $expand === '') {
+                // 对于在Grid中占用多列的VBox或HBox，自动设置水平扩展以填充列宽
+                $gridItem->expand(true, false);
+                echo "[HtmlRenderer] Auto-enabling horizontal expand for VBox/HBox with colspan > 1\n";
+            }
         }
         
         return $builder;

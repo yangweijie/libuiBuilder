@@ -1,0 +1,13 @@
+<window title="Grid ColSpan 测试" size="800,600">
+    <grid padded="true">
+        <!-- 第一个VBox：位置(0,0)，占用3列 -->
+        <vbox row="0" col="0" rowspan="1" colspan="3">
+            <label>左侧 VBox (colspan=3)</label>
+        </vbox>
+        
+        <!-- 第二个VBox：位置(0,4)，占用50列 -->
+        <vbox row="0" col="4" rowspan="1" colspan="50">
+            <label>右侧 VBox (colspan=50)</label>
+        </vbox>
+    </grid>
+</window>

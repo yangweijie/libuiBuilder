@@ -13,6 +13,16 @@ class LibuiBuilderDesigner {
         this.setupEventListeners();
         this.setupDragAndDrop();
         this.updateCodePreview();
+        this.setupDebugShortcuts();
+    }
+    setupDebugShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // 按 Ctrl+Shift+D 来调试Grid布局
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                e.preventDefault();
+                this.debugGridLayout();
+            }
+        });
     }
     
     setupEventListeners() {
@@ -355,6 +365,60 @@ class LibuiBuilderDesigner {
         }
     }
     
+    // 调试Grid布局的函数
+    debugGridLayout() {
+        console.log('=== Grid Layout Debug ===');
+        
+        // 查找所有Grid组件
+        this.components.forEach(component => {
+            if (component.type === 'grid') {
+                console.log(`Grid Component: ${component.id}`);
+                console.log(`- Children count: ${component.children.length}`);
+                
+                const gridElement = document.querySelector(`[data-component-id="${component.id}"]`);
+                if (gridElement) {
+                    const gridRect = gridElement.getBoundingClientRect();
+                    console.log(`- Grid total width: ${gridRect.width}px`);
+                    
+                    // 检查Grid的CSS Grid列数
+                    const gridContainer = gridElement.querySelector('.ui-grid');
+                    if (gridContainer) {
+                        const computedStyle = window.getComputedStyle(gridContainer);
+                        console.log(`- Grid template columns: ${computedStyle.gridTemplateColumns}`);
+                        
+                        // 检查每个子组件的grid-column属性
+                        component.children.forEach((child, idx) => {
+                            const childElement = document.querySelector(`[data-component-id="${child.id}"]`);
+                            if (childElement) {
+                                const childRect = childElement.getBoundingClientRect();
+                                const childComputedStyle = window.getComputedStyle(childElement);
+                                
+                                console.log(`  Child ${idx} (${child.type}):`);
+                                console.log(`  - ID: ${child.id}`);
+                                console.log(`  - Layout: row=${child.layout?.row}, col=${child.layout?.col}, rowspan=${child.layout?.rowspan}, colspan=${child.layout?.colspan}`);
+                                console.log(`  - Width: ${childRect.width}px`);
+                                console.log(`  - Grid column: ${childComputedStyle.gridColumn}`);
+                                console.log(`  - Grid row: ${childComputedStyle.gridRow}`);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+        
+        // 输出所有组件信息
+        console.log('=== All Components ===');
+        this.components.forEach(component => {
+            console.log(`${component.type} (${component.id}): parent=${component.parent || 'none'}`);
+            if (component.layout) {
+                console.log(`  Layout: row=${component.layout.row}, col=${component.layout.col}, rowspan=${component.layout.rowspan}, colspan=${component.layout.colspan}`);
+            }
+            if (component.children && component.children.length > 0) {
+                console.log(`  Children: ${component.children.length}`);
+            }
+        });
+    }
+    
     createComponentElement(component) {
         const div = document.createElement('div');
         div.className = 'designer-component';
@@ -483,11 +547,9 @@ class LibuiBuilderDesigner {
             case 'grid':
                 // 计算网格的行列数
                 let maxRow = 1;
-                let maxCol = 2; // 默认2列
+                let maxCol = 1; // 默认至少1列
                 
                 if (component.children && component.children.length > 0) {
-                    maxRow = 0;
-                    maxCol = 0;
                     component.children.forEach(child => {
                         if (child.layout) {
                             const row = child.layout.row || 0;
@@ -499,20 +561,20 @@ class LibuiBuilderDesigner {
                             maxCol = Math.max(maxCol, col + colspan);
                         }
                     });
-                    
-                    // 确保至少有1列
-                    maxCol = Math.max(1, maxCol);
                 }
                 
+                // 创建列定义数组，每列宽度设为1fr
+                const columnDefinitions = Array(maxCol).fill('1fr').join(' ');
+                
                 content.innerHTML = `
-                    <div class="ui-grid ${component.props.padded === 'true' ? 'padded' : ''}" style="min-width: 200px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: repeat(${maxCol}, 1fr); grid-template-rows: repeat(${maxRow}, minmax(60px, auto)); gap: 8px; padding: 8px; position: relative;">
+                    <div class="ui-grid ${component.props.padded === 'true' ? 'padded' : ''}" style="min-width: 600px; width: 100%; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: ${columnDefinitions}; grid-template-rows: repeat(${maxRow}, minmax(60px, auto)); gap: 8px; padding: 8px; position: relative;">
                         <!-- 占位符文字，只在无子元素时显示 -->
                         <div class="container-placeholder" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0078d4; font-weight: 500; font-size: 14px; pointer-events: none; z-index: 1; grid-column: 1 / -1; ${component.children.length > 0 ? 'display: none;' : ''}">
                             Grid 布局容器
                         </div>
-                        <!-- 子组件容器 -->
-                        <div class="container-content" style="display: grid; grid-template-columns: repeat(${maxCol}, 1fr); grid-template-rows: repeat(${maxRow}, minmax(60px, auto)); gap: 8px; width: 100%; z-index: 2;">
-                            <!-- 子组件将在这里动态添加 -->
+                        <!-- Grid子组件将直接附加到Grid容器，而不是嵌套容器 -->
+                        <div class="container-content" style="display: contents;">
+                            <!-- Grid子组件将被添加到这里，但会成为Grid的直接子项 -->
                         </div>
                     </div>
                 `;
