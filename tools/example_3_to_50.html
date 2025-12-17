@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid布局预览 - 3:50比例</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        /* 网格容器 - 模拟libui的Grid */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 3fr 50fr; /* 3:50比例 */
+            grid-template-rows: auto;
+            gap: 10px;
+            background-color: #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 垂直盒子 - 模拟VBox */
+        .vbox {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 4px;
+            min-height: 200px;
+        }
+
+        .vbox1 {
+            background-color: #e3f2fd;
+            border: 2px solid #2196f3;
+        }
+
+        .vbox2 {
+            background-color: #f3e5f5;
+            border: 2px solid #9c27b0;
+        }
+
+        /* 示例内容 */
+        .item {
+            background-color: white;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 标签显示比例信息 */
+        .label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 4px;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr; /* 小屏幕改为单列 */
+            }
+        }
+    </style>
+</head>
+<body>
+<h1>CSS Grid 布局预览 - 3:50 比例</h1>
+<p>左侧VBox宽度占比 3/53，右侧VBox宽度占比 50/53</p>
+
+<div class="grid-container">
+    <!-- 第一个VBox - 宽度3 -->
+    <div class="vbox vbox1">
+        <div class="label">VBox 1 (3份宽度)</div>
+        <div class="item">元素 1</div>
+        <div class="item">元素 2</div>
+        <div class="item">元素 3</div>
+    </div>
+
+    <!-- 第二个VBox - 宽度50 -->
+    <div class="vbox vbox2">
+        <div class="label">VBox 2 (50份宽度)</div>
+        <div class="item">元素 1</div>
+        <div class="item">元素 2</div>
+        <div class="item">元素 3</div>
+        <div class="item">元素 4</div>
+        <div class="item">元素 5</div>
+    </div>
+</div>
+
+<div style="margin-top: 20px; text-align: center; color: #666;">
+    <p>总比例：3 + 50 = 53份</p>
+    <p>左侧占比：3/53 ≈ 5.66%</p>
+    <p>右侧占比：50/53 ≈ 94.34%</p>
+</div>
+</body>
+</html>

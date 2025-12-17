@@ -1083,10 +1083,22 @@
                         margined: 'true'
                     },
                     hbox: {
-                        padded: 'false'
+                        padded: 'false',
+                        // Grid布局属性
+                        row: '0',
+                        col: '0',
+                        align: 'fill',
+                        rowspan: '1',
+                        colspan: '1'
                     },
                     vbox: {
-                        padded: 'false'
+                        padded: 'false',
+                        // Grid布局属性
+                        row: '0',
+                        col: '0',
+                        align: 'fill',
+                        rowspan: '1',
+                        colspan: '1'
                     },
                     form: {
                         padded: 'true'
@@ -1615,7 +1627,7 @@
                                 <div class="container-placeholder" style="grid-area: 1 / 1 / span ${rowCount} / span 2; display: flex; align-items: center; justify-content: center; color: #0078d4; font-size: 14px; pointer-events: none;">
                                     Grid 布局容器
                                 </div>
-                                <div class="container-content" style="display: grid; grid-template-columns: inherit; grid-template-rows: inherit; gap: inherit; position: absolute; top: ${gridPadding}; left: ${gridPadding}; right: ${gridPadding}; bottom: ${gridPadding}; z-index: 2;">
+                                <div class="container-content" style="display: grid; grid-template-columns: inherit; grid-template-rows: inherit; gap: inherit; position: relative; width: 100%; z-index: 2;">
                                     <!-- 子组件将在这里动态添加 -->
                                 </div>
                             </div>
@@ -2071,7 +2083,7 @@
                         </div>
                         <div class="property-row">
                             <label class="property-label">列跨度 (colspan):</label>
-                            <input type="number" class="property-input" data-prop="colspan" value="${component.props.colspan || '1'}" min="1" max="10">
+                            <input type="number" class="property-input" data-prop="colspan" value="${component.props.colspan || '1'}" min="1">
                         </div>
                         <div class="property-row">
                             <label class="property-label">水平对齐:</label>
@@ -2660,6 +2672,12 @@
                     component.props[prop] = value;
                 });
                 
+                // 检查父组件是否为Grid，如果是则更新Grid布局
+                const parentComponent = this.findParentComponent(component);
+                if (parentComponent && parentComponent.type === 'grid') {
+                    this.updateGridTemplate(parentComponent);
+                }
+                
                 // 刷新组件显示（包括Grid布局属性）
                 this.refreshComponent(component);
                 this.updateCodePreview();
@@ -3078,73 +3096,14 @@
             applyGridStyles(element, component, parentComponent) {
                 if (parentComponent.type !== 'grid') return;
                 
-                // 设置Grid布局属性
-                const row = parseInt(component.props.row || '0');
-                const col = parseInt(component.props.col || '0');
-                const rowspan = parseInt(component.props.rowspan || '1');
-                const colspan = parseInt(component.props.colspan || '1');
+                // 设置Grid布局基础属性
+                // 注意：实际的grid定位会在 updateGridTemplate 中重新计算
+                element.style.width = '100%';
+                element.style.alignSelf = 'stretch';
+                element.style.justifySelf = 'stretch';
                 
-                // 使用 grid-area 简化设置，确保格式正确
-                element.style.gridArea = `${row + 1} / ${col + 1} / span ${rowspan} / span ${colspan}`;
-                
-                // 根据align属性设置对齐方式
-                const align = component.props.align || 'fill,fill';
-                let horizontalAlign = 'fill';
-                let verticalAlign = 'fill';
-                
-                // 解析对齐值
-                if (align.includes(',')) {
-                    // 分离水平和垂直对齐
-                    const [h, v] = align.split(',');
-                    horizontalAlign = h.trim() || 'fill';
-                    verticalAlign = v.trim() || 'fill';
-                } else {
-                    // 单个值，水平和垂直相同
-                    horizontalAlign = align;
-                    verticalAlign = align;
-                }
-                
-                // 设置水平对齐
-                switch (horizontalAlign) {
-                    case 'fill':
-                        element.style.justifySelf = 'stretch';
-                        break;
-                    case 'start':
-                        element.style.justifySelf = 'start';
-                        break;
-                    case 'center':
-                        element.style.justifySelf = 'center';
-                        break;
-                    case 'end':
-                        element.style.justifySelf = 'end';
-                        break;
-                    default:
-                        element.style.justifySelf = 'stretch';
-                }
-                
-                // 设置垂直对齐
-                switch (verticalAlign) {
-                    case 'fill':
-                        element.style.alignSelf = 'stretch';
-                        break;
-                    case 'start':
-                        element.style.alignSelf = 'start';
-                        break;
-                    case 'center':
-                        element.style.alignSelf = 'center';
-                        break;
-                    case 'end':
-                        element.style.alignSelf = 'end';
-                        break;
-                    default:
-                        element.style.alignSelf = 'stretch';
-                }
-                
-                // 当组件跨多列时，确保占据整行
-                if (colspan > 1) {
-                    element.style.display = 'block';
-                    element.style.width = '100%';
-                }
+                // 调用 updateGridTemplate 更新整个Grid布局
+                this.updateGridTemplate(parentComponent);
             }
 
             // 动态更新Grid容器的网格模板和高度
@@ -3200,10 +3159,9 @@
                 
                 children.forEach(child => {
                     const row = parseInt(child.props.row || '0');
-                    const col = parseInt(child.props.col || '0');
                     const rowspan = parseInt(child.props.rowspan || '1');
+                    const col = parseInt(child.props.col || '0');
                     const colspan = parseInt(child.props.colspan || '1');
-                    
                     maxRow = Math.max(maxRow, row + rowspan);
                     maxCol = Math.max(maxCol, col + colspan);
                 });
@@ -3212,27 +3170,41 @@
                 const rows = Math.max(1, maxRow);
                 const cols = Math.max(1, maxCol);
                 
-                // 计算列宽比例：分析所有子组件的colspan，为每一列分配权重
-                const columnWeights = new Array(cols).fill(1);
+                // 使用标准的Grid布局：每列等宽
+                const gridTemplateColumns = `repeat(${cols}, 1fr)`;
                 
+                // 为每个子组件设置正确的grid定位（基于row/col/rowspan/colspan）
                 children.forEach(child => {
-                    const col = parseInt(child.props.col || '0');
-                    const colspan = parseInt(child.props.colspan || '1');
-                    
-                    // 如果组件跨越多列，按比例分配权重
-                    if (colspan > 1) {
-                        const weightPerCol = colspan / colspan; // 每列权重为colspan值
-                        for (let i = col; i < col + colspan && i < cols; i++) {
-                            columnWeights[i] = Math.max(columnWeights[i], colspan);
+                    const childElement = document.querySelector(`[data-component-id="${child.id}"]`);
+                    if (childElement) {
+                        const row = parseInt(child.props.row || '0');
+                        const col = parseInt(child.props.col || '0');
+                        const rowspan = parseInt(child.props.rowspan || '1');
+                        const colspan = parseInt(child.props.colspan || '1');
+                        // 使用标准的grid定位：col+1 / span colspan
+                        childElement.style.gridColumn = `${col + 1} / span ${colspan}`;
+                        childElement.style.gridRow = `${row + 1} / span ${rowspan}`;
+                        childElement.style.width = '100%';
+                        childElement.style.height = '100%';
+                        childElement.style.alignSelf = 'stretch';
+                        childElement.style.justifySelf = 'stretch';
+                        
+                        // 给内部容器也设置高度100%
+                        const componentContent = childElement.querySelector('.component-content');
+                        if (componentContent) {
+                            componentContent.style.height = '100%';
+                            // 给.ui-box等内部元素设置高度
+                            const innerBox = componentContent.querySelector('.ui-box, .ui-grid, .ui-form, .ui-tab');
+                            if (innerBox) {
+                                innerBox.style.height = '100%';
+                                innerBox.style.minHeight = 'unset';
+                            }
                         }
                     }
                 });
                 
-                // 生成列模板：使用fr单位按权重分配
-                const gridTemplateColumns = columnWeights.map(w => `${w}fr`).join(' ');
-                
-                // 使用auto行高，让内容撑开Grid
-                const gridTemplateRows = `repeat(${rows}, auto)`;
+                // 使用minmax行高，确保每行有最小高度，体现rowspan差异
+                const gridTemplateRows = `repeat(${rows}, minmax(40px, auto))`;
                 const gridPadding = gridElement.style.padding ? parseInt(gridElement.style.padding) : 8;
                 
                 gridElement.style.gridTemplateColumns = gridTemplateColumns;
