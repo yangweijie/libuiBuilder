@@ -292,7 +292,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 200px;
+            height: 300px;
             background: #1e1e1e;
             color: #d4d4d4;
             font-family: monospace;
@@ -3615,7 +3615,7 @@
             generateHTML() {
                 const self = this; // 保存this引用
                 
-                function generateComponentHTML(component, indent = 0) {
+                function generateComponentHTML(component, indent = 0, parentComponent = null) {
                     const spaces = '    '.repeat(indent);
 
                     // 根据生成风格选择标签
@@ -3623,31 +3623,34 @@
                         return self.htmlGenerationStyle === 'html' ? tagHtml : tagGui;
                     }
                     
-                    // 为组件添加Grid布局属性
-                    function addGridAttributes(html, componentProps) {
+                    // 为组件添加Grid布局属性（仅当父组件是Grid时）
+                    function addGridAttributes(html, componentProps, shouldAddGridAttrs) {
                         let result = html;
                         
-                        // 总是添加Grid布局属性，即使它们是默认值
-                        if (componentProps.row !== undefined) {
-                            result += ` row="${componentProps.row}"`;
-                        }
-                        if (componentProps.col !== undefined) {
-                            result += ` col="${componentProps.col}"`;
-                        }
-                        if (componentProps.rowspan !== undefined) {
-                            result += ` rowspan="${componentProps.rowspan}"`;
-                        }
-                        if (componentProps.colspan !== undefined) {
-                            result += ` colspan="${componentProps.colspan}"`;
-                        }
-                        if (componentProps.align !== undefined) {
-                            // 如果水平和垂直对齐相同，使用单个值
-                            // 如果不同，使用逗号分隔的格式
-                            result += ` align="${componentProps.align}"`;
+                        // 只有当父组件是Grid时，才添加Grid布局属性
+                        if (shouldAddGridAttrs) {
+                            if (componentProps.row !== undefined) {
+                                result += ` row="${componentProps.row}"`;
+                            }
+                            if (componentProps.col !== undefined) {
+                                result += ` col="${componentProps.col}"`;
+                            }
+                            if (componentProps.rowspan !== undefined) {
+                                result += ` rowspan="${componentProps.rowspan}"`;
+                            }
+                            if (componentProps.colspan !== undefined) {
+                                result += ` colspan="${componentProps.colspan}"`;
+                            }
+                            if (componentProps.align !== undefined) {
+                                result += ` align="${componentProps.align}"`;
+                            }
                         }
                         
                         return result;
                     }
+                    
+                    // 判断当前组件是否是Grid的直接子组件
+                    const isGridChild = parentComponent && parentComponent.type === 'grid';
 
                     switch (component.type) {
                         case 'window':
@@ -3658,15 +3661,15 @@
                             if (component.props.centered === 'true') windowHTML += ' centered="true"';
                             if (component.props.margined === 'true') windowHTML += ' margined="true"';
                             
-                            // 添加Grid布局属性
-                            windowHTML = addGridAttributes(windowHTML, component.props);
+                            // 添加Grid布局属性（仅当父组件是Grid时）
+                            windowHTML = addGridAttributes(windowHTML, component.props, isGridChild);
                             
                             windowHTML += '>\n';
                             
-                            // 递归生成子组件
+                            // 递归生成子组件，传入当前组件作为父组件
                             if (component.children && component.children.length > 0) {
                                 component.children.forEach(child => {
-                                    windowHTML += generateComponentHTML(child, indent + 1) + '\n';
+                                    windowHTML += generateComponentHTML(child, indent + 1, component) + '\n';
                                 });
                             } else {
                                 windowHTML += `${spaces}    窗口内容\n`;
@@ -3680,15 +3683,15 @@
                             let hboxHTML = `${spaces}<${hboxTag}`;
                             if (component.props.padded === 'true') hboxHTML += ' padded="true"';
                             
-                            // 添加Grid布局属性
-                            hboxHTML = addGridAttributes(hboxHTML, component.props);
+                            // 添加Grid布局属性（仅当父组件是Grid时）
+                            hboxHTML = addGridAttributes(hboxHTML, component.props, isGridChild);
                             
                             hboxHTML += '>\n';
                             
-                            // 递归生成子组件
+                            // 递归生成子组件，传入当前组件作为父组件
                             if (component.children && component.children.length > 0) {
                                 component.children.forEach(child => {
-                                    hboxHTML += generateComponentHTML(child, indent + 1) + '\n';
+                                    hboxHTML += generateComponentHTML(child, indent + 1, component) + '\n';
                                 });
                             } else {
                                 hboxHTML += `${spaces}    HBox 内容\n`;
@@ -3702,15 +3705,15 @@
                             let vboxHTML = `${spaces}<${vboxTag}`;
                             if (component.props.padded === 'true') vboxHTML += ' padded="true"';
                             
-                            // 添加Grid布局属性
-                            vboxHTML = addGridAttributes(vboxHTML, component.props);
+                            // 添加Grid布局属性（仅当父组件是Grid时）
+                            vboxHTML = addGridAttributes(vboxHTML, component.props, isGridChild);
                             
                             vboxHTML += '>\n';
                             
-                            // 递归生成子组件
+                            // 递归生成子组件，传入当前组件作为父组件
                             if (component.children && component.children.length > 0) {
                                 component.children.forEach(child => {
-                                    vboxHTML += generateComponentHTML(child, indent + 1) + '\n';
+                                    vboxHTML += generateComponentHTML(child, indent + 1, component) + '\n';
                                 });
                             } else {
                                 vboxHTML += `${spaces}    VBox 内容\n`;
@@ -3724,15 +3727,15 @@
                             let boxHTML = `${spaces}<${boxTag}`;
                             if (component.props.padded === 'true') boxHTML += ' padded="true"';
                             
-                            // 添加Grid布局属性
-                            boxHTML = addGridAttributes(boxHTML, component.props);
+                            // 添加Grid布局属性（仅当父组件是Grid时）
+                            boxHTML = addGridAttributes(boxHTML, component.props, isGridChild);
                             
                             boxHTML += '>\n';
                             
-                            // 递归生成子组件
+                            // 递归生成子组件，传入当前组件作为父组件
                             if (component.children && component.children.length > 0) {
                                 component.children.forEach(child => {
-                                    boxHTML += generateComponentHTML(child, indent + 1) + '\n';
+                                    boxHTML += generateComponentHTML(child, indent + 1, component) + '\n';
                                 });
                             } else {
                                 boxHTML += `${spaces}    Box 内容\n`;
@@ -3746,15 +3749,15 @@
                             let formHTML = `${spaces}<${formTag}`;
                             if (component.props.padded === 'true') formHTML += ' padded="true"';
                             
-                            // 添加Grid布局属性
-                            formHTML = addGridAttributes(formHTML, component.props);
+                            // 添加Grid布局属性（仅当父组件是Grid时）
+                            formHTML = addGridAttributes(formHTML, component.props, isGridChild);
                             
                             formHTML += '>\n';
                             
-                            // 递归生成子组件
+                            // 递归生成子组件，传入当前组件作为父组件
                             if (component.children && component.children.length > 0) {
                                 component.children.forEach(child => {
-                                    formHTML += generateComponentHTML(child, indent + 1) + '\n';
+                                    formHTML += generateComponentHTML(child, indent + 1, component) + '\n';
                                 });
                             } else {
                                 formHTML += `${spaces}    Form 内容\n`;
@@ -3768,15 +3771,15 @@
                             let gridHTML = `${spaces}<${gridTag}`;
                             if (component.props.padded === 'true') gridHTML += ' padded="true"';
                             
-                            // 添加Grid布局属性
-                            gridHTML = addGridAttributes(gridHTML, component.props);
+                            // 添加Grid布局属性（仅当父组件是Grid时）
+                            gridHTML = addGridAttributes(gridHTML, component.props, isGridChild);
                             
                             gridHTML += '>\n';
                             
-                            // 递归生成子组件
+                            // 递归生成子组件，传入当前组件作为父组件（Grid的子组件会获得Grid布局属性）
                             if (component.children && component.children.length > 0) {
                                 component.children.forEach(child => {
-                                    gridHTML += generateComponentHTML(child, indent + 1) + '\n';
+                                    gridHTML += generateComponentHTML(child, indent + 1, component) + '\n';
                                 });
                             } else {
                                 gridHTML += `${spaces}    Grid 内容\n`;
@@ -3790,8 +3793,8 @@
                             let tabHTML = `${spaces}<${tabTag}`;
                             if (component.props.padded === 'true') tabHTML += ' padded="true"';
                             
-                            // 添加Grid布局属性
-                            tabHTML = addGridAttributes(tabHTML, component.props);
+                            // 添加Grid布局属性（仅当父组件是Grid时）
+                            tabHTML = addGridAttributes(tabHTML, component.props, isGridChild);
                             
                             tabHTML += '>\n';
                             
@@ -3806,7 +3809,8 @@
                                 const tabChildren = self.getChildrenForTabPage(component, tabIndex);
                                 if (tabChildren.length > 0) {
                                     tabChildren.forEach(child => {
-                                        tabHTML += generateComponentHTML(child, indent + 2) + '\n';
+                                        // Tab的子组件传入tab组件作为父组件，不是Grid
+                                        tabHTML += generateComponentHTML(child, indent + 2, component) + '\n';
                                     });
                                 } else {
                                     // 如果没有子组件，生成占位符label
@@ -3828,15 +3832,15 @@
                             if (component.props.title) groupHTML += ` title="${component.props.title}"`;
                             if (component.props.margined === 'true') groupHTML += ' margined="true"';
                             
-                            // 添加Grid布局属性
-                            groupHTML = addGridAttributes(groupHTML, component.props);
+                            // 添加Grid布局属性（仅当父组件是Grid时）
+                            groupHTML = addGridAttributes(groupHTML, component.props, isGridChild);
                             
                             groupHTML += '>\n';
                             
-                            // 递归生成子组件（不添加图例，因为标题已通过title属性指定）
+                            // 递归生成子组件，传入当前组件作为父组件
                             if (component.children && component.children.length > 0) {
                                 component.children.forEach(child => {
-                                    groupHTML += generateComponentHTML(child, indent + 1) + '\n';
+                                    groupHTML += generateComponentHTML(child, indent + 1, component) + '\n';
                                 });
                             } else {
                                 groupHTML += `${spaces}    分组内容\n`;
@@ -3853,7 +3857,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            inputHTML = addGridAttributes(inputHTML, component.props);
+                            inputHTML = addGridAttributes(inputHTML, component.props, isGridChild);
                             
                             inputHTML += ' />';
                             return inputHTML;
@@ -3866,7 +3870,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            textareaHTML = addGridAttributes(textareaHTML, component.props);
+                            textareaHTML = addGridAttributes(textareaHTML, component.props, isGridChild);
                             
                             textareaHTML += `></textarea>`;
                             return textareaHTML;
@@ -3879,7 +3883,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            passwordHTML = addGridAttributes(passwordHTML, component.props);
+                            passwordHTML = addGridAttributes(passwordHTML, component.props, isGridChild);
                             
                             passwordHTML += ' />';
                             return passwordHTML;
@@ -3892,7 +3896,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            comboboxHTML = addGridAttributes(comboboxHTML, component.props);
+                            comboboxHTML = addGridAttributes(comboboxHTML, component.props, isGridChild);
                             
                             comboboxHTML += '>\n';
                             
@@ -3912,7 +3916,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            spinboxHTML = addGridAttributes(spinboxHTML, component.props);
+                            spinboxHTML = addGridAttributes(spinboxHTML, component.props, isGridChild);
                             
                             spinboxHTML += ' />';
                             return spinboxHTML;
@@ -3925,7 +3929,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            sliderHTML = addGridAttributes(sliderHTML, component.props);
+                            sliderHTML = addGridAttributes(sliderHTML, component.props, isGridChild);
                             
                             sliderHTML += ' />';
                             return sliderHTML;
@@ -3938,7 +3942,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            buttonHTML = addGridAttributes(buttonHTML, component.props);
+                            buttonHTML = addGridAttributes(buttonHTML, component.props, isGridChild);
                             
                             buttonHTML += `>${component.props.text || '按钮'}</button>`;
                             return buttonHTML;
@@ -3953,7 +3957,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            checkboxHTML = addGridAttributes(checkboxHTML, component.props);
+                            checkboxHTML = addGridAttributes(checkboxHTML, component.props, isGridChild);
                             
                             checkboxHTML += ' />';
                             return checkboxHTML;
@@ -3967,7 +3971,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            radioHTML = addGridAttributes(radioHTML, component.props);
+                            radioHTML = addGridAttributes(radioHTML, component.props, isGridChild);
                             
                             radioHTML += ' />';
                             return radioHTML;
@@ -3980,7 +3984,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            labelHTML = addGridAttributes(labelHTML, component.props);
+                            labelHTML = addGridAttributes(labelHTML, component.props, isGridChild);
                             
                             labelHTML += `>${component.props.text || '标签'}</${labelTag}>`;
                             return labelHTML;
@@ -3993,7 +3997,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            progressbarHTML = addGridAttributes(progressbarHTML, component.props);
+                            progressbarHTML = addGridAttributes(progressbarHTML, component.props, isGridChild);
                             
                             progressbarHTML += '></progress>';
                             return progressbarHTML;
@@ -4007,7 +4011,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            separatorHTML = addGridAttributes(separatorHTML, component.props);
+                            separatorHTML = addGridAttributes(separatorHTML, component.props, isGridChild);
                             
                             separatorHTML += ' />';
                             return separatorHTML;
@@ -4033,7 +4037,7 @@
                             }
                             
                             // 添加Grid布局属性
-                            tableHTML = addGridAttributes(tableHTML, component.props);
+                            tableHTML = addGridAttributes(tableHTML, component.props, isGridChild);
                             
                             tableHTML += '>\n';
                             
@@ -4145,17 +4149,33 @@
                 `;
                 
                 modal.innerHTML = `
-                    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 80%; max-height: 80%; overflow: auto;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto;">
                         <h3>生成的HTML代码</h3>
-                        <textarea style="width: 100%; height: 400px; font-family: monospace;">${html}</textarea>
-                        <div style="margin-top: 10px;">
-                            <button onclick="navigator.clipboard.writeText(document.querySelector('textarea').value).then(() => alert('已复制到剪贴板'))">复制</button>
-                            <button onclick="this.closest('div[style]').remove()">关闭</button>
+                        <textarea id="exportCodeTextarea" style="width: 100%; height: 500px; font-family: monospace; font-size: 12px; line-height: 1.4;">${html}</textarea>
+                        <div style="margin-top: 10px; text-align: right;">
+                            <button id="copyExportCodeBtn" style="margin-right: 10px; padding: 8px 16px;">复制</button>
+                            <button id="closeExportModalBtn" style="padding: 8px 16px;">关闭</button>
                         </div>
                     </div>
                 `;
                 
                 document.body.appendChild(modal);
+                
+                // 为复制按钮添加事件监听器
+                document.getElementById('copyExportCodeBtn').addEventListener('click', () => {
+                    const textarea = document.getElementById('exportCodeTextarea');
+                    navigator.clipboard.writeText(textarea.value).then(() => {
+                        alert('已复制到剪贴板');
+                    }).catch(err => {
+                        console.error('复制失败:', err);
+                        alert('复制失败');
+                    });
+                });
+                
+                // 为关闭按钮添加事件监听器
+                document.getElementById('closeExportModalBtn').addEventListener('click', () => {
+                    modal.remove();
+                });
             }
 
             preview() {
