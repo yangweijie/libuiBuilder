@@ -1619,15 +1619,15 @@
                             ), 2);
                         }
                         
-                        // 使用auto行高，让内容撑开Grid
-                        const gridTemplateRows = `repeat(${rowCount}, auto)`;
+                        // 使用minmax确保每行有最小高度40px
+                        const gridTemplateRows = `repeat(${rowCount}, minmax(40px, auto))`;
                         
                         content.innerHTML = `
                             <div class="ui-grid" style="min-width: 200px; height: auto; min-height: 150px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: ${gridTemplateRows}; gap: 8px; padding: ${gridPadding}; width: 100%; position: relative; box-sizing: border-box;" data-grid-id="${component.id}">
                                 <div class="container-placeholder" style="grid-area: 1 / 1 / span ${rowCount} / span 2; display: flex; align-items: center; justify-content: center; color: #0078d4; font-size: 14px; pointer-events: none;">
                                     Grid 布局容器
                                 </div>
-                                <div class="container-content" style="display: grid; grid-template-columns: inherit; grid-template-rows: inherit; gap: inherit; position: relative; width: 100%; z-index: 2;">
+                                <div class="container-content" style="display: contents; position: relative; width: 100%; z-index: 2;">
                                     <!-- 子组件将在这里动态添加 -->
                                 </div>
                             </div>
@@ -3145,11 +3145,9 @@
                 if (children.length === 0) {
                     // 如果没有子组件，保持默认的2x2网格
                     gridElement.style.gridTemplateColumns = 'repeat(2, 1fr)';
-                    gridElement.style.gridTemplateRows = 'repeat(2, auto)';
+                    gridElement.style.gridTemplateRows = 'repeat(2, minmax(40px, auto))';
                     gridElement.style.minHeight = '150px';
                     gridElement.style.height = 'auto';
-                    containerContent.style.gridTemplateColumns = 'repeat(2, 1fr)';
-                    containerContent.style.gridTemplateRows = 'repeat(2, auto)';
                     return;
                 }
                 
@@ -3211,11 +3209,6 @@
                 gridElement.style.gridTemplateRows = gridTemplateRows;
                 gridElement.style.minHeight = '150px';
                 gridElement.style.height = 'auto';
-                
-                // 同时更新container-content的网格模板
-                containerContent.style.gridTemplateColumns = gridTemplateColumns;
-                containerContent.style.gridTemplateRows = gridTemplateRows;
-                containerContent.style.gap = gridElement.style.gap || '8px';
                 
                 // 更新占位符的grid-area
                 if (placeholder) {
