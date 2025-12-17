@@ -1611,20 +1611,25 @@
                     case 'grid':
                         const gridPadding = component.props.padded === 'true' ? '8px' : '0px';
                         
-                        // 动态计算Grid需要的行数
+                        // 动态计算Grid需要的行数和列数
                         let rowCount = 2; // 默认2行
+                        let colCount = 2; // 默认2列
                         if (component.children && component.children.length > 0) {
                             rowCount = Math.max(...component.children.map(child => 
                                 parseInt(child.props.row || '0') + (parseInt(child.props.rowspan || '1'))
+                            ), 2);
+                            colCount = Math.max(...component.children.map(child => 
+                                parseInt(child.props.col || '0') + (parseInt(child.props.colspan || '1'))
                             ), 2);
                         }
                         
                         // 使用minmax确保每行有最小高度40px
                         const gridTemplateRows = `repeat(${rowCount}, minmax(40px, auto))`;
+                        const gridTemplateColumns = `repeat(${colCount}, 1fr)`;
                         
                         content.innerHTML = `
-                            <div class="ui-grid" style="min-width: 200px; height: auto; min-height: 150px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: ${gridTemplateRows}; gap: 8px; padding: ${gridPadding}; width: 100%; position: relative; box-sizing: border-box;" data-grid-id="${component.id}">
-                                <div class="container-placeholder" style="grid-area: 1 / 1 / span ${rowCount} / span 2; display: flex; align-items: center; justify-content: center; color: #0078d4; font-size: 14px; pointer-events: none;">
+                            <div class="ui-grid" style="min-width: 200px; height: auto; min-height: 150px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: ${gridTemplateColumns}; grid-template-rows: ${gridTemplateRows}; gap: 8px; padding: ${gridPadding}; width: 100%; position: relative; box-sizing: border-box;" data-grid-id="${component.id}">
+                                <div class="container-placeholder" style="grid-area: 1 / 1 / span ${rowCount} / span ${colCount}; display: flex; align-items: center; justify-content: center; color: #0078d4; font-size: 14px; pointer-events: none;">
                                     Grid 布局容器
                                 </div>
                                 <div class="container-content" style="display: contents; position: relative; width: 100%; z-index: 2;">
@@ -2598,11 +2603,11 @@
                                 }
                             }
                             
-                            // 如果是Grid布局属性，需要重新应用Grid样式
-                            const element = document.querySelector(`[data-component-id="${component.id}"]`);
+                            // 如果是Grid布局属性，需要重新计算Grid模板和应用样式
                             const parentComponent = this.findParentComponent(component);
-                            if (element && parentComponent && parentComponent.type === 'grid') {
-                                this.applyGridStyles(element, component, parentComponent);
+                            if (parentComponent && parentComponent.type === 'grid') {
+                                // 关键修复：立即更新Grid模板（重新计算总行列数）
+                                this.updateGridTemplate(parentComponent);
                             }
                             // 更新代码预览
                             this.updateCodePreview();
@@ -3143,11 +3148,16 @@
                 }
                 
                 if (children.length === 0) {
-                    // 如果没有子组件，保持默认的2x2网格
+                    // 如果没有子组件，保持默认的2x2网格（与初始化保持一致）
                     gridElement.style.gridTemplateColumns = 'repeat(2, 1fr)';
                     gridElement.style.gridTemplateRows = 'repeat(2, minmax(40px, auto))';
                     gridElement.style.minHeight = '150px';
                     gridElement.style.height = 'auto';
+                    
+                    // 更新占位符（默认2x2）
+                    if (placeholder) {
+                        placeholder.style.gridArea = '1 / 1 / span 2 / span 2';
+                    }
                     return;
                 }
                 
