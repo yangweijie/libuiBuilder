@@ -370,19 +370,63 @@ class LibuiBuilderDesigner {
             div.style.left = component.x + 'px';
             div.style.top = component.y + 'px';
         } else {
-            // 子组件使用相对定位，但在容器内不使用绝对定位
-            div.style.position = 'relative';
-            div.style.margin = '0';
-            div.style.display = 'block';
-            div.style.flex = 'none';
-            div.style.border = '1px solid #ddd';
-            div.style.borderRadius = '4px';
-            div.style.padding = '4px';
-            div.style.background = 'white';
-            div.style.zIndex = '20';
-            div.style.minWidth = '0';
-            div.style.maxWidth = '100%';
-            div.style.boxSizing = 'border-box';
+            // 获取父组件
+            const parentComponent = this.findComponentById(component.parent);
+            
+            // 如果父组件是Grid，使用Grid定位
+            if (parentComponent && parentComponent.type === 'grid' && component.layout) {
+                div.style.position = 'relative';
+                div.style.margin = '0';
+                div.style.display = 'block';
+                div.style.border = '1px solid #ddd';
+                div.style.borderRadius = '4px';
+                div.style.padding = '4px';
+                div.style.background = 'white';
+                div.style.zIndex = '20';
+                div.style.minWidth = '0';
+                div.style.maxWidth = '100%';
+                div.style.boxSizing = 'border-box';
+                
+                // 设置Grid定位
+                const row = component.layout.row || 0;
+                const col = component.layout.col || 0;
+                const rowspan = component.layout.rowspan || 1;
+                const colspan = component.layout.colspan || 1;
+                
+                div.style.gridColumn = `${col + 1} / ${col + 1 + colspan}`;
+                div.style.gridRow = `${row + 1} / ${row + 1 + rowspan}`;
+                
+                // 设置对齐方式
+                if (component.layout.align) {
+                    if (component.layout.align.includes(',')) {
+                        // 分离的对齐值 (水平,垂直)
+                        const [hAlign, vAlign] = component.layout.align.split(',');
+                        div.style.justifySelf = hAlign.trim() || 'stretch';
+                        div.style.alignSelf = vAlign.trim() || 'stretch';
+                    } else {
+                        // 单个值，水平和垂直相同
+                        div.style.justifySelf = component.layout.align;
+                        div.style.alignSelf = component.layout.align;
+                    }
+                } else {
+                    div.style.justifySelf = 'stretch';
+                    div.style.alignSelf = 'stretch';
+                }
+            } else {
+                // 非Grid子组件使用相对定位
+                div.style.position = 'relative';
+                div.style.margin = '0';
+                div.style.display = 'block';
+                div.style.flex = 'none';
+                div.style.border = '1px solid #ddd';
+                div.style.borderRadius = '4px';
+                div.style.padding = '4px';
+                div.style.background = 'white';
+                div.style.zIndex = '20';
+                div.style.minWidth = '0';
+                div.style.maxWidth = '100%';
+                div.style.boxSizing = 'border-box';
+            }
         }
         
         // 创建组件内容
@@ -437,14 +481,37 @@ class LibuiBuilderDesigner {
                 break;
                 
             case 'grid':
+                // 计算网格的行列数
+                let maxRow = 1;
+                let maxCol = 2; // 默认2列
+                
+                if (component.children && component.children.length > 0) {
+                    maxRow = 0;
+                    maxCol = 0;
+                    component.children.forEach(child => {
+                        if (child.layout) {
+                            const row = child.layout.row || 0;
+                            const col = child.layout.col || 0;
+                            const rowspan = child.layout.rowspan || 1;
+                            const colspan = child.layout.colspan || 1;
+                            
+                            maxRow = Math.max(maxRow, row + rowspan);
+                            maxCol = Math.max(maxCol, col + colspan);
+                        }
+                    });
+                    
+                    // 确保至少有1列
+                    maxCol = Math.max(1, maxCol);
+                }
+                
                 content.innerHTML = `
-                    <div class="ui-grid ${component.props.padded === 'true' ? 'padded' : ''}" style="min-width: 200px; min-height: 150px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; position: relative;">
+                    <div class="ui-grid ${component.props.padded === 'true' ? 'padded' : ''}" style="min-width: 200px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: repeat(${maxCol}, 1fr); grid-template-rows: repeat(${maxRow}, minmax(60px, auto)); gap: 8px; padding: 8px; position: relative;">
                         <!-- 占位符文字，只在无子元素时显示 -->
                         <div class="container-placeholder" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0078d4; font-weight: 500; font-size: 14px; pointer-events: none; z-index: 1; grid-column: 1 / -1; ${component.children.length > 0 ? 'display: none;' : ''}">
                             Grid 布局容器
                         </div>
                         <!-- 子组件容器 -->
-                        <div class="container-content" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 100%; z-index: 2;">
+                        <div class="container-content" style="display: grid; grid-template-columns: repeat(${maxCol}, 1fr); grid-template-rows: repeat(${maxRow}, minmax(60px, auto)); gap: 8px; width: 100%; z-index: 2;">
                             <!-- 子组件将在这里动态添加 -->
                         </div>
                     </div>

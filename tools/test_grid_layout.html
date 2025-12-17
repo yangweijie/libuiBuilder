@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid布局测试</title>
+    <link rel="stylesheet" href="libui-ng-complete.css">
+    <link rel="stylesheet" href="designer.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .test-description {
+            margin-bottom: 15px;
+            color: #666;
+        }
+    </style>
+</head>
+<body class="windows">
+    <h1>Grid布局修复测试</h1>
+    
+    <div class="test-container">
+        <div class="test-title">测试1：两个VBox水平排列</div>
+        <div class="test-description">
+            在Grid容器中放置两个VBox组件，位置分别为(0,0)和(0,1)，应该显示为同一行的两列。
+        </div>
+        <div class="ui-grid padded" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(1, auto); gap: 8px; padding: 8px; min-height: 200px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05);">
+            <div style="grid-area: 1 / 1 / 2 / 2; display: block; margin: 0; min-width: 0; min-height: 0;">
+                <div class="designer-component" data-component-type="vbox" style="border: 1px solid #ddd; border-radius: 4px; padding: 4px; background: white;">
+                    <div class="component-content">
+                        <div class="ui-box vertical" style="display: flex; flex-direction: column; gap: 8px; padding: 8px; width: 100%; position: relative; box-sizing: border-box; min-height: 120px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05);">
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0078d4; font-weight: 500; font-size: 14px; pointer-events: none; z-index: 1;">
+                                VBox 容器 1
+                            </div>
+                            <div class="container-content" style="display: flex; flex-direction: column; gap: 8px; width: 100%; z-index: 2;">
+                                <!-- 子组件将在这里动态添加 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="grid-area: 1 / 2 / 2 / 3; display: block; margin: 0; min-width: 0; min-height: 0;">
+                <div class="designer-component" data-component-type="vbox" style="border: 1px solid #ddd; border-radius: 4px; padding: 4px; background: white;">
+                    <div class="component-content">
+                        <div class="ui-box vertical" style="display: flex; flex-direction: column; gap: 8px; padding: 8px; width: 100%; position: relative; box-sizing: border-box; min-height: 120px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05);">
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0078d4; font-weight: 500; font-size: 14px; pointer-events: none; z-index: 1;">
+                                VBox 容器 2
+                            </div>
+                            <div class="container-content" style="display: flex; flex-direction: column; gap: 8px; width: 100%; z-index: 2;">
+                                <!-- 子组件将在这里动态添加 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-title">测试2：2x2 Grid布局</div>
+        <div class="test-description">
+            测试2行2列的Grid布局，验证不同位置的组件是否正确显示。
+        </div>
+        <div class="ui-grid padded" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, auto); gap: 8px; padding: 8px; min-height: 200px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05);">
+            <div style="grid-area: 1 / 1 / 2 / 2; display: block; margin: 0; min-width: 0; min-height: 0;">
+                <div class="designer-component" data-component-type="button" style="border: 1px solid #ddd; border-radius: 4px; padding: 4px; background: white;">
+                    <div class="component-content">
+                        <button class="ui-button">按钮 (0,0)</button>
+                    </div>
+                </div>
+            </div>
+            <div style="grid-area: 1 / 2 / 2 / 3; display: block; margin: 0; min-width: 0; min-height: 0;">
+                <div class="designer-component" data-component-type="label" style="border: 1px solid #ddd; border-radius: 4px; padding: 4px; background: white;">
+                    <div class="component-content">
+                        <span class="ui-label">标签 (0,1)</span>
+                    </div>
+                </div>
+            </div>
+            <div style="grid-area: 2 / 1 / 3 / 2; display: block; margin: 0; min-width: 0; min-height: 0;">
+                <div class="designer-component" data-component-type="input" style="border: 1px solid #ddd; border-radius: 4px; padding: 4px; background: white;">
+                    <div class="component-content">
+                        <input type="text" class="ui-entry" placeholder="输入框 (1,0)" style="width: 100%; box-sizing: border-box;">
+                    </div>
+                </div>
+            </div>
+            <div style="grid-area: 2 / 2 / 3 / 3; display: block; margin: 0; min-width: 0; min-height: 0;">
+                <div class="designer-component" data-component-type="checkbox" style="border: 1px solid #ddd; border-radius: 4px; padding: 4px; background: white;">
+                    <div class="component-content">
+                        <label class="ui-checkbox">
+                            <input type="checkbox">
+                            <span>复选框 (1,1)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-title">测试3：跨行跨列</div>
+        <div class="test-description">
+            测试组件跨越多行多列的功能。
+        </div>
+        <div class="ui-grid padded" style="display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, auto); gap: 8px; padding: 8px; min-height: 200px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05);">
+            <div style="grid-area: 1 / 1 / 2 / 3; display: block; margin: 0; min-width: 0; min-height: 0;">
+                <div class="designer-component" data-component-type="hbox" style="border: 1px solid #ddd; border-radius: 4px; padding: 4px; background: white;">
+                    <div class="component-content">
+                        <div class="ui-box horizontal" style="display: flex; gap: 8px; padding: 8px; width: 100%; position: relative; box-sizing: border-box; min-height: 60px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); align-items: center;">
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0078d4; font-weight: 500; font-size: 14px; pointer-events: none; z-index: 1;">
+                                HBox (colspan=2)
+                            </div>
+                            <div class="container-content" style="display: flex; gap: 8px; width: 100%; z-index: 2; align-items: center;">
+                                <!-- 子组件将在这里动态添加 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="grid-area: 1 / 3 / 3 / 4; display: block; margin: 0; min-width: 0; min-height: 0;">
+                <div class="designer-component" data-component-type="vbox" style="border: 1px solid #ddd; border-radius: 4px; padding: 4px; background: white;">
+                    <div class="component-content">
+                        <div class="ui-box vertical" style="display: flex; flex-direction: column; gap: 8px; padding: 8px; width: 100%; position: relative; box-sizing: border-box; min-height: 120px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05);">
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #0078d4; font-weight: 500; font-size: 14px; pointer-events: none; z-index: 1;">
+                                VBox (rowspan=2)
+                            </div>
+                            <div class="container-content" style="display: flex; flex-direction: column; gap: 8px; width: 100%; z-index: 2;">
+                                <!-- 子组件将在这里动态添加 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="grid-area: 2 / 1 / 3 / 2; display: block; margin: 0; min-width: 0; min-height: 0;">
+                <div class="designer-component" data-component-type="button" style="border: 1px solid #ddd; border-radius: 4px; padding: 4px; background: white;">
+                    <div class="component-content">
+                        <button class="ui-button">按钮 (1,0)</button>
+                    </div>
+                </div>
+            </div>
+            <div style="grid-area: 2 / 2 / 3 / 3; display: block; margin: 0; min-width: 0; min-height: 0;">
+                <div class="designer-component" data-component-type="label" style="border: 1px solid #ddd; border-radius: 4px; padding: 4px; background: white;">
+                    <div class="component-content">
+                        <span class="ui-label">标签 (1,1)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-title">测试结果</div>
+        <div class="test-description">
+            <ul>
+                <li>✅ 两个VBox应该水平排列在同一行</li>
+                <li>✅ 2x2 Grid中的组件应该按正确位置显示</li>
+                <li>✅ 跨行跨列的组件应该正确占用指定空间</li>
+                <li>✅ 所有组件应该有正确的边框和背景色</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

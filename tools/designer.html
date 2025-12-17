@@ -950,6 +950,13 @@
                             
                             if (!hasWindow) {
                                 // 画布上没有Window，需要创建Window和可能的HBox
+                                
+                                // 如果拖拽的本身就是Window组件，直接添加到画布
+                                if (this.draggedComponent === 'window') {
+                                    this.addComponent(this.draggedComponent, x, y);
+                                    return;
+                                }
+                                
                                 let windowComponent = {
                                     id: `component_${++this.componentIdCounter}`,
                                     type: 'window',
@@ -1262,13 +1269,24 @@
                             }
                         } else {
                             // 非Tab组件，使用原来的逻辑
-                            targetElement = parentEl.querySelector('.window-content') || 
-                                          parentEl.querySelector('.ui-box') || 
-                                          parentEl.querySelector('.ui-form') || 
-                                          parentEl.querySelector('.ui-grid') || 
-                                          parentEl.querySelector('.ui-tab') ||
-                                          parentEl.querySelector('.group-content') ||
-                                          parentEl.querySelector('.component-content');
+                            if (parentComponent.type === 'grid') {
+                                // Grid组件需要特殊处理，子组件应该添加到.container-content中
+                                const containerContent = parentEl.querySelector('.ui-grid .container-content');
+                                if (containerContent) {
+                                    targetElement = containerContent;
+                                } else {
+                                    // 如果找不到.container-content，使用.ui-grid作为后备
+                                    targetElement = parentEl.querySelector('.ui-grid') || parentEl.querySelector('.component-content');
+                                }
+                            } else {
+                                targetElement = parentEl.querySelector('.window-content') || 
+                                              parentEl.querySelector('.ui-box') || 
+                                              parentEl.querySelector('.ui-form') || 
+                                              parentEl.querySelector('.ui-grid') || 
+                                              parentEl.querySelector('.ui-tab') ||
+                                              parentEl.querySelector('.group-content') ||
+                                              parentEl.querySelector('.component-content');
+                            }
                         }
                     }
                 } else {
@@ -1580,8 +1598,28 @@
 
                     case 'grid':
                         const gridPadding = component.props.padded === 'true' ? '8px' : '0px';
+                        
+                        // 动态计算Grid需要的行数
+                        let rowCount = 2; // 默认2行
+                        if (component.children && component.children.length > 0) {
+                            rowCount = Math.max(...component.children.map(child => 
+                                parseInt(child.props.row || '0') + (parseInt(child.props.rowspan || '1'))
+                            ), 2);
+                        }
+                        
+                        // 计算合适的行高（每行61px）
+                        const rowHeight = 61;
+                        const gridTemplateRows = `repeat(${rowCount}, ${rowHeight}px)`;
+                        const minGridHeight = rowCount * rowHeight + (gridPadding ? parseInt(gridPadding) * 2 : 0);
+                        
                         content.innerHTML = `
-                            <div class="ui-grid" style="min-width: 200px; min-height: 150px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 8px; padding: ${gridPadding}; width: 100%; position: relative; box-sizing: border-box;">
+                            <div class="ui-grid" style="min-width: 200px; height: auto; min-height: ${minGridHeight}px; border: 2px dashed #0078d4; background: rgba(0, 120, 212, 0.05); display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: ${gridTemplateRows}; gap: 8px; padding: ${gridPadding}; width: 100%; position: relative; box-sizing: border-box;" data-grid-id="${component.id}">
+                                <div class="container-placeholder" style="grid-area: 1 / 1 / span ${rowCount} / span 2; display: flex; align-items: center; justify-content: center; color: #0078d4; font-size: 14px; pointer-events: none;">
+                                    Grid 布局容器
+                                </div>
+                                <div class="container-content" style="display: grid; grid-template-columns: inherit; grid-template-rows: inherit; gap: inherit; position: absolute; top: ${gridPadding}; left: ${gridPadding}; right: ${gridPadding}; bottom: ${gridPadding}; z-index: 2;">
+                                    <!-- 子组件将在这里动态添加 -->
+                                </div>
                             </div>
                         `;
                         break;
@@ -3111,6 +3149,95 @@
                 }
             }
 
+            // 动态更新Grid容器的网格模板和高度
+            updateGridTemplate(gridComponent) {
+                const gridElement = document.querySelector(`[data-component-id="${gridComponent.id}"] .ui-grid`) ||
+                                  document.querySelector(`[data-grid-id="${gridComponent.id}"]`);
+                
+                if (!gridElement) {
+                    console.warn(`Grid element not found for component ${gridComponent.id}`);
+                    return;
+                }
+                
+                // 获取Grid容器的所有子组件
+                const children = gridComponent.children || [];
+                
+                // 获取或创建.container-content元素
+                let containerContent = gridElement.querySelector('.container-content');
+                if (!containerContent) {
+                    // 如果不存在，创建它
+                    containerContent = document.createElement('div');
+                    containerContent.className = 'container-content';
+                    containerContent.style.position = 'absolute';
+                    containerContent.style.zIndex = '2';
+                    gridElement.appendChild(containerContent);
+                }
+                
+                // 处理占位符显示
+                const placeholder = gridElement.querySelector('.container-placeholder');
+                if (placeholder) {
+                    if (children.length === 0) {
+                        // 没有子组件时显示占位符
+                        placeholder.style.display = 'flex';
+                    } else {
+                        // 有子组件时隐藏占位符
+                        placeholder.style.display = 'none';
+                    }
+                }
+                
+                if (children.length === 0) {
+                    // 如果没有子组件，保持默认的2x2网格
+                    gridElement.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                    gridElement.style.gridTemplateRows = 'repeat(2, 61px)';
+                    gridElement.style.minHeight = '150px';
+                    containerContent.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                    containerContent.style.gridTemplateRows = 'repeat(2, 61px)';
+                    return;
+                }
+                
+                // 计算需要的行数和列数
+                let maxRow = 0;
+                let maxCol = 0;
+                
+                children.forEach(child => {
+                    const row = parseInt(child.props.row || '0');
+                    const col = parseInt(child.props.col || '0');
+                    const rowspan = parseInt(child.props.rowspan || '1');
+                    const colspan = parseInt(child.props.colspan || '1');
+                    
+                    maxRow = Math.max(maxRow, row + rowspan);
+                    maxCol = Math.max(maxCol, col + colspan);
+                });
+                
+                // 确保至少有1行1列
+                const rows = Math.max(1, maxRow);
+                const cols = Math.max(1, maxCol);
+                
+                // 计算合适的行高（每行61px）
+                const rowHeight = 61;
+                const gridPadding = gridElement.style.padding ? parseInt(gridElement.style.padding) : 8;
+                const gridTemplateRows = `repeat(${rows}, ${rowHeight}px)`;
+                const minGridHeight = rows * rowHeight + gridPadding * 2;
+                
+                // 更新网格模板
+                const gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                
+                gridElement.style.gridTemplateColumns = gridTemplateColumns;
+                gridElement.style.gridTemplateRows = gridTemplateRows;
+                gridElement.style.minHeight = `${minGridHeight}px`;
+                gridElement.style.height = 'auto';
+                
+                // 同时更新container-content的网格模板
+                containerContent.style.gridTemplateColumns = gridTemplateColumns;
+                containerContent.style.gridTemplateRows = gridTemplateRows;
+                containerContent.style.gap = gridElement.style.gap || '8px';
+                
+                // 更新占位符的grid-area
+                if (placeholder) {
+                    placeholder.style.gridArea = `1 / 1 / span ${rows} / span ${cols}`;
+                }
+            }
+
             deleteComponent(component) {
                 // 获取组件的父容器
                 const parentComponent = this.findParentComponent(component);
@@ -3144,6 +3271,13 @@
                             }
                         }
                     }
+                }
+                
+                // 如果父容器是Grid，更新网格模板
+                if (parentComponent && parentComponent.type === 'grid') {
+                    setTimeout(() => {
+                        this.updateGridTemplate(parentComponent);
+                    }, 10);
                 }
                 
                 this.updateCodePreview();
@@ -3223,10 +3357,43 @@
             getComponentAtPosition(clientX, clientY) {
                 const elements = document.elementsFromPoint(clientX, clientY);
                 for (let element of elements) {
+                    // 首先尝试找到组件元素
                     const componentEl = element.closest('.component-element');
                     if (componentEl) {
                         const componentId = componentEl.dataset.componentId;
-                        return this.findComponentById(componentId);
+                        const component = this.findComponentById(componentId);
+                        
+                        // 如果找到组件，检查是否是容器组件
+                        if (component && this.isContainerComponent(component.type)) {
+                            return component;
+                        }
+                        
+                        // 如果不是容器组件，检查其父组件是否是容器
+                        const parentComponent = this.findParentComponent(component);
+                        if (parentComponent && this.isContainerComponent(parentComponent.type)) {
+                            return parentComponent;
+                        }
+                    }
+                    
+                    // 特殊处理：如果是Grid容器内部区域，也要能识别
+                    if (element.closest('.ui-grid')) {
+                        const gridEl = element.closest('.ui-grid');
+                        const gridId = gridEl.dataset.gridId;
+                        if (gridId) {
+                            return this.findComponentById(gridId);
+                        }
+                    }
+                    
+                    // 特殊处理：如果是Grid容器的.container-content区域
+                    if (element.closest('.container-content')) {
+                        const containerContent = element.closest('.container-content');
+                        const gridEl = containerContent.closest('.ui-grid');
+                        if (gridEl) {
+                            const gridId = gridEl.dataset.gridId;
+                            if (gridId) {
+                                return this.findComponentById(gridId);
+                            }
+                        }
                     }
                 }
                 return null;
@@ -3311,7 +3478,7 @@
                     component.props.stretchy = 'true';
                 } else if (containerComponent.type === 'grid') {
                     // Grid容器中自动计算下一个可用位置
-                    const nextPos = this.calculateNextGridPosition(containerComponent);
+                    const nextPos = this.calculateNextGridPosition(containerComponent, type);
                     component.props.row = nextPos.row.toString();
                     component.props.col = nextPos.col.toString();
                     component.props.stretchy = 'true';
@@ -3342,11 +3509,19 @@
                 
                 // 渲染组件到容器中
                 this.renderComponent(component, containerComponent);
+                
+                // 如果父容器是Grid，更新网格模板
+                if (containerComponent.type === 'grid') {
+                    setTimeout(() => {
+                        this.updateGridTemplate(containerComponent);
+                    }, 10);
+                }
+                
                 this.updateCodePreview();
             }
             
             // 计算Grid容器中下一个可用位置
-            calculateNextGridPosition(containerComponent) {
+            calculateNextGridPosition(containerComponent, componentType) {
                 if (containerComponent.type !== 'grid') {
                     return { row: 0, col: 0 };
                 }
@@ -3358,37 +3533,52 @@
                     return { row: 0, col: 0 }; // 第一个组件放在(0,0)
                 }
                 
-                // 简单策略：找到最小的空闲位置
-                // 创建一个二维数组来标记占用位置
-                const gridSize = 10; // 假设最大10x10网格
-                const occupied = Array(gridSize).fill().map(() => Array(gridSize).fill(false));
-                
-                // 标记已占用的位置
-                for (const child of children) {
-                    const row = parseInt(child.props.row || '0');
-                    const col = parseInt(child.props.col || '0');
-                    const rowspan = parseInt(child.props.rowspan || '1');
-                    const colspan = parseInt(child.props.colspan || '1');
+                // 根据组件类型决定自增策略
+                if (componentType === 'hbox') {
+                    // HBox垂直排列：找到下一个可用的row位置
+                    const maxRow = Math.max(...children.map(child => 
+                        parseInt(child.props.row || '0')
+                    ), 0);
+                    return { row: maxRow + 1, col: 0 };
+                } else if (componentType === 'vbox') {
+                    // VBox水平排列：找到下一个可用的col位置
+                    const maxCol = Math.max(...children.map(child => 
+                        parseInt(child.props.col || '0')
+                    ), 0);
+                    return { row: 0, col: maxCol + 1 };
+                } else {
+                    // 其他组件：使用原有的空闲位置查找算法
+                    // 创建一个二维数组来标记占用位置
+                    const gridSize = 10; // 假设最大10x10网格
+                    const occupied = Array(gridSize).fill().map(() => Array(gridSize).fill(false));
                     
-                    // 标记组件占用的所有单元格
-                    for (let r = row; r < row + rowspan && r < gridSize; r++) {
-                        for (let c = col; c < col + colspan && c < gridSize; c++) {
-                            occupied[r][c] = true;
+                    // 标记已占用的位置
+                    for (const child of children) {
+                        const row = parseInt(child.props.row || '0');
+                        const col = parseInt(child.props.col || '0');
+                        const rowspan = parseInt(child.props.rowspan || '1');
+                        const colspan = parseInt(child.props.colspan || '1');
+                        
+                        // 标记组件占用的所有单元格
+                        for (let r = row; r < row + rowspan && r < gridSize; r++) {
+                            for (let c = col; c < col + colspan && c < gridSize; c++) {
+                                occupied[r][c] = true;
+                            }
                         }
                     }
-                }
-                
-                // 找到第一个空闲位置
-                for (let row = 0; row < gridSize; row++) {
-                    for (let col = 0; col < gridSize; col++) {
-                        if (!occupied[row][col]) {
-                            return { row, col };
+                    
+                    // 找到第一个空闲位置
+                    for (let row = 0; row < gridSize; row++) {
+                        for (let col = 0; col < gridSize; col++) {
+                            if (!occupied[row][col]) {
+                                return { row, col };
+                            }
                         }
                     }
+                    
+                    // 如果没有找到空闲位置，返回默认位置
+                    return { row: Math.floor(children.length / 2), col: children.length % 2 };
                 }
-                
-                // 如果没有找到空闲位置，返回默认位置（简单策略：放在下一行）
-                return { row: Math.floor(children.length / 2), col: children.length % 2 };
             }
             
             updateContainerPlaceholder(containerComponent) {

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<ui version="1.0">
+  <window title="STS-Bcut v1.0.4" size="800,600" margined="true">
+    <grid padded="true">
+      <!-- 左侧控制区 -->
+      <grid row="0" col="0" rowspan="2" align="start,start">
+        <vbox padded="false">
+          <!-- 第一行：添加文件和删除按钮 -->
+          <hbox padded="false" align="center,start">
+            <button>添加文件</button>
+            <button>删除选中项</button>
+          </hbox>
+          
+          <!-- 第二行：格式选择标签和下拉框 -->
+          <label>选择输出文件格式</label>
+          <combobox selected="0">
+            <option>srt</option>
+            <option>vtt</option>
+            <option>ass</option>
+            <option>txt</option>
+          </combobox>
+          
+          <!-- 第三行：开始按钮 -->
+          <button align="center,center">开始</button>
+        </vbox>
+      </grid>
+      
+      <!-- 右侧文件列表区 -->
+      <grid row="0" col="1" rowspan="2" align="fill,fill">
+        <table columns="文件名,文件路径">
+          <!-- 表头 -->
+          <grid row="0" col="0" align="center,center">
+            <label align="center,center">文件名</label>
+          </grid>
+          <grid row="0" col="1" align="center,center">
+            <label align="center,center">文件路径</label>
+          </grid>
+          
+          <!-- 空白区域提示 -->
+          <grid row="1" col="0" colspan="2" align="center,center">
+            <label>拖动以添加...</label>
+          </grid>
+        </table>
+      </grid>
+      
+      <!-- 底部功能区 -->
+      <grid row="2" col="0" colspan="2" align="end,end">
+        <hbox padded="false" align="center,end">
+          <button>ℹ 关于</button>
+          <button>⚙ 设置</button>
+        </hbox>
+      </grid>
+    </grid>
+  </window>
+</ui>
