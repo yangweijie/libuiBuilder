@@ -77,12 +77,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/KingBes/php-libui.git",
-                "reference": "f82301f500b9d0f39ffabc5ac849aec1ccdf1d51"
+                "reference": "ec7751186f579903579c28023b8a0fda40221866"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KingBes/php-libui/zipball/f82301f500b9d0f39ffabc5ac849aec1ccdf1d51",
-                "reference": "f82301f500b9d0f39ffabc5ac849aec1ccdf1d51",
+                "url": "https://api.github.com/repos/KingBes/php-libui/zipball/ec7751186f579903579c28023b8a0fda40221866",
+                "reference": "ec7751186f579903579c28023b8a0fda40221866",
                 "shasum": ""
             },
             "require": {
@@ -115,9 +115,9 @@
             ],
             "support": {
                 "issues": "https://github.com/KingBes/php-libui/issues",
-                "source": "https://github.com/KingBes/php-libui/tree/main"
+                "source": "https://github.com/KingBes/php-libui/tree/v0.1.10"
             },
-            "time": "2025-12-08T01:22:37+00:00"
+            "time": "2025-12-15T02:11:56+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
