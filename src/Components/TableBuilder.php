@@ -87,13 +87,15 @@ class TableBuilder extends ComponentBuilder
             TableValueType::String, // 默认使用字符串类型
             $numRows, // 使用实际行数
             function($handler, $row, $column) use ($tableData) {
+                // 安全地获取单元格值并保证返回非 null 的 CData
                 if (isset($tableData[$row][$column])) {
                     $value = $tableData[$row][$column];
-                    return LibuiTable::createValueStr((string) $value);
+                    $safe = $this->sanitizeCellValue($value);
+                    return LibuiTable::createValueStr($safe);
                 }
                 return LibuiTable::createValueStr('');
             },
-            null // 设置回调 - 暂时为null
+            null // 设置回调 - 暂时为 null
         );
         
         echo "[TableBuilder] Model handler created\n";
@@ -541,6 +543,32 @@ class TableBuilder extends ComponentBuilder
     {
         $this->refreshTable();
         return $this;
+    }
+
+    /**
+     * Sanitize a cell value to a string safe to pass to native layer.
+     * Ensures we never return NULL to the native lib which may lead to crashes.
+     *
+     * @param mixed $value
+     * @return string
+     */
+    private function sanitizeCellValue($value): string
+    {
+        if (!isset($value) || $value === null) {
+            return '';
+        }
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+        if (is_scalar($value)) {
+            return (string)$value;
+        }
+        // For arrays/objects, JSON-encode as a readable fallback
+        $encoded = @json_encode($value, JSON_UNESCAPED_UNICODE);
+        if ($encoded === false) {
+            return '';
+        }
+        return $encoded;
     }
 }
 

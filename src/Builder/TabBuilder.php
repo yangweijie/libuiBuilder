@@ -11,7 +11,7 @@ class TabBuilder extends ComponentBuilder
 {
     private array $tabs = [];
 
-    protected function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
         return [
             'selectedIndex' => 0,

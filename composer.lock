@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "00ed9c7c131badb0327e32d9f644fcc7",
+    "content-hash": "a0523707c61d633c39c823da73a1d5c8",
     "packages": [
         {
             "name": "ffi/var-dumper",
@@ -73,11 +73,16 @@
         },
         {
             "name": "kingbes/libui",
-            "version": "v0.1.9",
+            "version": "v0.1.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/KingBes/php-libui.git",
+                "reference": "ec7751186f579903579c28023b8a0fda40221866"
+            },
             "dist": {
                 "type": "zip",
-                "url": "https://mirrors.cloud.tencent.com/repository/composer/kingbes/libui/v0.1.9/kingbes-libui-v0.1.9.zip",
-                "reference": "f82301f500b9d0f39ffabc5ac849aec1ccdf1d51",
+                "url": "https://api.github.com/repos/KingBes/php-libui/zipball/ec7751186f579903579c28023b8a0fda40221866",
+                "reference": "ec7751186f579903579c28023b8a0fda40221866",
                 "shasum": ""
             },
             "require": {
@@ -90,6 +95,7 @@
                     "Kingbes\\Libui\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -108,9 +114,9 @@
             ],
             "support": {
                 "issues": "https://github.com/KingBes/php-libui/issues",
-                "source": "https://github.com/KingBes/php-libui/tree/v0.1.9"
+                "source": "https://github.com/KingBes/php-libui/tree/v0.1.10"
             },
-            "time": "2025-12-08T01:22:37+00:00"
+            "time": "2025-12-15T02:11:56+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -3241,5 +3247,5 @@
         "ext-libxml": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }
