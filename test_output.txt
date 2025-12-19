@@ -1,0 +1,310 @@
+﻿
+   FAIL  Tests\Builder\BuilderTest
+  ⨯ Builder Factory Methods → creates window builder
+  ⨯ Builder Factory Methods → creates button builder
+  ⨯ Builder Factory Methods → creates label builder
+  ⨯ Builder Factory Methods → creates entry builder
+  ⨯ Builder Factory Methods → creates grid builder
+  ⨯ Builder Factory Methods → creates hbox builder
+  ⨯ Builder Factory Methods → creates vbox builder
+  ⨯ Builder Factory Methods → creates tab builder
+  ⨯ Builder Factory Methods → creates slider builder
+  ⨯ Builder Factory Methods → creates spinbox builder
+  ⨯ Builder Factory Methods → creates progress builder
+  ⨯ Builder Factory Methods → creates checkbox builder
+  ⨯ Builder Factory Methods → creates combobox builder
+  ⨯ Builder Factory Methods → creates separator builder
+  ⨯ Builder Factory Methods → creates group builder
+  ⨯ Builder Factory Methods → creates box with custom direction
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates window builder                                                                                                                               TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates button builder                                                                                                                               TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates label builder                                                                                                                                TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates entry builder                                                                                                                                TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates grid builder                                                                                                                                 TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates hbox builder                                                                                                                                 TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates vbox builder                                                                                                                                 TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates tab builder                                                                                                                                  TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates slider builder                                                                                                                               TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates spinbox builder                                                                                                                              TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates progress builder                                                                                                                             TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates checkbox builder                                                                                                                             TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates combobox builder                                                                                                                             TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates separator builder                                                                                                                            TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates group builder                                                                                                                                TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Builder\BuilderTest > `Builder Factory Methods` → creates box with custom direction                                                                                                                    TypeError   
+  Kingbes\Libui\View\Builder\Builder::setStateManager(): Argument #1 ($manager) must be of type Kingbes\Libui\View\State\StateManager, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 20
+
+  at src\Builder\Builder.php:34
+     30▕      *
+     31▕      * @param StateManager $manager
+     32▕      * @return void
+     33▕      */
+  ➜  34▕     public static function setStateManager(StateManager $manager): void
+     35▕     {
+     36▕         self::$stateManager = $manager;
+     37▕     }
+     38▕
+
+  1   src\Builder\Builder.php:34
+  2   tests\TestCase.php:20
+
+
+  Tests:    16 failed (0 assertions)
+  Duration: 0.25s
+

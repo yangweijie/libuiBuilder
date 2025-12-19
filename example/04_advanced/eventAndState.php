@@ -2,7 +2,7 @@
 use Kingbes\Libui\App;
 
 use Kingbes\Libui\Control;
-use Kingbes\Libui\View\Builder;
+use Kingbes\Libui\View\Builder\Builder;
 use Kingbes\Libui\View\State\StateManager;
 
 require_once __DIR__ . '/../../vendor/autoload.php';

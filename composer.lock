@@ -4,19 +4,83 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a0523707c61d633c39c823da73a1d5c8",
+    "content-hash": "c1938274b7193680554be2d6a4628915",
     "packages": [
+        {
+            "name": "dflydev/dot-access-data",
+            "version": "dev-main",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/dflydev/dot-access-data/dev-main/dflydev-dot-access-data-dev-main.zip",
+                "reference": "a23a2bf4f31d3518f3ecb38660c95715dfead60f",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1 || ^8.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^0.12.42",
+                "phpunit/phpunit": "^7.5 || ^8.5 || ^9.3",
+                "scrutinizer/ocular": "1.6.0",
+                "squizlabs/php_codesniffer": "^3.5",
+                "vimeo/psalm": "^4.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Dflydev\\DotAccessData\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dragonfly Development Inc.",
+                    "email": "info@dflydev.com",
+                    "homepage": "http://dflydev.com"
+                },
+                {
+                    "name": "Beau Simensen",
+                    "email": "beau@dflydev.com",
+                    "homepage": "http://beausimensen.com"
+                },
+                {
+                    "name": "Carlos Frutos",
+                    "email": "carlos@kiwing.it",
+                    "homepage": "https://github.com/cfrutos"
+                },
+                {
+                    "name": "Colin O'Dell",
+                    "email": "colinodell@gmail.com",
+                    "homepage": "https://www.colinodell.com"
+                }
+            ],
+            "description": "Given a deep data structure, access data by dot notation.",
+            "homepage": "https://github.com/dflydev/dflydev-dot-access-data",
+            "keywords": [
+                "access",
+                "data",
+                "dot",
+                "notation"
+            ],
+            "support": {
+                "issues": "https://github.com/dflydev/dflydev-dot-access-data/issues",
+                "source": "https://github.com/dflydev/dflydev-dot-access-data/tree/v3.0.3"
+            },
+            "time": "2024-07-08T12:26:09+00:00"
+        },
         {
             "name": "ffi/var-dumper",
             "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-ffi/var-dumper.git",
-                "reference": "77eed693f3833c21ee4c5f9a1c63fbaaa500cc52"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-ffi/var-dumper/zipball/77eed693f3833c21ee4c5f9a1c63fbaaa500cc52",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/ffi/var-dumper/dev-master/ffi-var-dumper-dev-master.zip",
                 "reference": "77eed693f3833c21ee4c5f9a1c63fbaaa500cc52",
                 "shasum": ""
             },
@@ -29,7 +93,6 @@
                 "squizlabs/php_codesniffer": "^3.7",
                 "vimeo/psalm": "^5.4"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -45,7 +108,6 @@
                     "FFI\\VarDumper\\": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -74,14 +136,9 @@
         {
             "name": "kingbes/libui",
             "version": "v0.1.10",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/KingBes/php-libui.git",
-                "reference": "ec7751186f579903579c28023b8a0fda40221866"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KingBes/php-libui/zipball/ec7751186f579903579c28023b8a0fda40221866",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/kingbes/libui/v0.1.10/kingbes-libui-v0.1.10.zip",
                 "reference": "ec7751186f579903579c28023b8a0fda40221866",
                 "shasum": ""
             },
@@ -95,7 +152,6 @@
                     "Kingbes\\Libui\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -117,6 +173,511 @@
                 "source": "https://github.com/KingBes/php-libui/tree/v0.1.10"
             },
             "time": "2025-12-15T02:11:56+00:00"
+        },
+        {
+            "name": "laravel/serializable-closure",
+            "version": "2.x-dev",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/laravel/serializable-closure/2.x-dev/laravel-serializable-closure-2.x-dev.zip",
+                "reference": "29f1806b11fdda42b6023b38450d6974b40b7e1d",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "illuminate/support": "^10.0|^11.0|^12.0",
+                "nesbot/carbon": "^2.67|^3.0",
+                "pestphp/pest": "^2.36|^3.0|^4.0",
+                "phpstan/phpstan": "^2.0",
+                "symfony/var-dumper": "^6.2.0|^7.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\SerializableClosure\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                },
+                {
+                    "name": "Nuno Maduro",
+                    "email": "nuno@laravel.com"
+                }
+            ],
+            "description": "Laravel Serializable Closure provides an easy and secure way to serialize closures in PHP.",
+            "keywords": [
+                "closure",
+                "laravel",
+                "serializable"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/serializable-closure/issues",
+                "source": "https://github.com/laravel/serializable-closure"
+            },
+            "time": "2025-11-25T15:20:29+00:00"
+        },
+        {
+            "name": "league/config",
+            "version": "dev-main",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/league/config/dev-main/league-config-dev-main.zip",
+                "reference": "af46987110f9c3aec257f06b0d77a8e97db2ef85",
+                "shasum": ""
+            },
+            "require": {
+                "dflydev/dot-access-data": "^3.0.1",
+                "nette/schema": "^1.2",
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.8.2",
+                "phpunit/phpunit": "^9.5.5 || ^10.0.0 || ^11.0.0",
+                "scrutinizer/ocular": "^1.8.1",
+                "unleashedtech/php-coding-standard": "^3.1",
+                "vimeo/psalm": "^4.7.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "League\\Config\\": "src"
+                }
+            },
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Colin O'Dell",
+                    "email": "colinodell@gmail.com",
+                    "homepage": "https://www.colinodell.com",
+                    "role": "Lead Developer"
+                }
+            ],
+            "description": "Define configuration arrays with strict schemas and access values with dot notation",
+            "homepage": "https://config.thephpleague.com",
+            "keywords": [
+                "array",
+                "config",
+                "configuration",
+                "dot",
+                "dot-access",
+                "nested",
+                "schema"
+            ],
+            "support": {
+                "docs": "https://config.thephpleague.com/",
+                "issues": "https://github.com/thephpleague/config/issues",
+                "rss": "https://github.com/thephpleague/config/releases.atom",
+                "source": "https://github.com/thephpleague/config"
+            },
+            "time": "2025-11-24T00:20:59+00:00"
+        },
+        {
+            "name": "league/event",
+            "version": "dev-master",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/league/event/dev-master/league-event-dev-master.zip",
+                "reference": "ec38ff7ea10cad7d99a79ac937fbcffb9334c210",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0",
+                "psr/event-dispatcher": "^1.0"
+            },
+            "provide": {
+                "psr/event-dispatcher-implementation": "1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.16",
+                "phpstan/phpstan": "^0.12.45",
+                "phpunit/phpunit": "^8.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "League\\Event\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank de Jonge",
+                    "email": "info@frenky.net"
+                }
+            ],
+            "description": "Event package",
+            "keywords": [
+                "emitter",
+                "event",
+                "listener"
+            ],
+            "support": {
+                "issues": "https://github.com/thephpleague/event/issues",
+                "source": "https://github.com/thephpleague/event/tree/3.0.3"
+            },
+            "time": "2024-09-04T16:06:53+00:00"
+        },
+        {
+            "name": "nette/schema",
+            "version": "v1.3.x-dev",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/nette/schema/v1.3.x-dev/nette-schema-v1.3.x-dev.zip",
+                "reference": "2befc2f42d7c715fd9d95efc31b1081e5d765004",
+                "shasum": ""
+            },
+            "require": {
+                "nette/utils": "^4.0",
+                "php": "8.1 - 8.5"
+            },
+            "require-dev": {
+                "nette/tester": "^2.5.2",
+                "phpstan/phpstan-nette": "^2.0@stable",
+                "tracy/tracy": "^2.8"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nette\\": "src"
+                },
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "license": [
+                "BSD-3-Clause",
+                "GPL-2.0-only",
+                "GPL-3.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "David Grudl",
+                    "homepage": "https://davidgrudl.com"
+                },
+                {
+                    "name": "Nette Community",
+                    "homepage": "https://nette.org/contributors"
+                }
+            ],
+            "description": "📐 Nette Schema: validating data structures against a given Schema.",
+            "homepage": "https://nette.org",
+            "keywords": [
+                "config",
+                "nette"
+            ],
+            "support": {
+                "issues": "https://github.com/nette/schema/issues",
+                "source": "https://github.com/nette/schema/tree/v1.3"
+            },
+            "time": "2025-10-30T22:57:59+00:00"
+        },
+        {
+            "name": "nette/utils",
+            "version": "dev-master",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/nette/utils/dev-master/nette-utils-dev-master.zip",
+                "reference": "baa7cb7cb24338cc015229b207573c8cdc3388a3",
+                "shasum": ""
+            },
+            "require": {
+                "php": "8.2 - 8.5"
+            },
+            "conflict": {
+                "nette/finder": "<3",
+                "nette/schema": "<1.2.2"
+            },
+            "require-dev": {
+                "jetbrains/phpstorm-attributes": "^1.2",
+                "nette/tester": "^2.5",
+                "phpstan/phpstan-nette": "^2.0@stable",
+                "tracy/tracy": "^2.9"
+            },
+            "suggest": {
+                "ext-gd": "to use Image",
+                "ext-iconv": "to use Strings::webalize(), toAscii(), chr() and reverse()",
+                "ext-intl": "to use Strings::webalize(), toAscii(), normalize() and compare()",
+                "ext-json": "to use Nette\\Utils\\Json",
+                "ext-mbstring": "to use Strings::lower() etc...",
+                "ext-tokenizer": "to use Nette\\Utils\\Reflection::getUseStatements()"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nette\\": "src"
+                },
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "license": [
+                "BSD-3-Clause",
+                "GPL-2.0-only",
+                "GPL-3.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "David Grudl",
+                    "homepage": "https://davidgrudl.com"
+                },
+                {
+                    "name": "Nette Community",
+                    "homepage": "https://nette.org/contributors"
+                }
+            ],
+            "description": "🛠  Nette Utils: lightweight utilities for string & array manipulation, image handling, safe JSON encoding/decoding, validation, slug or strong password generating etc.",
+            "homepage": "https://nette.org",
+            "keywords": [
+                "array",
+                "core",
+                "datetime",
+                "images",
+                "json",
+                "nette",
+                "paginator",
+                "password",
+                "slugify",
+                "string",
+                "unicode",
+                "utf-8",
+                "utility",
+                "validation"
+            ],
+            "support": {
+                "issues": "https://github.com/nette/utils/issues",
+                "source": "https://github.com/nette/utils/tree/master"
+            },
+            "time": "2025-12-01T17:42:36+00:00"
+        },
+        {
+            "name": "php-di/invoker",
+            "version": "2.3.7",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/php-di/invoker/2.3.7/php-di-invoker-2.3.7.zip",
+                "reference": "3c1ddfdef181431fbc4be83378f6d036d59e81e1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.3",
+                "psr/container": "^1.0|^2.0"
+            },
+            "require-dev": {
+                "athletic/athletic": "~0.1.8",
+                "mnapoli/hard-mode": "~0.3.0",
+                "phpunit/phpunit": "^9.0 || ^10 || ^11 || ^12"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Invoker\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Generic and extensible callable invoker",
+            "homepage": "https://github.com/PHP-DI/Invoker",
+            "keywords": [
+                "callable",
+                "dependency",
+                "dependency-injection",
+                "injection",
+                "invoke",
+                "invoker"
+            ],
+            "support": {
+                "issues": "https://github.com/PHP-DI/Invoker/issues",
+                "source": "https://github.com/PHP-DI/Invoker/tree/2.3.7"
+            },
+            "time": "2025-08-30T10:22:22+00:00"
+        },
+        {
+            "name": "php-di/php-di",
+            "version": "7.1.1",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/php-di/php-di/7.1.1/php-di-php-di-7.1.1.zip",
+                "reference": "f88054cc052e40dbe7b383c8817c19442d480352",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/serializable-closure": "^1.0 || ^2.0",
+                "php": ">=8.0",
+                "php-di/invoker": "^2.0",
+                "psr/container": "^1.1 || ^2.0"
+            },
+            "provide": {
+                "psr/container-implementation": "^1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3",
+                "friendsofphp/proxy-manager-lts": "^1",
+                "mnapoli/phpunit-easymock": "^1.3",
+                "phpunit/phpunit": "^9.6 || ^10 || ^11",
+                "vimeo/psalm": "^5|^6"
+            },
+            "suggest": {
+                "friendsofphp/proxy-manager-lts": "Install it if you want to use lazy injection (version ^1)"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/functions.php"
+                ],
+                "psr-4": {
+                    "DI\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "The dependency injection container for humans",
+            "homepage": "https://php-di.org/",
+            "keywords": [
+                "PSR-11",
+                "container",
+                "container-interop",
+                "dependency injection",
+                "di",
+                "ioc",
+                "psr11"
+            ],
+            "support": {
+                "issues": "https://github.com/PHP-DI/PHP-DI/issues",
+                "source": "https://github.com/PHP-DI/PHP-DI/tree/7.1.1"
+            },
+            "time": "2025-08-16T11:10:48+00:00"
+        },
+        {
+            "name": "psr/container",
+            "version": "dev-master",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/psr/container/dev-master/psr-container-dev-master.zip",
+                "reference": "707984727bd5b2b670e59559d3ed2500240cf875",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Container\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common Container Interface (PHP FIG PSR-11)",
+            "homepage": "https://github.com/php-fig/container",
+            "keywords": [
+                "PSR-11",
+                "container",
+                "container-interface",
+                "container-interop",
+                "psr"
+            ],
+            "support": {
+                "issues": "https://github.com/php-fig/container/issues",
+                "source": "https://github.com/php-fig/container"
+            },
+            "time": "2023-09-22T11:11:30+00:00"
+        },
+        {
+            "name": "psr/event-dispatcher",
+            "version": "dev-master",
+            "dist": {
+                "type": "zip",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/psr/event-dispatcher/dev-master/psr-event-dispatcher-dev-master.zip",
+                "reference": "bbd9eacc080d33861e5b5c75b3b8c4d7e6d01874",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0"
+            },
+            "suggest": {
+                "fig/event-dispatcher-util": "Provides some useful PSR-14 utilities"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\EventDispatcher\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Standard interfaces for event handling.",
+            "keywords": [
+                "events",
+                "psr",
+                "psr-14"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/event-dispatcher"
+            },
+            "time": "2024-03-17T21:29:03+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -229,15 +790,10 @@
         {
             "name": "symfony/var-dumper",
             "version": "7.4.x-dev",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/var-dumper.git",
-                "reference": "41fd6c4ae28c38b294b42af6db61446594a0dece"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/41fd6c4ae28c38b294b42af6db61446594a0dece",
-                "reference": "41fd6c4ae28c38b294b42af6db61446594a0dece",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/symfony/var-dumper/7.4.x-dev/symfony-var-dumper-7.4.x-dev.zip",
+                "reference": "7e99bebcb3f90d8721890f2963463280848cba92",
                 "shasum": ""
             },
             "require": {
@@ -270,7 +826,6 @@
                     "/Tests/"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -293,35 +848,17 @@
             "support": {
                 "source": "https://github.com/symfony/var-dumper/tree/7.4"
             },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://github.com/nicolas-grekas",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2025-10-27T20:36:44+00:00"
+            "time": "2025-12-18T07:04:31+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "brianium/paratest",
-            "version": "7.x-dev",
+            "version": "v7.16.0",
             "dist": {
                 "type": "zip",
-                "url": "https://mirrors.cloud.tencent.com/repository/composer/brianium/paratest/7.x-dev/brianium-paratest-7.x-dev.zip",
-                "reference": "4e62fa3e2dbd1ca42a12ade358fbf3ddb56a307e",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/brianium/paratest/v7.16.0/brianium-paratest-v7.16.0.zip",
+                "reference": "a10878ed0fe0bbc2f57c980f7a08065338b970b6",
                 "shasum": ""
             },
             "require": {
@@ -332,24 +869,24 @@
                 "fidry/cpu-core-counter": "^1.3.0",
                 "jean85/pretty-package-versions": "^2.1.1",
                 "php": "~8.3.0 || ~8.4.0 || ~8.5.0",
-                "phpunit/php-code-coverage": "^12.4.0",
+                "phpunit/php-code-coverage": "^12.5.1",
                 "phpunit/php-file-iterator": "^6",
                 "phpunit/php-timer": "^8",
-                "phpunit/phpunit": "^12.4.4",
+                "phpunit/phpunit": "^12.5.2",
                 "sebastian/environment": "^8.0.3",
-                "symfony/console": "^6.4.20 || ^7.3.4",
-                "symfony/process": "^6.4.20 || ^7.3.4"
+                "symfony/console": "^7.3.4 || ^8.0.0",
+                "symfony/process": "^7.3.4 || ^8.0.0"
             },
             "require-dev": {
                 "doctrine/coding-standard": "^14.0.0",
                 "ext-pcntl": "*",
                 "ext-pcov": "*",
                 "ext-posix": "*",
-                "phpstan/phpstan": "^2.1.32",
+                "phpstan/phpstan": "^2.1.33",
                 "phpstan/phpstan-deprecation-rules": "^2.0.3",
-                "phpstan/phpstan-phpunit": "^2.0.8",
+                "phpstan/phpstan-phpunit": "^2.0.10",
                 "phpstan/phpstan-strict-rules": "^2.0.7",
-                "symfony/filesystem": "^6.4.13 || ^7.3.2"
+                "symfony/filesystem": "^7.3.2 || ^8.0.0"
             },
             "bin": [
                 "bin/paratest",
@@ -388,9 +925,9 @@
             ],
             "support": {
                 "issues": "https://github.com/paratestphp/paratest/issues",
-                "source": "https://github.com/paratestphp/paratest/tree/7.x"
+                "source": "https://github.com/paratestphp/paratest/tree/v7.16.0"
             },
-            "time": "2025-11-21T10:45:20+00:00"
+            "time": "2025-12-09T20:03:26+00:00"
         },
         {
             "name": "doctrine/deprecations",
@@ -398,7 +935,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://mirrors.cloud.tencent.com/repository/composer/doctrine/deprecations/1.1.x-dev/doctrine-deprecations-1.1.x-dev.zip",
-                "reference": "8dfcd6625820194ff0e4de93663fb3199d28b60a",
+                "reference": "ffa29dc95e857426d6e7fdd5078b71bc647be327",
                 "shasum": ""
             },
             "require": {
@@ -432,7 +969,7 @@
                 "issues": "https://github.com/doctrine/deprecations/issues",
                 "source": "https://github.com/doctrine/deprecations/tree/1.1.x"
             },
-            "time": "2025-11-03T13:53:48+00:00"
+            "time": "2025-12-15T15:02:56+00:00"
         },
         {
             "name": "fidry/cpu-core-counter",
@@ -548,7 +1085,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://mirrors.cloud.tencent.com/repository/composer/jean85/pretty-package-versions/2.x-dev/jean85-pretty-package-versions-2.x-dev.zip",
-                "reference": "6c16cf43394416706532e51c781c0584a6780258",
+                "reference": "d47de165556b09d2fe773e95c32fad5c3f95fe2f",
                 "shasum": ""
             },
             "require": {
@@ -594,7 +1131,7 @@
                 "issues": "https://github.com/Jean85/pretty-package-versions/issues",
                 "source": "https://github.com/Jean85/pretty-package-versions/tree/2.x"
             },
-            "time": "2025-11-27T00:39:55+00:00"
+            "time": "2025-12-10T08:19:13+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -650,7 +1187,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://mirrors.cloud.tencent.com/repository/composer/nikic/php-parser/dev-master/nikic-php-parser-dev-master.zip",
-                "reference": "c97b23dce761ab3c913ee8ac5879af7a358f88de",
+                "reference": "8c360e27327c8bd29e1c57721574709d0d706118",
                 "shasum": ""
             },
             "require": {
@@ -694,7 +1231,7 @@
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
                 "source": "https://github.com/nikic/PHP-Parser/tree/master"
             },
-            "time": "2025-10-26T16:58:55+00:00"
+            "time": "2025-12-06T20:24:35+00:00"
         },
         {
             "name": "nunomaduro/collision",
@@ -848,24 +1385,24 @@
             "dist": {
                 "type": "zip",
                 "url": "https://mirrors.cloud.tencent.com/repository/composer/pestphp/pest/4.x-dev/pestphp-pest-4.x-dev.zip",
-                "reference": "ae419afd363299c29ad5b17e8b70d118b1068bb4",
+                "reference": "62694c14b9c39b21d02c6102919cf0b638e06bf9",
                 "shasum": ""
             },
             "require": {
-                "brianium/paratest": "^7.14.2",
+                "brianium/paratest": "^7.16.0",
                 "nunomaduro/collision": "^8.8.3",
                 "nunomaduro/termwind": "^2.3.3",
                 "pestphp/pest-plugin": "^4.0.0",
                 "pestphp/pest-plugin-arch": "^4.0.0",
                 "pestphp/pest-plugin-mutate": "^4.0.1",
-                "pestphp/pest-plugin-profanity": "^4.2.0",
+                "pestphp/pest-plugin-profanity": "^4.2.1",
                 "php": "^8.3.0",
-                "phpunit/phpunit": "^12.4.4",
+                "phpunit/phpunit": "^12.5.3",
                 "symfony/process": "^7.4.0|^8.0.0"
             },
             "conflict": {
                 "filp/whoops": "<2.18.3",
-                "phpunit/phpunit": ">12.4.4",
+                "phpunit/phpunit": ">12.5.3",
                 "sebastian/exporter": "<7.0.0",
                 "webmozart/assert": "<1.11.0"
             },
@@ -873,7 +1410,7 @@
                 "pestphp/pest-dev-tools": "^4.0.0",
                 "pestphp/pest-plugin-browser": "^4.1.1",
                 "pestphp/pest-plugin-type-coverage": "^4.0.3",
-                "psy/psysh": "^0.12.15"
+                "psy/psysh": "^0.12.17"
             },
             "bin": [
                 "bin/pest"
@@ -940,7 +1477,7 @@
                 "issues": "https://github.com/pestphp/pest/issues",
                 "source": "https://github.com/pestphp/pest/tree/4.x"
             },
-            "time": "2025-11-28T12:04:48+00:00"
+            "time": "2025-12-15T11:54:24+00:00"
         },
         {
             "name": "pestphp/pest-plugin",
@@ -1108,7 +1645,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://mirrors.cloud.tencent.com/repository/composer/pestphp/pest-plugin-profanity/4.x-dev/pestphp-pest-plugin-profanity-4.x-dev.zip",
-                "reference": "c37e5e2c7136ee4eae12082e7952332bc1c6600a",
+                "reference": "343cfa6f3564b7e35df0ebb77b7fa97039f72b27",
                 "shasum": ""
             },
             "require": {
@@ -1150,7 +1687,7 @@
             "support": {
                 "source": "https://github.com/pestphp/pest-plugin-profanity/tree/4.x"
             },
-            "time": "2025-10-28T23:14:11+00:00"
+            "time": "2025-12-08T00:13:17+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -1456,14 +1993,14 @@
             "dist": {
                 "type": "zip",
                 "url": "https://mirrors.cloud.tencent.com/repository/composer/phpunit/php-code-coverage/dev-main/phpunit-php-code-coverage-dev-main.zip",
-                "reference": "1d846f1581ae5a55e992c51ba114d0e502f3058c",
+                "reference": "9654885eec9b6f8ba6b11c8505b8dcab9a652091",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-libxml": "*",
                 "ext-xmlwriter": "*",
-                "nikic/php-parser": "^5.6.1",
+                "nikic/php-parser": "^5.7.0",
                 "php": ">=8.3",
                 "phpunit/php-file-iterator": "^6.0",
                 "phpunit/php-text-template": "^5.0",
@@ -1471,10 +2008,10 @@
                 "sebastian/environment": "^8.0.3",
                 "sebastian/lines-of-code": "^4.0",
                 "sebastian/version": "^6.0",
-                "theseer/tokenizer": "^1.2.3"
+                "theseer/tokenizer": "^2.0.1"
             },
             "require-dev": {
-                "phpunit/phpunit": "^12.3.7"
+                "phpunit/phpunit": "^12.5.1"
             },
             "suggest": {
                 "ext-pcov": "PHP extension that provides line coverage",
@@ -1513,7 +2050,7 @@
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
                 "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/main"
             },
-            "time": "2025-11-28T18:25:41+00:00"
+            "time": "2025-12-13T07:32:13+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -1714,11 +2251,11 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.4.4",
+            "version": "12.5.3",
             "dist": {
                 "type": "zip",
-                "url": "https://mirrors.cloud.tencent.com/repository/composer/phpunit/phpunit/12.4.4/phpunit-phpunit-12.4.4.zip",
-                "reference": "9253ec75a672e39fcc9d85bdb61448215b8162c7",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/phpunit/phpunit/12.5.3/phpunit-phpunit-12.5.3.zip",
+                "reference": "6dc2e076d09960efbb0c1272aa9bc156fc80955e",
                 "shasum": ""
             },
             "require": {
@@ -1732,7 +2269,7 @@
                 "phar-io/manifest": "^2.0.4",
                 "phar-io/version": "^3.2.1",
                 "php": ">=8.3",
-                "phpunit/php-code-coverage": "^12.4.0",
+                "phpunit/php-code-coverage": "^12.5.1",
                 "phpunit/php-file-iterator": "^6.0.0",
                 "phpunit/php-invoker": "^6.0.0",
                 "phpunit/php-text-template": "^5.0.0",
@@ -1754,7 +2291,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "12.4-dev"
+                    "dev-main": "12.5-dev"
                 }
             },
             "autoload": {
@@ -1785,56 +2322,9 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.4.4"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.3"
             },
-            "time": "2025-11-21T07:39:11+00:00"
-        },
-        {
-            "name": "psr/container",
-            "version": "dev-master",
-            "dist": {
-                "type": "zip",
-                "url": "https://mirrors.cloud.tencent.com/repository/composer/psr/container/dev-master/psr-container-dev-master.zip",
-                "reference": "707984727bd5b2b670e59559d3ed2500240cf875",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.4.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Psr\\Container\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "PHP-FIG",
-                    "homepage": "https://www.php-fig.org/"
-                }
-            ],
-            "description": "Common Container Interface (PHP FIG PSR-11)",
-            "homepage": "https://github.com/php-fig/container",
-            "keywords": [
-                "PSR-11",
-                "container",
-                "container-interface",
-                "container-interop",
-                "psr"
-            ],
-            "support": {
-                "issues": "https://github.com/php-fig/container/issues",
-                "source": "https://github.com/php-fig/container"
-            },
-            "time": "2023-09-22T11:11:30+00:00"
+            "time": "2025-12-11T08:52:59+00:00"
         },
         {
             "name": "psr/log",
@@ -2628,7 +3118,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://mirrors.cloud.tencent.com/repository/composer/symfony/console/7.4.x-dev/symfony-console-7.4.x-dev.zip",
-                "reference": "0bc0f45254b99c58d45a8fbf9fb955d46cbd1bb8",
+                "reference": "b2683d6840533d658950a0db5c819fc012203157",
                 "shasum": ""
             },
             "require": {
@@ -2694,22 +3184,22 @@
             "support": {
                 "source": "https://github.com/symfony/console/tree/7.4"
             },
-            "time": "2025-11-27T13:27:24+00:00"
+            "time": "2025-12-16T08:02:06+00:00"
         },
         {
             "name": "symfony/finder",
-            "version": "7.4.x-dev",
+            "version": "6.4.x-dev",
             "dist": {
                 "type": "zip",
-                "url": "https://mirrors.cloud.tencent.com/repository/composer/symfony/finder/7.4.x-dev/symfony-finder-7.4.x-dev.zip",
-                "reference": "340b9ed7320570f319028a2cbec46d40535e94bd",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/symfony/finder/6.4.x-dev/symfony-finder-6.4.x-dev.zip",
+                "reference": "a1b6aa435d2fba50793b994a839c32b6064f063b",
                 "shasum": ""
             },
             "require": {
-                "php": ">=8.2"
+                "php": ">=8.1"
             },
             "require-dev": {
-                "symfony/filesystem": "^6.4|^7.0|^8.0"
+                "symfony/filesystem": "^6.0|^7.0"
             },
             "type": "library",
             "autoload": {
@@ -2736,9 +3226,9 @@
             "description": "Finds files and directories via an intuitive fluent interface",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/finder/tree/7.4"
+                "source": "https://github.com/symfony/finder/tree/6.4"
             },
-            "time": "2025-11-05T05:42:40+00:00"
+            "time": "2025-10-15T18:32:00+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -2965,7 +3455,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://mirrors.cloud.tencent.com/repository/composer/symfony/service-contracts/dev-main/symfony-service-contracts-dev-main.zip",
-                "reference": "45112560a3ba2d715666a509a0bc9521d10b6c43",
+                "reference": "37f608af519f85042e9a38eded401d4d1fc54e95",
                 "shasum": ""
             },
             "require": {
@@ -3020,7 +3510,7 @@
             "support": {
                 "source": "https://github.com/symfony/service-contracts/tree/main"
             },
-            "time": "2025-07-15T11:30:57+00:00"
+            "time": "2025-07-31T09:31:17+00:00"
         },
         {
             "name": "symfony/string",
@@ -3144,18 +3634,18 @@
         },
         {
             "name": "theseer/tokenizer",
-            "version": "1.3.1",
+            "version": "2.0.1",
             "dist": {
                 "type": "zip",
-                "url": "https://mirrors.cloud.tencent.com/repository/composer/theseer/tokenizer/1.3.1/theseer-tokenizer-1.3.1.zip",
-                "reference": "b7489ce515e168639d17feec34b8847c326b0b3c",
+                "url": "https://mirrors.cloud.tencent.com/repository/composer/theseer/tokenizer/2.0.1/theseer-tokenizer-2.0.1.zip",
+                "reference": "7989e43bf381af0eac72e4f0ca5bcbfa81658be4",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-tokenizer": "*",
                 "ext-xmlwriter": "*",
-                "php": "^7.2 || ^8.0"
+                "php": "^8.1"
             },
             "type": "library",
             "autoload": {
@@ -3176,9 +3666,9 @@
             "description": "A small library for converting tokenized PHP source code into XML and potentially other formats",
             "support": {
                 "issues": "https://github.com/theseer/tokenizer/issues",
-                "source": "https://github.com/theseer/tokenizer/tree/1.3.1"
+                "source": "https://github.com/theseer/tokenizer/tree/2.0.1"
             },
-            "time": "2025-11-17T20:03:58+00:00"
+            "time": "2025-12-08T11:19:18+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -3247,5 +3737,5 @@
         "ext-libxml": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

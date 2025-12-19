@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Tests\Unit\ExampleTest" file="tests\Unit\ExampleTest.php" tests="1" assertions="0" errors="1" failures="0" skipped="0" time="0.000000">
+    <testcase name="example" file="tests\Unit\ExampleTest.php::example" class="Tests\Unit\ExampleTest" classname="Tests.Unit.ExampleTest" assertions="0" time="0.000000">
+      <error type="TypeError">exampleTypeError: Kingbes\Libui\View\Builder\Builder::setEventDispatcher(): Argument #1 ($dispatcher) must be of type Kingbes\Libui\View\Core\Event\EventDispatcher, null given, called in D:\git\php\libuiBuilder\tests\TestCase.php on line 21&#13;
+at src\Builder\Builder.php:55
+at tests\TestCase.php:21</error>
+    </testcase>
+  </testsuite>
+</testsuites>

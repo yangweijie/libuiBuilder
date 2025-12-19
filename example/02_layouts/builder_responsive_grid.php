@@ -13,13 +13,14 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../src/helper.php';
 
 use Kingbes\Libui\App;
-use Kingbes\Libui\View\Components\BoxBuilder;
-use Kingbes\Libui\View\Components\ButtonBuilder;
-use Kingbes\Libui\View\Components\EntryBuilder;
-use Kingbes\Libui\View\Components\LabelBuilder;
-use Kingbes\Libui\View\Components\SeparatorBuilder;
-use Kingbes\Libui\View\Components\WindowBuilder;
-use Kingbes\Libui\View\Components\GridBuilder;
+use Kingbes\Libui\View\Builder\BoxBuilder;
+use Kingbes\Libui\View\Builder\ButtonBuilder;
+use Kingbes\Libui\View\Builder\EntryBuilder;
+use Kingbes\Libui\View\Builder\GridBuilder;
+use Kingbes\Libui\View\Builder\LabelBuilder;
+use Kingbes\Libui\View\Builder\SeparatorBuilder;
+use Kingbes\Libui\View\Builder\WindowBuilder;
+
 
 App::init();
 

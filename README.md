@@ -1,459 +1,254 @@
 # libuiBuilder
 
-Builder 方式开发 [kingbes/libui](https://github.com/kingbes/libui) GUI 应用，提供直观、灵活的 PHP 桌面应用开发体验。
+基于 kingbes/libui 的现代化 GUI 开发框架，采用链式构建器模式，深度集成了依赖注入、事件系统和配置管理。
 
-## ✨ 特性
+## ✨ 核心特性
 
-- 🎨 **Builder 模式** - 流畅的链式调用 API
-- 🌐 **HTML 模板渲染** - 使用熟悉的 HTML 语法定义界面
-- 📊 **强大的 Grid 布局** - 精确的二维布局控制
-- 🔄 **状态管理** - 响应式数据绑定
-- 🎯 **事件系统** - 简洁的事件处理
-- 📦 **组件复用** - 模板系统支持
-- 🧪 **完整测试** - Pest 测试覆盖
-- 👁️ **可视化预览工具** - 浏览器实时预览 `.ui.html` 布局
+### 1. 链式构建器模式
+```php
+$app = Builder::window()
+    ->title('My App')
+    ->size(600, 400)
+    ->contains(
+        Builder::vbox()
+            ->contains([
+                Builder::label()->text('Hello'),
+                Builder::button()->text('Click')
+            ])
+    )
+    ->show();
+```
+
+### 2. 依赖注入 (PHP-DI)
+```php
+$container = ContainerFactory::create();
+$builder = $container->get(Builder::class);
+// Builder 自动注入 StateManager, EventDispatcher, ConfigManager
+```
+
+### 3. 事件系统 (league/event)
+```php
+$events = new EventDispatcher();
+$events->on(ButtonClickEvent::class, function($event) {
+    echo "按钮 {$event->getComponentId()} 被点击\n";
+});
+```
+
+### 4. 配置管理 (league/config)
+```php
+$config = new ConfigManager([
+    'app' => ['title' => 'My App', 'width' => 800],
+]);
+$title = $config->get('app.title');
+```
+
+### 5. 状态管理
+```php
+$state = StateManager::instance();
+$state->set('count', 0);
+$state->watch('count', fn($new, $old) => echo "变化: $old → $new");
+```
 
 ## 🚀 快速开始
 
 ### 安装
-
 ```bash
-composer require yangweijie/libui-builder
+composer install
 ```
 
-### 方式一：Builder API
-
+### 基础使用
 ```php
-<?php
-use Kingbes\Libui\App;
-use Kingbes\Libui\View\Builder;
-use Kingbes\Libui\View\State\StateManager;
+require_once 'vendor/autoload.php';
 
-App::init();
+use Kingbes\Libui\View\Core\Container\ContainerFactory;
 
-$state = StateManager::instance();
-$state->set('username', '');
+// 1. 创建容器（自动配置所有服务）
+$container = ContainerFactory::create();
 
+// 2. 获取 Builder（已注入依赖）
+$builder = $container->get(Builder::class);
+
+// 3. 构建 UI
 $app = Builder::window()
-    ->title('登录窗口')
+    ->title('Hello DI')
     ->size(400, 300)
-    ->contains([
-        Builder::vbox()->padded(true)->contains([
-            // 使用 GroupBuilder 创建带标题的分组
-            Builder::group()
-                ->title('用户信息')
-                ->margined(true)
-                ->contains([
-                    Builder::grid()->padded(true)->form([
-                        [
-                            'label' => Builder::label()->text('用户名:'),
-                            'control' => Builder::entry()
-                                ->id('usernameInput')
-                                ->bind('username')
-                                ->placeholder('请输入用户名')
-                        ]
-                    ])
-                ]),
-            Builder::button()
-                ->text('登录')
-                ->onClick(function($button, $state) {
-                    echo "登录: " . $state->get('username') . "\n";
-                })
-        ])
-    ]);
-
-$app->show();
+    ->contains(
+        Builder::button()
+            ->text('Click Me')
+            ->onClick(function($component, $state, $events) {
+                echo "Clicked!\n";
+            })
+    )
+    ->show();
 ```
 
-### 方式二：HTML 模板（推荐）
+## 📁 项目结构
 
-**views/login.ui.html:**
-```html
-<!DOCTYPE html>
-<ui version="1.0">
-  <window title="登录窗口" size="400,300" centered="true">
-    <vbox padded="true">
-      <!-- 使用 group 标签创建带标题的分组 -->
-      <group title="用户信息" margined="true">
-        <grid padded="true">
-          <label row="0" col="0" align="end,center">用户名:</label>
-          <input 
-            id="usernameInput"
-            row="0" 
-            col="1" 
-            bind="username"
-            placeholder="请输入用户名"
-            expand="horizontal"
-          />
-        </grid>
-      </group>
-      
-      <button row="0" col="0" onclick="handleLogin">
-        登录
-      </button>
-    </vbox>
-  </window>
-</ui>
+```
+src/
+├── Builder/              # 构建器模式
+│   ├── ComponentBuilder.php    # 基类
+│   ├── Builder.php             # 工厂类
+│   ├── ButtonBuilder.php       # 按钮构建器
+│   ├── EntryBuilder.php        # 输入框构建器
+│   └── ...                     # 17+ 组件构建器
+├── State/               # 状态管理
+│   └── StateManager.php
+├── Core/                # 核心服务
+│   ├── Config/
+│   │   └── ConfigManager.php   # 配置管理 (league/config)
+│   ├── Event/
+│   │   ├── EventDispatcher.php # 事件分发 (league/event)
+│   │   ├── ButtonClickEvent.php
+│   │   ├── ValueChangeEvent.php
+│   │   └── StateChangeEvent.php
+│   └── Container/
+│       └── ContainerFactory.php # DI 容器 (php-di)
+└── helper.php
 ```
 
-**app.php:**
-```php
-<?php
-use Kingbes\Libui\App;
-use Kingbes\Libui\View\HtmlRenderer;
-use Kingbes\Libui\View\State\StateManager;
+## 🎯 架构概览
 
-App::init();
-
-$state = StateManager::instance();
-$state->set('username', '');
-
-$handlers = [
-    'handleLogin' => function($button, $state) {
-        echo "登录: " . $state->get('username') . "\n";
-    }
-];
-
-$app = HtmlRenderer::render('views/login.ui.html', $handlers);
-$app->show();
 ```
-
-## 🛠️ 开发工具
-
-### 可视化预览工具
-
-在编写 `.ui.html` 模板时，使用可视化预览工具实时查看布局效果：
-
-```bash
-# 在浏览器中打开预览工具
-open tools/preview.html
-
-# 然后加载任意 .ui.html 文件
-# 例如: example/views/login.ui.html
+应用层 (Builder 链式调用)
+    ↓
+工厂层 (Builder 静态工厂)
+    ↓
+构建层 (ComponentBuilder + 依赖注入)
+    ↓
+核心服务 (Config/Event/Container/State)
+    ↓
+基础库 (kingbes/libui)
 ```
-
-**特性**:
-- ✅ 零依赖，纯浏览器运行
-- ✅ 完整支持 Grid 布局属性
-- ✅ 可视化显示状态绑定和事件处理器
-- ✅ 缩放控制和网格线显示
-
-详细使用说明: [tools/README.md](tools/README.md)
 
 ## 📚 文档
 
-- [HTML 渲染器完整文档](docs/HTML_RENDERER.md)
-- [Builder API 参考](docs/BUILDER_API.md)
-- [状态管理指南](docs/STATE_MANAGEMENT.md)
-- [Grid 布局详解](docs/GRID_LAYOUT.md)
-- [可视化预览工具](tools/README.md) 🆕
+### 核心文档
+- **[架构设计](docs/ARCHITECTURE.md)** - 完整架构说明
+- **[快速开始](docs/QUICKSTART_DI.md)** - 依赖注入快速指南
+- **[构建器文档](docs/BUILDER_README.md)** - 组件构建器使用
 
-## 🎯 核心概念
+### 示例代码
+```bash
+# 基础示例
+php example/04_advanced/builder_example.php
 
-### HTML 模板系统
+# DI 集成示例
+php example/04_advanced/di_integration_example.php
 
-使用 HTML 标签定义界面，自动渲染为原生 GUI 组件：
-
-```html
-<grid padded="true">
-  <!-- 网格布局：row/col 定位 -->
-  <label row="0" col="0">姓名:</label>
-  <input row="0" col="1" bind="name" expand="horizontal"/>
-  
-  <!-- 跨列布局 -->
-  <button row="1" col="0" colspan="2" align="center">
-    提交
-  </button>
-</grid>
+# 验证集成
+php test_verify.php
 ```
 
-**支持的标签：**
-- 容器: `<window>`, `<vbox>`, `<hbox>`, `<grid>`, `<tab>`, `<group>`
-- 控件: `<input>`, `<button>`, `<label>`, `<checkbox>`, `<radio>`
-- 选择: `<combobox>`, `<spinbox>`, `<slider>`, `<progressbar>`
-- 其他: `<separator>`, `<table>`, `<canvas>`
+## 🔧 依赖包集成
 
-### Group 容器
+### ✅ league/event
+- 事件驱动架构
+- 解耦业务逻辑
+- 支持全局/局部监听
 
-使用 Group 创建带标题的分组容器：
+### ✅ league/config  
+- 类型安全配置
+- 多格式支持 (PHP/JSON/YAML)
+- 配置验证
 
-```html
-<group title="用户信息" margined="true">
-  <grid padded="true">
-    <label row="0" col="0">用户名:</label>
-    <input row="0" col="1" bind="username"/>
-    
-    <label row="1" col="0">密码:</label>
-    <input row="1" col="1" type="password" bind="password"/>
-  </grid>
-</group>
-```
+### ✅ php-di/php-di
+- 依赖注入容器
+- 自动依赖解析
+- 服务生命周期管理
 
-### Grid 布局
+### ✅ kingbes/libui
+- PHP FFI GUI 库
+- 原生控件绑定
+- 跨平台支持
 
-精确的二维布局系统：
+## 🎨 使用场景
 
-```html
-<grid padded="true">
-  <!-- 基础定位 -->
-  <label row="0" col="0">字段1:</label>
-  <input row="0" col="1"/>
-  
-  <!-- 跨行列 -->
-  <label row="1" col="0" rowspan="2">多行标签</label>
-  <input row="1" col="1" colspan="2"/>
-  
-  <!-- 对齐和扩展 -->
-  <button 
-    row="2" 
-    col="0" 
-    colspan="3" 
-    align="center"
-    expand="horizontal"
-  >提交</button>
-</grid>
-```
-
-**布局属性：**
-- `row`, `col`: 位置
-- `rowspan`, `colspan`: 跨度
-- `align`: 对齐（`fill`, `start`, `center`, `end`）
-- `expand`: 扩展（`true`, `horizontal`, `vertical`）
-
-### 状态管理
-
-响应式数据绑定：
-
+### 简单应用
 ```php
-// 初始化状态
+$container = ContainerFactory::create();
+$builder = $container->get(Builder::class);
+
+$app = Builder::window()
+    ->title('计算器')
+    ->contains(/* ... */)
+    ->show();
+```
+
+### 复杂应用
+```php
+// 1. 配置
+$config = new ConfigManager(require 'config.php');
+
+// 2. 事件系统
+$events = new EventDispatcher();
+$events->on(UserLoginEvent::class, $loginHandler);
+
+// 3. 状态管理
 $state = StateManager::instance();
-$state->set('username', '');
-$state->set('count', 0);
+$state->setEventDispatcher($events);
 
-// 监听变化
-$state->watch('count', function($newValue) {
-    echo "Count 变更为: {$newValue}\n";
-});
+// 4. 依赖注入
+$container = ContainerFactory::create($config->getAll());
 
-// 批量更新
-$state->update([
-    'username' => 'admin',
-    'count' => 10
-]);
+// 5. 构建 UI
+Builder::setStateManager($state);
+Builder::setEventDispatcher($events);
+Builder::setConfigManager($config);
+
+$app = Builder::window()
+    ->title($config->get('app.title'))
+    ->contains(/* 复杂布局 */)
+    ->show();
 ```
-
-HTML 中绑定：
-```html
-<input bind="username"/>
-<label>{{username}}</label>
-```
-
-### 事件系统
-
-```html
-<!-- HTML 中定义事件 -->
-<button onclick="handleClick">点击</button>
-<input onchange="handleChange"/>
-<radio onselected="handleSelect">
-  <option>A</option>
-  <option>B</option>
-</radio>
-```
-
-```php
-// PHP 中处理事件
-$handlers = [
-    'handleClick' => function($button, $state) {
-        echo "按钮被点击\n";
-    },
-    
-    'handleChange' => function($value, $component) {
-        echo "新值: {$value}\n";
-    },
-    
-    'handleSelect' => function($index) {
-        echo "选择了索引: {$index}\n";
-    }
-];
-```
-
-### 模板复用
-
-```html
-<!-- 定义模板 -->
-<template id="form-field">
-  <label row="{{row}}" col="0">{{label}}</label>
-  <input row="{{row}}" col="1" bind="{{bind}}"/>
-</template>
-
-<!-- 使用模板 -->
-<grid>
-  <use template="form-field"/>
-</grid>
-```
-
-## 📦 支持的组件
-
-### 容器组件
-- `WindowBuilder` - 主窗口
-- `BoxBuilder` - 水平/垂直盒子
-- `GridBuilder` - 网格布局
-- `TabBuilder` - 标签页
-- `GroupBuilder` - 分组容器（带有标题的容器）
-
-### 基础控件
-- `LabelBuilder` - 文本标签
-- `ButtonBuilder` - 按钮
-- `EntryBuilder` - 单行输入
-- `MultilineEntryBuilder` - 多行输入
-- `CheckboxBuilder` - 复选框
-- `RadioBuilder` - 单选框组
-
-### 选择控件
-- `ComboboxBuilder` - 下拉选择
-- `SpinboxBuilder` - 数字输入
-- `SliderBuilder` - 滑动条
-- `ProgressBarBuilder` - 进度条
-
-### 其他控件
-- `SeparatorBuilder` - 分隔符
-- `TableBuilder` - 表格
-- `CanvasBuilder` - 画布
-- `MenuBuilder` - 菜单
 
 ## 🧪 测试
 
 ```bash
-# 运行所有测试
+# 验证集成
+php test_verify.php
+
+# 运行单元测试
 ./vendor/bin/pest
-
-# 运行 HTML 渲染器测试
-./vendor/bin/pest tests/HtmlRendererTest.php
-
-# 运行状态管理测试
-./vendor/bin/pest tests/StateManagerTest.php
 ```
 
-## 📖 示例
+## 📊 功能对比
 
-查看 `example/` 目录：
+| 功能 | 传统方式 | libuiBuilder |
+|------|----------|--------------|
+| UI 构建 | 命令式 | 声明式链式调用 |
+| 配置管理 | 硬编码 | 类型安全配置 |
+| 事件处理 | 回调嵌套 | 事件驱动 |
+| 依赖管理 | 手动创建 | 自动注入 |
+| 状态同步 | 手动更新 | 双向绑定 |
+| 代码量 | 多 | 少 50%+ |
 
-- `simple.php` - 简单示例
-- `full.php` - 完整控件演示
-- `eventAndState.php` - 事件和状态管理
-- `htmlLogin.php` - HTML 模板登录表单
-- `htmlFull.php` - HTML 模板完整示例
+## 🎯 设计优势
 
-运行示例：
+1. **解耦性** - 事件系统分离业务逻辑
+2. **可维护** - 配置驱动，易于修改
+3. **可测试** - 依赖注入支持单元测试
+4. **可扩展** - 模块化设计，易于扩展
+5. **现代化** - 依赖注入 + 事件驱动 + 状态管理
 
-```bash
-php example/htmlLogin.php
-php example/htmlFull.php
-```
-
-## 🎨 最佳实践
-
-### 1. 使用 HTML 模板作为主要开发方式
-
-✅ **推荐：**
-```html
-<window title="我的应用" size="800,600">
-  <grid padded="true">
-    <!-- 清晰的界面定义 -->
-  </grid>
-</window>
-```
-
-❌ **不推荐（除非需要动态构建）：**
-```php
-Builder::window()
-    ->title('我的应用')
-    ->size(800, 600)
-    ->contains([
-        Builder::grid()->...
-    ]);
-```
-
-### 2. 组织项目结构
+## 🔗 依赖关系
 
 ```
-project/
-├── views/              # HTML 模板
-│   ├── login.ui.html
-│   └── dashboard.ui.html
-├── handlers/           # 事件处理器
-│   ├── LoginHandlers.php
-│   └── DashboardHandlers.php
-├── state/              # 状态管理
-│   └── AppState.php
-└── app.php             # 主入口
+libuiBuilder
+├── league/event       ^3.0
+├── league/config      ^1.2
+├── php-di/php-di      ^7.0
+├── kingbes/libui      0.1.*
+└── 其他标准库...
 ```
 
-### 3. 分离事件处理逻辑
+## 🚀 下一步
 
-```php
-class LoginHandlers {
-    public static function getHandlers(): array {
-        return [
-            'handleLogin' => [self::class, 'login'],
-            'handleReset' => [self::class, 'reset'],
-        ];
-    }
-    
-    public static function login($button, $state) {
-        // 登录逻辑
-    }
-    
-    public static function reset($button, $state) {
-        // 重置逻辑
-    }
-}
-```
+1. 阅读 [架构设计](docs/ARCHITECTURE.md) 了解完整设计
+2. 查看 [快速开始](docs/QUICKSTART_DI.md) 实践示例
+3. 运行 [DI 集成示例](example/04_advanced/di_integration_example.php)
+4. 探索 [组件构建器](src/Builder/) 源码
 
-### 4. 使用 Grid 布局
-
-优先使用 Grid 而不是嵌套的 Box：
-
-✅ **好：**
-```html
-<grid>
-  <label row="0" col="0">字段1:</label>
-  <input row="0" col="1"/>
-  <label row="1" col="0">字段2:</label>
-  <input row="1" col="1"/>
-</grid>
-```
-
-❌ **不好：**
-```html
-<vbox>
-  <hbox>
-    <label>字段1:</label>
-    <input/>
-  </hbox>
-  <hbox>
-    <label>字段2:</label>
-    <input/>
-  </hbox>
-</vbox>
-```
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 📄 许可证
+## 📝 许可证
 
 MIT License
-
-## 🙏 致谢
-
-基于 [kingbes/libui](https://github.com/kingbes/libui) 构建。
-
----
-
-**注意**: 本项目主要提供两种开发方式：
-1. **HTML 模板渲染**（推荐） - 熟悉的语法、可视化预览、组件复用
-2. **Builder API** - 动态构建、编程灵活性
-
-两种方式可以混合使用，选择最适合你的工作流！

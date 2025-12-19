@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Kingbes\Libui\App;
-use Kingbes\Libui\View\Builder;
+use Kingbes\Libui\View\Builder\Builder;
 use Kingbes\Libui\View\State\StateManager;
 
 App::init();

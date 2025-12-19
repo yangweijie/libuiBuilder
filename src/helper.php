@@ -1,5 +1,6 @@
 <?php
 
+use Kingbes\Libui\View\Builder\Builder;
 use Kingbes\Libui\View\State\StateManager;
 
 // 密码强度计算函数
@@ -111,7 +112,6 @@ function watch(string $key, callable $callback)
 
 // ========== Builder 快捷函数 ==========
 
-use Kingbes\Libui\View\Builder;
 
 // 窗口和容器
 function window(array $config = []) { return Builder::window($config); }
