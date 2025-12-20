@@ -141,7 +141,9 @@ class GridBuilder extends ComponentBuilder
 
         // 添加网格项
         foreach ($this->items as $item) {
+            echo "[GRID_DEBUG] 构建子组件: " . get_class($item['component']) . "\n";
             $componentHandle = $item['component']->build();
+            echo "[GRID_DEBUG] 子组件构建完成\n";
             
             $left = $item['col'];
             $top = $item['row'];

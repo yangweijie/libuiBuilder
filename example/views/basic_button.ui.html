@@ -5,22 +5,22 @@
 </head>
 <body>
 <window title="基础按钮示例 - HTML 模板" size="400,300">
-    <grid padded="true" hexpand="true" vexpand="true">
+    <grid padded="true">
         <!-- 标题 - 不垂直扩展，只占用必要空间 -->
         <label row="0" col="0" colspan="2" align="center" hexpand="true">按钮组件演示</label>
         <separator row="1" col="0" colspan="2" hexpand="true"/>
         
         <!-- 基础按钮 - 内容行垂直扩展 -->
         <label row="2" col="0">基础按钮:</label>
-        <button row="2" col="1" onclick="handleBasicClick" hexpand="true" vexpand="true">点击我</button>
+        <button row="2" col="1" stretchy="false" align="center" onclick="handleBasicClick" hexpand="false" vexpand="false">点击我</button>
         
         <!-- 计数器按钮 - 内容行垂直扩展 -->
         <label row="3" col="0">计数器按钮:</label>
-        <button row="3" col="1" bind="buttonValue" onclick="handleCounterClick" hexpand="true" vexpand="true">点击次数: 0</button>
+        <button row="3" col="1" stretchy="false" align="center" bind="buttonValue" onclick="handleCounterClick" hexpand="false" vexpand="false">点击次数: 0</button>
         
         <!-- 控制按钮 - 内容行垂直扩展 -->
         <label row="4" col="0">控制按钮:</label>
-        <hbox row="4" col="1" padded="true" hexpand="true" vexpand="true">
+        <hbox row="4" col="1" padded="true" hexpand="true" vexpand="false">
             <button onclick="handleReset">重置计数器</button>
             <button onclick="handleQuit">退出</button>
         </hbox>

@@ -383,9 +383,32 @@ abstract class ComponentBuilder implements ComponentInterface
     {
         $this->config['bind'] = $stateKey;
         
-        // 如果有状态管理器，自动同步初始值
-        if ($this->stateManager && $this->stateManager->has($stateKey)) {
-            $this->config['value'] = $this->stateManager->get($stateKey);
+        // 如果有状态管理器，设置监听器
+        if ($this->stateManager) {
+            // 同步初始值
+            if ($this->stateManager->has($stateKey)) {
+                $initialValue = $this->stateManager->get($stateKey);
+                $this->config['value'] = $initialValue;
+                
+                // 如果组件已构建，立即更新显示
+                if ($this->handle) {
+                    $this->updateComponentValue($initialValue);
+                }
+            }
+            
+            // 注册状态变化监听器
+            $this->stateManager->watch($stateKey, function($newValue, $oldValue, $key) {
+                echo "[BIND_DEBUG] 状态变化: {$key} 从 '{$oldValue}' 变为 '{$newValue}'\n";
+                $this->config['value'] = $newValue;
+                
+                // 如果组件已构建，更新显示
+                if ($this->handle) {
+                    $this->updateComponentValue($newValue);
+                    echo "[BIND_DEBUG] 组件显示已更新\n";
+                }
+            });
+            
+            echo "[BIND_DEBUG] 绑定状态: {$stateKey}\n";
         }
         
         return $this;

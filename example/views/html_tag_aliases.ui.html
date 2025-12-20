@@ -46,7 +46,7 @@
         <hr row="11" col="1"/>
         
         <label row="12" col="0">&lt;entry&gt; (多行)</label>
-        <entry row="12" col="1" rowspan="3" placeholder="多行文本输入..."></entry>
+        <textarea row="12" col="1" rowspan="3" placeholder="多行文本输入..."></textarea>
         
         <separator row="15" col="0" colspan="2"/>
         
@@ -54,26 +54,26 @@
         <label row="16" col="0" colspan="2" align="center">完整表单示例</label>
         
         <label row="17" col="0">姓名:</label>
-        <input row="17" col="1" placeholder="请输入姓名"/>
+        <input id="name" row="17" col="1" placeholder="请输入姓名"/>
         
         <label row="18" col="0">年龄:</label>
-        <input type="number" row="18" col="1" min="18" max="100" value="25"/>
+        <input id="age" type="number" row="18" col="1" min="18" max="100" value="25"/>
         
         <label row="19" col="0">技能水平:</label>
-        <input type="range" row="19" col="1" min="1" max="5" value="3"/>
+        <input id="skill" type="range" row="19" col="1" min="1" max="5" value="3"/>
         
         <label row="20" col="0">部门:</label>
-        <combobox row="20" col="1">
+        <combobox id="department" row="20" col="1">
             <option>技术部</option>
             <option>市场部</option>
             <option>人事部</option>
         </combobox>
         
         <label row="21" col="0">任务进度:</label>
-        <progress row="21" col="1" value="60" max="100">60%</progress>
+        <progress id="progress" row="21" col="1" value="60" max="100">60%</progress>
         
         <label row="22" col="0">备注:</label>
-        <entry row="22" col="1" placeholder="请输入备注信息..."></entry>
+        <entry id="remarks" row="22" col="1" placeholder="请输入备注信息..."></entry>
         
         <separator row="23" col="0" colspan="2"/>
         

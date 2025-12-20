@@ -86,18 +86,28 @@ class EntryBuilder extends ComponentBuilder
     protected function buildComponent(): CData
     {
         $type = $this->config['type'] ?? 'normal';
+        $isMultiline = $this->config['multiline'] ?? false;
+        $isNonWrapping = $this->config['nonWrapping'] ?? false;
         
         // 根据类型创建输入框
-        switch ($type) {
-            case 'password':
-                $this->handle = Entry::createPwd();
-                break;
-            case 'search':
-                $this->handle = Entry::createSearch();
-                break;
-            default:
-                $this->handle = Entry::create();
-                break;
+        if ($isMultiline) {
+            if ($isNonWrapping) {
+                $this->handle = Entry::createNonWrappingMultiline();
+            } else {
+                $this->handle = Entry::createMultiline();
+            }
+        } else {
+            switch ($type) {
+                case 'password':
+                    $this->handle = Entry::createPwd();
+                    break;
+                case 'search':
+                    $this->handle = Entry::createSearch();
+                    break;
+                default:
+                    $this->handle = Entry::create();
+                    break;
+            }
         }
 
         // 设置初始值
@@ -198,6 +208,29 @@ class EntryBuilder extends ComponentBuilder
             $this->stateManager->set($this->config['bind'], $value);
         }
         
+        return $this;
+    }
+
+    /**
+     * 设置为多行输入框
+     *
+     * @return $this
+     */
+    public function multiline(): self
+    {
+        $this->config['multiline'] = true;
+        return $this;
+    }
+
+    /**
+     * 设置为不换行多行输入框
+     *
+     * @return $this
+     */
+    public function nonWrapping(): self
+    {
+        $this->config['multiline'] = true;
+        $this->config['nonWrapping'] = true;
         return $this;
     }
 

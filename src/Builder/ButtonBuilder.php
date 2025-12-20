@@ -46,17 +46,39 @@ class ButtonBuilder extends ComponentBuilder
      */
     protected function afterBuild(): void
     {
+        echo "[BUTTON_DEBUG] afterBuild() 被调用，按钮 ID: " . ($this->id ?? 'unknown') . "\n";
+        echo "[BUTTON_DEBUG] 已注册的事件: " . json_encode(array_keys($this->events)) . "\n";
+        
         // 绑定点击事件（支持事件分发器）
+        // 支持 onClick 和 click 两种事件名
+        $callback = null;
+        $eventName = null;
+        
         if (isset($this->events['onClick'])) {
             $callback = $this->events['onClick'];
+            $eventName = 'onClick';
+        } elseif (isset($this->events['click'])) {
+            $callback = $this->events['click'];
+            $eventName = 'click';
+        }
+        
+        if ($callback) {
+            echo "[BUTTON_DEBUG] 绑定 {$eventName} 事件处理器\n";
             $stateManager = $this->stateManager;
             $eventDispatcher = $this->eventDispatcher;
             
-            Button::onClicked($this->handle, function($button) use ($callback, $stateManager, $eventDispatcher) {
+            Button::onClicked($this->handle, function($button) use ($callback, $stateManager, $eventDispatcher, $eventName) {
+                echo "[BUTTON_DEBUG] === 按钮被点击了！===\n";
+                echo "[BUTTON_DEBUG] 按钮 ID: " . ($this->id ?? 'unknown') . "\n";
+                echo "[BUTTON_DEBUG] 事件名: {$eventName}\n";
+                
                 // 通过事件分发器触发（如果可用）
                 if ($eventDispatcher) {
+                    echo "[BUTTON_DEBUG] 触发事件分发器\n";
                     $event = new ButtonClickEvent($this, $stateManager);
                     $eventDispatcher->dispatch($event);
+                } else {
+                    echo "[BUTTON_DEBUG] 没有事件分发器\n";
                 }
                 
                 // 调用传统回调 - 支持1-3个参数
@@ -69,8 +91,14 @@ class ButtonBuilder extends ComponentBuilder
                     $args[] = $eventDispatcher;
                 }
                 
+                echo "[BUTTON_DEBUG] 调用回调函数，参数数量: " . count($args) . "\n";
                 call_user_func_array($callback, $args);
+                echo "[BUTTON_DEBUG] 回调函数调用完成\n";
             });
+            
+            echo "[BUTTON_DEBUG] {$eventName} 事件绑定完成\n";
+        } else {
+            echo "[BUTTON_DEBUG] 警告：没有找到 onClick 或 click 事件处理器\n";
         }
     }
 
