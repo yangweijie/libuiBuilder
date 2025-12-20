@@ -72,8 +72,8 @@ $paginationBox = Builder::hbox()
 
 // 创建表格
 $table = Builder::table()
-    ->headers(['ID', 'Name', 'Email', 'Department', 'Salary'])
-    ->options(['headerVisible'=>false])
+    ->id('dataTable')
+    ->columns(['ID', 'Name', 'Email', 'Department', 'Salary'])
     ->data($sampleData);
 
 // 主容器
@@ -95,7 +95,8 @@ $searchBtn->onClick(function() use ($filterEntry) {
 
 $clearBtn->onClick(function() use ($filterEntry) {
     echo "Clear clicked\n";
-    // 这里不能直接修改 entry，因为 Builder 模式中的控件可能没有 setText 方法
+    // 使用统一API清空输入框
+    $filterEntry->setValue('');
 });
 
 $prevBtn->onClick(function() {

@@ -57,11 +57,11 @@ class SliderBuilder extends ComponentBuilder
     }
 
     /**
-     * 构建滑块
+     * 构建滑块组件
      *
      * @return CData 滑块句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         $min = $this->config['min'] ?? 0;
         $max = $this->config['max'] ?? 100;
@@ -74,6 +74,16 @@ class SliderBuilder extends ComponentBuilder
             Slider::setValue($this->handle, $this->config['value']);
         }
 
+        return $this->handle;
+    }
+
+    /**
+     * 构建后处理 - 绑定事件
+     *
+     * @return void
+     */
+    protected function afterBuild(): void
+    {
         // 绑定值改变事件
         if (isset($this->events['onChange']) || isset($this->config['bind'])) {
             $callback = $this->events['onChange'] ?? null;
@@ -98,13 +108,6 @@ class SliderBuilder extends ComponentBuilder
                 }
             });
         }
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
-        }
-
-        return $this->handle;
     }
 
     /**
@@ -152,4 +155,6 @@ class SliderBuilder extends ComponentBuilder
         
         return $this;
     }
+
+    
 }

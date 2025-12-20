@@ -17,17 +17,10 @@ class SeparatorBuilder extends ComponentBuilder
      *
      * @return CData 分隔线句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         // 创建水平分隔线
-        $this->handle = Separator::createHorizontal();
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
-        }
-
-        return $this->handle;
+        return Separator::createHorizontal();
     }
 
     /**

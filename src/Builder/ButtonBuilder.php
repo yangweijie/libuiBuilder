@@ -31,13 +31,21 @@ class ButtonBuilder extends ComponentBuilder
      *
      * @return CData 按钮句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         $text = $this->config['text'] ?? 'Button';
         
         // 创建按钮
-        $this->handle = Button::create($text);
+        return Button::create($text);
+    }
 
+    /**
+     * 构建后处理（绑定事件等）
+     *
+     * @return void
+     */
+    protected function afterBuild(): void
+    {
         // 绑定点击事件（支持事件分发器）
         if (isset($this->events['onClick'])) {
             $callback = $this->events['onClick'];
@@ -64,13 +72,6 @@ class ButtonBuilder extends ComponentBuilder
                 call_user_func_array($callback, $args);
             });
         }
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
-        }
-
-        return $this->handle;
     }
 
     /**
@@ -108,5 +109,47 @@ class ButtonBuilder extends ComponentBuilder
         }
         
         return $this;
+    }
+
+    /**
+     * 获取组件值（覆盖默认实现）
+     * 
+     * 对于按钮，值优先使用 text 属性
+     *
+     * @return mixed
+     */
+    public function getValue(): mixed
+    {
+        return $this->config['value'] ?? $this->config['text'] ?? null;
+    }
+
+    /**
+     * 设置组件值（覆盖默认实现）
+     * 
+     * 对于按钮，如果是字符串则更新文本
+     *
+     * @param mixed $value
+     * @return self
+     */
+    public function setValue(mixed $value): self
+    {
+        $this->config['value'] = $value;
+        if (is_string($value)) {
+            $this->setText($value);
+        }
+        return $this;
+    }
+
+    /**
+     * 更新组件显示值（覆盖默认实现）
+     *
+     * @param mixed $value
+     * @return void
+     */
+    protected function updateComponentValue(mixed $value): void
+    {
+        if (is_string($value)) {
+            $this->setText($value);
+        }
     }
 }

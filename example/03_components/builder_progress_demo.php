@@ -90,7 +90,7 @@ $app = Builder::window()
                             ->text('当前任务: 无')
                             ->id('taskLabel'),
                         
-                        Builder::progressBar()
+                        Builder::progress()
                             ->id('progressBar')
                             ->value(0),
                         
@@ -111,7 +111,7 @@ $app = Builder::window()
                     ->id('taskSelector')
                     ->items(['文件下载', '数据处理', '图像渲染', '计算任务', '网络请求'])
                     ->selected(0)
-                    ->onSelected(function($index, $item, $component) use ($state) {
+                    ->onChange(function($index, $value) {
                         $state->set('taskName', $item);
                         echo "选择了任务: {$item}\n";
                     }),

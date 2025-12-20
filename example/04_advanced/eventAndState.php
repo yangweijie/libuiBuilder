@@ -10,6 +10,26 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 App::init();
 
+// 密码强度计算函数
+function calculateStrength($password) {
+    if (empty($password)) return '无';
+    $length = strlen($password);
+    
+    if ($length < 6) return '弱';
+    if ($length < 10) return '中等';
+    
+    $hasUpper = preg_match('/[A-Z]/', $password);
+    $hasLower = preg_match('/[a-z]/', $password);
+    $hasNumber = preg_match('/[0-9]/', $password);
+    $hasSpecial = preg_match('/[^A-Za-z0-9]/', $password);
+    
+    $strengthScore = ($hasUpper ? 1 : 0) + ($hasLower ? 1 : 0) + ($hasNumber ? 1 : 0) + ($hasSpecial ? 1 : 0);
+    
+    if ($strengthScore >= 3) return '强';
+    if ($strengthScore >= 2) return '中等';
+    return '弱';
+}
+
 // 初始化状态
 $state = StateManager::instance();
 $state->set('username', '');

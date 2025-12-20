@@ -6,6 +6,7 @@ namespace Kingbes\Libui\View\Builder;
 
 use FFI\CData;
 use Kingbes\Libui\View\State\StateManager;
+use Kingbes\Libui\View\State\ComponentInterface;
 use Kingbes\Libui\View\Core\Event\EventDispatcher;
 use Kingbes\Libui\View\Core\Config\ConfigManager;
 
@@ -15,7 +16,7 @@ use Kingbes\Libui\View\Core\Config\ConfigManager;
  * 所有 UI 组件构建器的基类，提供链式调用和通用功能
  * 支持依赖注入和事件系统
  */
-abstract class ComponentBuilder
+abstract class ComponentBuilder implements ComponentInterface
 {
     /** @var array 组件配置 */
     protected array $config = [];
@@ -205,6 +206,8 @@ abstract class ComponentBuilder
         return $this;
     }
 
+    
+
     /**
      * 获取事件处理器
      *
@@ -251,14 +254,61 @@ abstract class ComponentBuilder
     /**
      * 构建组件
      * 
+     * 使用模板方法模式，统一状态注册逻辑
+     *
+     * @return CData 控件句柄
+     */
+    public function build(): CData
+    {
+        // 调用子类的具体构建逻辑
+        $this->handle = $this->buildComponent();
+        
+        // 调用子类的构建后处理（可选）
+        $this->afterBuild();
+        
+        // 统一的状态注册逻辑
+        if ($this->id && $this->stateManager) {
+            $this->stateManager->registerComponent($this->id, $this);
+        }
+        
+        return $this->handle;
+    }
+
+    /**
+     * 构建具体组件
+     * 
      * 子类必须实现此方法来创建实际的 UI 控件
      *
      * @return CData 控件句柄
      */
-    abstract public function build(): CData;
+    abstract protected function buildComponent(): CData;
 
     /**
-     * 获取组件值（用于状态绑定）
+     * 构建后处理
+     * 
+     * 子类可以覆盖此方法以执行构建后的特殊处理
+     * 如事件绑定等
+     *
+     * @return void
+     */
+    protected function afterBuild(): void
+    {
+        // 默认实现为空，子类可以覆盖
+    }
+
+    
+
+    /**
+     * 获取组件类型
+     *
+     * @return string
+     */
+    abstract public function getType(): string;
+
+    /**
+     * 获取组件值（默认实现）
+     * 
+     * 子类可以覆盖此方法以提供特殊的值获取逻辑
      *
      * @return mixed
      */
@@ -268,21 +318,78 @@ abstract class ComponentBuilder
     }
 
     /**
-     * 设置组件值（用于状态绑定）
+     * 设置组件值（默认实现）
+     * 
+     * 子类可以覆盖此方法以提供特殊的值设置逻辑
      *
      * @param mixed $value
-     * @return $this
+     * @return self
      */
     public function setValue(mixed $value): self
     {
         $this->config['value'] = $value;
+        
+        // 如果组件已构建，尝试更新显示值
+        if ($this->handle) {
+            $this->updateComponentValue($value);
+        }
+        
+        // 更新绑定的状态
+        if (isset($this->config['bind']) && $this->stateManager) {
+            $this->stateManager->set($this->config['bind'], $value);
+        }
+        
         return $this;
     }
 
     /**
-     * 获取组件类型
+     * 更新组件的显示值（默认实现）
+     * 
+     * 子类可以覆盖此方法以实现特定的值更新逻辑
      *
-     * @return string
+     * @param mixed $value
+     * @return void
      */
-    abstract public function getType(): string;
+    protected function updateComponentValue(mixed $value): void
+    {
+        // 默认实现为空，子类可以覆盖
+    }
+
+    /**
+     * 调用组件方法（统一实现）
+     *
+     * @param string $method 方法名
+     * @param mixed ...$args 参数
+     * @return mixed
+     */
+    public function call(string $method, ...$args): mixed
+    {
+        if (method_exists($this, $method)) {
+            return $this->$method(...$args);
+        }
+        
+        throw new \BadMethodCallException("Method {$method} does not exist on " . static::class);
+    }
+
+    /**
+     * 标准状态绑定方法
+     * 
+     * 为支持状态绑定的组件提供统一的绑定逻辑
+     *
+     * @param string $stateKey 状态键名
+     * @return self
+     */
+    public function bind(string $stateKey): self
+    {
+        $this->config['bind'] = $stateKey;
+        
+        // 如果有状态管理器，自动同步初始值
+        if ($this->stateManager && $this->stateManager->has($stateKey)) {
+            $this->config['value'] = $this->stateManager->get($stateKey);
+        }
+        
+        return $this;
+    }
+
+    
 }

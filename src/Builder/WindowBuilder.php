@@ -69,6 +69,8 @@ class WindowBuilder extends ComponentBuilder
         return $this;
     }
 
+    
+
     /**
      * 设置窗口是否有菜单条
      *
@@ -158,11 +160,11 @@ class WindowBuilder extends ComponentBuilder
     }
 
     /**
-     * 构建窗口
+     * 构建窗口组件
      *
      * @return CData 窗口句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         // 获取配置
         $title = $this->config['title'] ?? 'Untitled Window';
@@ -188,6 +190,17 @@ class WindowBuilder extends ComponentBuilder
             // 如果只有一个子组件，直接设置
             if (count($this->children) === 1) {
                 $child = $this->children[0];
+                
+                // 如果是 Grid 且有扩展属性，在构建前设置
+                if ($child instanceof GridBuilder) {
+                    if ($child->getConfig('hexpand')) {
+                        $child->setConfig('window_hexpand', true);
+                    }
+                    if ($child->getConfig('vexpand')) {
+                        $child->setConfig('window_vexpand', true);
+                    }
+                }
+                
                 $childHandle = $child->build();
                 Window::setChild($this->handle, $childHandle);
             } else {
@@ -197,15 +210,18 @@ class WindowBuilder extends ComponentBuilder
             }
         }
 
+        return $this->handle;
+    }
+
+    /**
+     * 构建后处理 - 绑定事件
+     *
+     * @return void
+     */
+    protected function afterBuild(): void
+    {
         // 绑定事件
         $this->bindEvents();
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
-        }
-
-        return $this->handle;
     }
 
     /**
@@ -284,4 +300,28 @@ class WindowBuilder extends ComponentBuilder
     {
         return $this->children;
     }
+
+    /**
+     * 获取组件值（实现ComponentInterface）
+     *
+     * @return mixed
+     */
+    public function getValue(): mixed
+    {
+        return $this->config['value'] ?? null;
+    }
+
+    /**
+     * 设置组件值（实现ComponentInterface）
+     *
+     * @param mixed $value
+     * @return self
+     */
+    public function setValue(mixed $value): self
+    {
+        $this->config['value'] = $value;
+        return $this;
+    }
+
+    
 }

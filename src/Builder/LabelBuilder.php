@@ -25,6 +25,8 @@ class LabelBuilder extends ComponentBuilder
         return $this;
     }
 
+    
+
     /**
      * 设置对齐方式
      *
@@ -48,19 +50,12 @@ class LabelBuilder extends ComponentBuilder
      *
      * @return CData 标签句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         $text = $this->config['text'] ?? 'Label';
         
         // 创建标签
-        $this->handle = Label::create($text);
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
-        }
-
-        return $this->handle;
+        return Label::create($text);
     }
 
     /**
@@ -98,5 +93,47 @@ class LabelBuilder extends ComponentBuilder
         }
         
         return $this;
+    }
+
+    /**
+     * 获取组件值（覆盖默认实现）
+     * 
+     * 对于标签，值优先使用 text 属性
+     *
+     * @return mixed
+     */
+    public function getValue(): mixed
+    {
+        return $this->config['value'] ?? $this->config['text'] ?? null;
+    }
+
+    /**
+     * 设置组件值（覆盖默认实现）
+     * 
+     * 对于标签，如果是字符串则更新文本
+     *
+     * @param mixed $value
+     * @return self
+     */
+    public function setValue(mixed $value): self
+    {
+        $this->config['value'] = $value;
+        if (is_string($value)) {
+            $this->setText($value);
+        }
+        return $this;
+    }
+
+    /**
+     * 更新组件显示值（覆盖默认实现）
+     *
+     * @param mixed $value
+     * @return void
+     */
+    protected function updateComponentValue(mixed $value): void
+    {
+        if (is_string($value)) {
+            $this->setText($value);
+        }
     }
 }

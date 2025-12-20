@@ -47,5 +47,7 @@ $handlers = [
 ];
 
 // 渲染 HTML 模板
-$app = HtmlRenderer::render(__DIR__ . '/../views/basic_button.ui.html', $handlers);
+$renderer = new HtmlRenderer();
+$app = $renderer->render(__DIR__ . '/../views/basic_button.ui.html', $handlers);
 $app->show();
+App::main();

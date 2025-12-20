@@ -39,8 +39,6 @@ $displayGrid->place(
     Builder::entry()
         ->id('display')
         ->readOnly(true)
-        ->align('end')
-        ->text('0')
         ->bind('display'),
     0, 0
 );
@@ -215,7 +213,6 @@ $app = Builder::window()
     ->title('计算器')
     ->size(150, 200)
     ->margined(true)
-    ->centered(true)
     ->contains([
         Builder::vbox()->padded(true)->contains([
             // 显示屏

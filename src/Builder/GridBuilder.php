@@ -80,6 +80,26 @@ class GridBuilder extends ComponentBuilder
     }
 
     /**
+     * 添加组件到指定位置（兼容旧版本）
+     *
+     * @param ComponentBuilder $component 组件
+     * @param int $row 行索引
+     * @param int $col 列索引
+     * @param int $rowspan 行跨度
+     * @param int $colspan 列跨度
+     * @return $this
+     */
+    public function place(
+        ComponentBuilder $component,
+        int $row,
+        int $col,
+        int $rowspan = 1,
+        int $colspan = 1
+    ): self {
+        return $this->append($component, $row, $col, $rowspan, $colspan, false, 'fill', false, 'fill');
+    }
+
+    /**
      * 快速创建表单布局
      *
      * @param array $fields 字段数组 ['label' => LabelBuilder, 'control' => ComponentBuilder]
@@ -105,11 +125,11 @@ class GridBuilder extends ComponentBuilder
     }
 
     /**
-     * 构建网格
+     * 构建网格组件
      *
      * @return CData 网格句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         // 创建网格
         $this->handle = Grid::create();
@@ -145,11 +165,6 @@ class GridBuilder extends ComponentBuilder
                 $vexpand,
                 $valign
             );
-        }
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
         }
 
         return $this->handle;
@@ -190,4 +205,28 @@ class GridBuilder extends ComponentBuilder
     {
         return $this->items;
     }
+
+    /**
+     * 获取组件值（实现ComponentInterface）
+     *
+     * @return mixed
+     */
+    public function getValue(): mixed
+    {
+        return $this->config['value'] ?? null;
+    }
+
+    /**
+     * 设置组件值（实现ComponentInterface）
+     *
+     * @param mixed $value
+     * @return self
+     */
+    public function setValue(mixed $value): self
+    {
+        $this->config['value'] = $value;
+        return $this;
+    }
+
+    
 }

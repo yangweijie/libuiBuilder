@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<ui version="1.0">
+<html>
+<head>
+    <title>HTML 标签别名演示</title>
+</head>
+<body>
 <window title="HTML 标签别名演示" size="600,800">
     <grid padded="true">
         <!-- 标题 -->
@@ -28,12 +32,12 @@
         <label row="8" col="0">标准标签:</label>
         <label row="8" col="1">对应组件:</label>
         
-        <label row="9" col="0">&lt;select&gt;</label>
-        <select row="9" col="1">
+        <label row="9" col="0">&lt;combobox&gt;</label>
+        <combobox row="9" col="1">
             <option>选项1</option>
             <option>选项2</option>
             <option>选项3</option>
-        </select>
+        </combobox>
         
         <label row="10" col="0">&lt;progress&gt;</label>
         <progress row="10" col="1" value="75" max="100">75%</progress>
@@ -41,8 +45,8 @@
         <label row="11" col="0">&lt;hr&gt;</label>
         <hr row="11" col="1"/>
         
-        <label row="12" col="0">&lt;textarea&gt;</label>
-        <textarea row="12" col="1" rowspan="3" placeholder="多行文本输入..."></textarea>
+        <label row="12" col="0">&lt;entry&gt; (多行)</label>
+        <entry row="12" col="1" rowspan="3" placeholder="多行文本输入..."></entry>
         
         <separator row="15" col="0" colspan="2"/>
         
@@ -59,17 +63,17 @@
         <input type="range" row="19" col="1" min="1" max="5" value="3"/>
         
         <label row="20" col="0">部门:</label>
-        <select row="20" col="1">
+        <combobox row="20" col="1">
             <option>技术部</option>
             <option>市场部</option>
             <option>人事部</option>
-        </select>
+        </combobox>
         
         <label row="21" col="0">任务进度:</label>
         <progress row="21" col="1" value="60" max="100">60%</progress>
         
         <label row="22" col="0">备注:</label>
-        <textarea row="22" col="1" placeholder="请输入备注信息..."></textarea>
+        <entry row="22" col="1" placeholder="请输入备注信息..."></entry>
         
         <separator row="23" col="0" colspan="2"/>
         
@@ -81,4 +85,5 @@
         </hbox>
     </grid>
 </window>
-</ui>
+</body>
+</html>

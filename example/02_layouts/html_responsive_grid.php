@@ -45,5 +45,6 @@ $handlers = [
 ];
 
 // 渲染 HTML 模板
-$app = HtmlRenderer::render(__DIR__ . '/../views/layouts/responsive_grid.ui.html', $handlers);
+$renderer = new HtmlRenderer();
+$app = $renderer->render(__DIR__ . '/../views/layouts/responsive_grid.ui.html', $handlers);
 $app->show();

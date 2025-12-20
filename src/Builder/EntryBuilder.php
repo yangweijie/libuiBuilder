@@ -79,11 +79,11 @@ class EntryBuilder extends ComponentBuilder
     }
 
     /**
-     * 构建输入框
+     * 构建输入框组件
      *
      * @return CData 输入框句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         $type = $this->config['type'] ?? 'normal';
         
@@ -110,6 +110,16 @@ class EntryBuilder extends ComponentBuilder
             Entry::setReadOnly($this->handle, $this->config['readOnly']);
         }
 
+        return $this->handle;
+    }
+
+    /**
+     * 构建后处理 - 绑定事件
+     *
+     * @return void
+     */
+    protected function afterBuild(): void
+    {
         // 绑定值改变事件
         if (isset($this->events['onChange']) || isset($this->config['bind'])) {
             $callback = $this->events['onChange'] ?? null;
@@ -144,13 +154,6 @@ class EntryBuilder extends ComponentBuilder
                 $oldValue = $value;
             });
         }
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
-        }
-
-        return $this->handle;
     }
 
     /**
@@ -197,4 +200,6 @@ class EntryBuilder extends ComponentBuilder
         
         return $this;
     }
+
+    
 }

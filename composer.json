@@ -18,8 +18,6 @@
   "autoload": {
     "psr-4": {
       "Kingbes\\Libui\\View\\": "src/",
-      "Kingbes\\Libui\\View\\Builder\\": "src/Builder/",
-      "Kingbes\\Libui\\View\\State\\": "src/State/",
       "Tests\\": "tests/"
     },
     "files": [
@@ -51,8 +49,12 @@
     "sort-packages": true
   },
   "scripts": {
-    "test": "pest",
+    "test": "./run_tests.sh",
+    "test-basic": "./vendor/bin/pest tests/BasicTest.php tests/Builder/BasicWindowTest.php tests/Builder/BuilderFactoryTest.php tests/Builder/WindowTest.php tests/Builder/ComponentTest.php tests/Builder/CompleteBuilderTest.php tests/Unit/ExampleTest.php tests/Unit/SimpleTest.php tests/Feature/ExampleTest.php tests/Core/Config/ConfigTest.php tests/Core/Event/SimpleEventTest.php tests/Core/Event/ExtraEventTest.php tests/Core/Container/SimpleContainerTest.php tests/Core/Container/AdvancedContainerTest.php tests/State/BasicStateTest.php tests/State/ExtraStateTest.php",
+    "test-all": "./vendor/bin/pest tests/BasicTest.php tests/Builder/BasicWindowTest.php tests/Builder/BuilderFactoryTest.php tests/Builder/CompleteBuilderTest.php tests/Builder/ComponentTest.php tests/Builder/SimpleWindowBuilderTest.php tests/Builder/WindowTest.php tests/Unit/ExampleTest.php tests/Unit/SimpleTest.php tests/Unit/HtmlRendererTest.php tests/Unit/HtmlPreviewRendererTest.php tests/Feature/ExampleTest.php tests/Core/Config/ConfigTest.php tests/Core/Config/SimpleConfigManagerTest.php tests/Core/Container/AdvancedContainerTest.php tests/Core/Container/SimpleContainerTest.php tests/Core/Event/AdvancedEventTest.php tests/Core/Event/ExtraEventTest.php tests/Core/Event/SimpleEventTest.php tests/State/AdvancedStateTest.php tests/State/BasicStateTest.php tests/State/ExtraStateTest.php",
+    "pest-tests": "./vendor/bin/pest tests/BasicTest.php tests/Builder/BasicWindowTest.php tests/Builder/BuilderFactoryTest.php tests/Builder/CompleteBuilderTest.php tests/Builder/ComponentTest.php tests/Builder/SimpleWindowBuilderTest.php tests/Builder/WindowTest.php tests/Unit/ExampleTest.php tests/Unit/SimpleTest.php tests/Unit/HtmlRendererTest.php tests/Unit/HtmlPreviewRendererTest.php tests/Feature/ExampleTest.php tests/Core/Config/ConfigTest.php tests/Core/Config/SimpleConfigManagerTest.php tests/Core/Container/AdvancedContainerTest.php tests/Core/Container/SimpleContainerTest.php tests/Core/Event/AdvancedEventTest.php tests/Core/Event/ExtraEventTest.php tests/Core/Event/SimpleEventTest.php tests/State/AdvancedStateTest.php tests/State/BasicStateTest.php tests/State/ExtraStateTest.php",
     "test-coverage": "pest --coverage",
+    "test-dir": "./pest-all",
     "docs": "@php tools/GenerateDocs.php",
     "migrate": "@php tools/MigrateLegacyCode.php"
   }

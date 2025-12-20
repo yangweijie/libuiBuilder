@@ -138,5 +138,6 @@ $stateManager->watch('display', function($newValue) {
 });
 
 // 从 HTML 渲染
-$app = HtmlRenderer::render(__DIR__ . '/../views/calculator.ui.html', $handlers);
+$renderer = new HtmlRenderer();
+$app = $renderer->render(__DIR__ . '/../views/calculator.ui.html', $handlers);
 $app->show();

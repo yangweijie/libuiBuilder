@@ -56,6 +56,8 @@ function validateAge($age) {
     return '';
 }
 
+
+
 $app = Builder::window()
     ->title('表单验证示例 - Builder API')
     ->size(500, 600)
@@ -121,8 +123,9 @@ $app = Builder::window()
                     ],
                     [
                         'label' => Builder::label()->text('密码:'),
-                        'control' => Builder::passwordEntry()
+                        'control' => Builder::entry()
                             ->id('passwordInput')
+                            ->password()
                             ->placeholder('请输入密码')
                             ->onChange(function($value, $component) use ($state) {
                                 $state->set('formData.password', $value);
@@ -155,8 +158,9 @@ $app = Builder::window()
                     ],
                     [
                         'label' => Builder::label()->text('确认密码:'),
-                        'control' => Builder::passwordEntry()
+                        'control' => Builder::entry()
                             ->id('confirmPasswordInput')
+                            ->password()
                             ->placeholder('请再次输入密码')
                             ->onChange(function($value, $component) use ($state) {
                                 $state->set('formData.confirmPassword', $value);

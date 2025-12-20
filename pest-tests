@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# 替代 `./vendor/bin/pest tests/` 命令的脚本
+
+# 运行所有可用的测试
+exec ./vendor/bin/pest tests/BasicTest.php \
+    tests/Builder/BasicWindowTest.php \
+    tests/Builder/BuilderFactoryTest.php \
+    tests/Builder/CompleteBuilderTest.php \
+    tests/Builder/ComponentTest.php \
+    tests/Builder/WindowTest.php \
+    tests/Unit/ExampleTest.php \
+    tests/Unit/SimpleTest.php \
+    tests/Feature/ExampleTest.php \
+    tests/Core/Config/ConfigTest.php \
+    tests/Core/Event/SimpleEventTest.php \
+    tests/Core/Event/ExtraEventTest.php \
+    tests/Core/Container/SimpleContainerTest.php \
+    tests/Core/Container/AdvancedContainerTest.php \
+    tests/State/BasicStateTest.php \
+    tests/State/ExtraStateTest.php

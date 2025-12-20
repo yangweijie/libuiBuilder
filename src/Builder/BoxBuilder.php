@@ -82,11 +82,11 @@ class BoxBuilder extends ComponentBuilder
     }
 
     /**
-     * 构建盒子
+     * 构建盒子组件
      *
      * @return CData 盒子句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         $direction = $this->config['direction'] ?? 'vertical';
         
@@ -116,11 +116,6 @@ class BoxBuilder extends ComponentBuilder
             }
         }
 
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
-        }
-
         return $this->handle;
     }
 
@@ -143,4 +138,28 @@ class BoxBuilder extends ComponentBuilder
     {
         return $this->children;
     }
+
+    /**
+     * 获取组件值（实现ComponentInterface）
+     *
+     * @return mixed
+     */
+    public function getValue(): mixed
+    {
+        return $this->config['value'] ?? null;
+    }
+
+    /**
+     * 设置组件值（实现ComponentInterface）
+     *
+     * @param mixed $value
+     * @return self
+     */
+    public function setValue(mixed $value): self
+    {
+        $this->config['value'] = $value;
+        return $this;
+    }
+
+    
 }

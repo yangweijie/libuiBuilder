@@ -74,11 +74,11 @@ class ComboboxBuilder extends ComponentBuilder
     }
 
     /**
-     * 构建组合框
+     * 构建组合框组件
      *
      * @return CData 组合框句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         // 创建组合框
         $this->handle = Combobox::create();
@@ -93,6 +93,16 @@ class ComboboxBuilder extends ComponentBuilder
             Combobox::setSelected($this->handle, $this->config['selected']);
         }
 
+        return $this->handle;
+    }
+
+    /**
+     * 构建后处理 - 绑定事件
+     *
+     * @return void
+     */
+    protected function afterBuild(): void
+    {
         // 绑定选中改变事件
         if (isset($this->events['onChange']) || isset($this->config['bind'])) {
             $callback = $this->events['onChange'] ?? null;
@@ -119,13 +129,6 @@ class ComboboxBuilder extends ComponentBuilder
                 }
             });
         }
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
-        }
-
-        return $this->handle;
     }
 
     /**
@@ -181,4 +184,34 @@ class ComboboxBuilder extends ComponentBuilder
         
         return $this;
     }
+
+    /**
+     * 设置组件值（实现ComponentInterface）
+     *
+     * @param mixed $value
+     * @return self
+     */
+    public function setValue(mixed $value): self
+    {
+        $this->config['value'] = $value;
+        
+        // 查找值的索引
+        $index = array_search($value, $this->items, true);
+        if ($index !== false) {
+            $this->config['selected'] = $index;
+            
+            if ($this->handle) {
+                Combobox::setSelected($this->handle, $index);
+            }
+        }
+        
+        // 更新绑定的状态
+        if (isset($this->config['bind']) && $this->stateManager) {
+            $this->stateManager->set($this->config['bind'], $value);
+        }
+        
+        return $this;
+    }
+
+    
 }

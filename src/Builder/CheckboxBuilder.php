@@ -55,11 +55,11 @@ class CheckboxBuilder extends ComponentBuilder
     }
 
     /**
-     * 构建复选框
+     * 构建复选框组件
      *
      * @return CData 复选框句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         $text = $this->config['text'] ?? '';
         
@@ -71,6 +71,16 @@ class CheckboxBuilder extends ComponentBuilder
             Checkbox::setChecked($this->handle, $this->config['checked']);
         }
 
+        return $this->handle;
+    }
+
+    /**
+     * 构建后处理 - 绑定事件
+     *
+     * @return void
+     */
+    protected function afterBuild(): void
+    {
         // 绑定状态改变事件
         if (isset($this->events['onChange']) || isset($this->config['bind'])) {
             $callback = $this->events['onChange'] ?? null;
@@ -95,13 +105,6 @@ class CheckboxBuilder extends ComponentBuilder
                 }
             });
         }
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
-        }
-
-        return $this->handle;
     }
 
     /**
@@ -148,4 +151,30 @@ class CheckboxBuilder extends ComponentBuilder
         
         return $this;
     }
+
+    /**
+     * 设置组件值（实现ComponentInterface）
+     *
+     * @param mixed $value
+     * @return self
+     */
+    public function setValue(mixed $value): self
+    {
+        $checked = (bool)$value;
+        $this->config['value'] = $checked;
+        $this->config['checked'] = $checked;
+        
+        if ($this->handle) {
+            Checkbox::setChecked($this->handle, $checked);
+        }
+        
+        // 更新绑定的状态
+        if (isset($this->config['bind']) && $this->stateManager) {
+            $this->stateManager->set($this->config['bind'], $checked);
+        }
+        
+        return $this;
+    }
+
+    
 }

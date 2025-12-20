@@ -43,11 +43,11 @@ class ProgressBarBuilder extends ComponentBuilder
     }
 
     /**
-     * 构建进度条
+     * 构建进度条组件
      *
      * @return CData 进度条句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         // 创建进度条
         $this->handle = ProgressBar::create();
@@ -55,11 +55,6 @@ class ProgressBarBuilder extends ComponentBuilder
         // 设置初始值
         if (isset($this->config['value'])) {
             ProgressBar::setValue($this->handle, $this->config['value']);
-        }
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
         }
 
         return $this->handle;
@@ -110,4 +105,6 @@ class ProgressBarBuilder extends ComponentBuilder
         
         return $this;
     }
+
+    
 }

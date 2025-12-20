@@ -20,7 +20,7 @@ class TableBuilder extends ComponentBuilder
     protected array $data = [];
 
     /** @var callable|null 行选择回调 */
-    protected ?callable $rowSelectedCallback = null;
+    protected $rowSelectedCallback = null;
 
     /**
      * 设置列
@@ -61,11 +61,11 @@ class TableBuilder extends ComponentBuilder
     }
 
     /**
-     * 构建表格
+     * 构建表格组件
      *
      * @return CData 表格句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         $columnCount = $this->config['columnCount'] ?? 0;
         $rowCount = $this->config['rowCount'] ?? 0;
@@ -95,6 +95,16 @@ class TableBuilder extends ComponentBuilder
         // 创建表格
         $this->handle = Table::create($model, -1);
 
+        return $this->handle;
+    }
+
+    /**
+     * 构建后处理 - 绑定事件
+     *
+     * @return void
+     */
+    protected function afterBuild(): void
+    {
         // 绑定行选择事件
         if ($this->rowSelectedCallback) {
             $callback = $this->rowSelectedCallback;
@@ -108,13 +118,6 @@ class TableBuilder extends ComponentBuilder
                 }
             });
         }
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
-        }
-
-        return $this->handle;
     }
 
     /**
@@ -130,11 +133,15 @@ class TableBuilder extends ComponentBuilder
     /**
      * 更新表格数据
      *
-     * @param array $data 新数据
+     * @param mixed $data 新数据
      * @return $this
      */
-    public function setValue(array $data): self
+    public function setValue(mixed $data): self
     {
+        if (!is_array($data)) {
+            throw new \InvalidArgumentException('TableBuilder setValue expects array data');
+        }
+        
         $this->data = $data;
         $this->config['rowCount'] = count($data);
         
@@ -153,4 +160,6 @@ class TableBuilder extends ComponentBuilder
     {
         return $this->data;
     }
+
+    
 }

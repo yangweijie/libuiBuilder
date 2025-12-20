@@ -52,11 +52,11 @@ class GroupBuilder extends ComponentBuilder
     }
 
     /**
-     * 构建组容器
+     * 构建组容器组件
      *
      * @return CData 组容器句柄
      */
-    public function build(): CData
+    protected function buildComponent(): CData
     {
         $title = $this->config['title'] ?? '';
 
@@ -72,11 +72,6 @@ class GroupBuilder extends ComponentBuilder
         if ($this->child) {
             $childHandle = $this->child->build();
             Group::setChild($this->handle, $childHandle);
-        }
-
-        // 注册到状态管理器
-        if ($this->id && $this->stateManager) {
-            $this->stateManager->registerComponent($this->id, $this);
         }
 
         return $this->handle;
@@ -101,4 +96,28 @@ class GroupBuilder extends ComponentBuilder
     {
         return $this->child;
     }
+
+    /**
+     * 获取组件值（实现ComponentInterface）
+     *
+     * @return mixed
+     */
+    public function getValue(): mixed
+    {
+        return $this->config['value'] ?? null;
+    }
+
+    /**
+     * 设置组件值（实现ComponentInterface）
+     *
+     * @param mixed $value
+     * @return self
+     */
+    public function setValue(mixed $value): self
+    {
+        $this->config['value'] = $value;
+        return $this;
+    }
+
+    
 }

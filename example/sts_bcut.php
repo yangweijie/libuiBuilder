@@ -61,7 +61,8 @@ $handlers = [
 ];
 
 // 渲染HTML界面
-$app = HtmlRenderer::render(__DIR__.'/views/sts_bcut.ui.html', $handlers);
+$renderer = new HtmlRenderer();
+$app = $renderer->render(__DIR__.'/views/sts_bcut.ui.html', $handlers);
 
 // 显示窗口
 $app->show();

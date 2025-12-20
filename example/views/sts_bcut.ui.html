@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<ui version="1.0">
-  <window title="STS-Bcut v1.0.4" size="800,600" margined="true">
+<html>
+<head>
+    <title>STS-Bcut v1.0.4</title>
+</head>
+<body>
+<window title="STS-Bcut v1.0.4" size="800,600" margined="true">
     <grid padded="true">
       <!-- 左侧控制区 -->
       <grid row="0" col="0" rowspan="2" align="start,start">
@@ -27,20 +31,18 @@
       
       <!-- 右侧文件列表区 -->
       <grid row="0" col="1" rowspan="2" align="fill,fill">
-        <table columns="文件名,文件路径">
+        <vbox padded="true">
           <!-- 表头 -->
-          <grid row="0" col="0" align="center,center">
+          <hbox padded="false">
             <label align="center,center">文件名</label>
-          </grid>
-          <grid row="0" col="1" align="center,center">
             <label align="center,center">文件路径</label>
-          </grid>
+          </hbox>
+          
+          <separator/>
           
           <!-- 空白区域提示 -->
-          <grid row="1" col="0" colspan="2" align="center,center">
-            <label>拖动以添加...</label>
-          </grid>
-        </table>
+          <label align="center,center">拖动以添加...</label>
+        </vbox>
       </grid>
       
       <!-- 底部功能区 -->
@@ -52,4 +54,5 @@
       </grid>
     </grid>
   </window>
-</ui>
+</body>
+</html>
