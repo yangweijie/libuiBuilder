@@ -8,12 +8,14 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use DOMXPath;
+use InvalidArgumentException;
 use Kingbes\Libui\View\Builder\Builder;
 use Kingbes\Libui\View\Builder\WindowBuilder;
 use Kingbes\Libui\View\Builder\GridBuilder;
 use Kingbes\Libui\View\Builder\ComponentBuilder;
 use Kingbes\Libui\View\State\StateManager;
 use Kingbes\Libui\View\State\ComponentRef;
+use RuntimeException;
 
 /**
  * HTML模板渲染器 - 将HTML模板转换为libuiBuilder组件
@@ -80,7 +82,7 @@ class HtmlRenderer
     private function loadHtml(string $htmlFile): string
     {
         if (!file_exists($htmlFile)) {
-            throw new \InvalidArgumentException("HTML file not found: {$htmlFile}");
+            throw new InvalidArgumentException("HTML file not found: {$htmlFile}");
         }
         
         return file_get_contents($htmlFile);
@@ -158,7 +160,7 @@ class HtmlRenderer
         $body = $this->dom->getElementsByTagName('body')->item(0);
         
         if (!$body) {
-            throw new \RuntimeException('No body element found in HTML');
+            throw new RuntimeException('No body element found in HTML');
         }
         
         foreach ($body->childNodes as $child) {
@@ -167,7 +169,7 @@ class HtmlRenderer
             }
         }
         
-        throw new \RuntimeException('No root element found in HTML body');
+        throw new RuntimeException('No root element found in HTML body');
     }
 
     /**
@@ -242,14 +244,14 @@ class HtmlRenderer
     {
         $templateId = $element->getAttribute('ref');
         if (!$templateId || !isset($this->templates[$templateId])) {
-            throw new \InvalidArgumentException("Template not found: {$templateId}");
+            throw new InvalidArgumentException("Template not found: {$templateId}");
         }
         
         $template = $this->templates[$templateId];
         $templateElement = $template->firstElementChild;
         
         if (!$templateElement) {
-            throw new \RuntimeException("Template {$templateId} is empty");
+            throw new RuntimeException("Template {$templateId} is empty");
         }
         
         // 克隆模板元素
@@ -321,7 +323,7 @@ class HtmlRenderer
             'template' => null, // 模板标签在提取时处理
             'use' => null, // use 标签在 renderUseElement 中处理
             
-            default => throw new \InvalidArgumentException("Unsupported tag: {$tagName}")
+            default => throw new InvalidArgumentException("Unsupported tag: {$tagName}")
         };
     }
 

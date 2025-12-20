@@ -26,13 +26,36 @@ class StateManager
     public function set(string $key, $value): void
     {
         $oldValue = $this->state[$key] ?? null;
+        echo "[STATEMANAGER_DEBUG] 设置状态: {$key} = '{$value}' (旧值: '{$oldValue}')\n";
         $this->state[$key] = $value;
+        
+        // 处理嵌套字段同步（如 formData.username 同步到 formData 数组）
+        if (strpos($key, '.') !== false) {
+            list($arrayKey, $field) = explode('.', $key, 2);
+            if (isset($this->state[$arrayKey]) && is_array($this->state[$arrayKey])) {
+                echo "[STATEMANAGER_DEBUG] 同步更新数组 {$arrayKey}.{$field} = '{$value}'\n";
+                $this->state[$arrayKey][$field] = $value;
+                
+                // 通知数组监听者
+                if (isset($this->watchers[$arrayKey])) {
+                    echo "[STATEMANAGER_DEBUG] 通知数组 {$arrayKey} 的监听者\n";
+                    foreach ($this->watchers[$arrayKey] as $callback) {
+                        $callback($this->state[$arrayKey], $this->state[$arrayKey], $arrayKey);
+                    }
+                }
+            }
+        }
+        
+        echo "[STATEMANAGER_DEBUG] 状态数组现在包含: " . json_encode(array_keys($this->state)) . "\n";
 
         // 通知监听者
         if (isset($this->watchers[$key])) {
+            echo "[STATEMANAGER_DEBUG] 通知 {$key} 的监听者，数量: " . count($this->watchers[$key]) . "\n";
             foreach ($this->watchers[$key] as $callback) {
                 $callback($value, $oldValue, $key);
             }
+        } else {
+            echo "[STATEMANAGER_DEBUG] 没有找到 {$key} 的监听者\n";
         }
     }
 
@@ -41,7 +64,12 @@ class StateManager
      */
     public function get(string $key, $default = null)
     {
-        return $this->state[$key] ?? $default;
+        $value = $this->state[$key] ?? $default;
+        echo "[STATEMANAGER_DEBUG] 获取状态: {$key} = '{$value}'\n";
+        if ($key === 'formData') {
+            echo "[STATEMANAGER_DEBUG] formData详情: " . json_encode($this->state['formData'] ?? 'not found') . "\n";
+        }
+        return $value;
     }
 
     /**

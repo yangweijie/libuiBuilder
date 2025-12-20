@@ -48,3 +48,4 @@ $handlers = [
 $renderer = new HtmlRenderer();
 $app = $renderer->render(__DIR__ . '/../views/layouts/responsive_grid.ui.html', $handlers);
 $app->show();
+App::main();

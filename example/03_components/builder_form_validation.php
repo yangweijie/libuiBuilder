@@ -28,6 +28,9 @@ $state->set('formData', [
     'agreed' => false
 ]);
 
+// 设置全局StateManager到Builder类
+Builder::setStateManager($state);
+
 // 验证函数
 function validateUsername($username) {
     if (empty($username)) return '用户名不能为空';
@@ -56,6 +59,21 @@ function validateAge($age) {
     return '';
 }
 
+function getPasswordStrength($password) {
+    if (empty($password)) return '无';
+    
+    $strength = 0;
+    if (strlen($password) >= 6) $strength++;
+    if (strlen($password) >= 8) $strength++;
+    if (preg_match('/[a-z]/', $password)) $strength++;
+    if (preg_match('/[A-Z]/', $password)) $strength++;
+    if (preg_match('/[0-9]/', $password)) $strength++;
+    if (preg_match('/[^a-zA-Z0-9]/', $password)) $strength++;
+    
+    $levels = ['无', '弱', '一般', '中等', '强', '很强', '极强'];
+    return $levels[$strength] ?? '极强';
+}
+
 
 
 $app = Builder::window()
@@ -79,17 +97,20 @@ $app = Builder::window()
                         'control' => Builder::entry()
                             ->id('usernameInput')
                             ->placeholder('请输入用户名')
-                            ->onChange(function($value, $component) use ($state) {
-                                $state->set('formData.username', $value);
+                            ->bind('formData.username')
+                            ->onChange(function($value, $component, $stateManager) use ($state) {
+                                echo "[DEBUG] 用户名输入变化: '$value'\n";
+                                echo "[DEBUG] StateManager实例ID: " . spl_object_hash($stateManager) . "\n";
+                                echo "[DEBUG] 全局StateManager实例ID: " . spl_object_hash(StateManager::instance()) . "\n";
+                                echo "[DEBUG] 当前状态: " . json_encode($stateManager->get('formData')) . "\n";
                                 
                                 $error = validateUsername($value);
-                                $errorLabel = StateManager::instance()->getComponent('usernameError');
+                                $errorLabel = $stateManager->getComponent('usernameError');
                                 if ($errorLabel) {
                                     $errorLabel->setValue($error);
                                 }
                                 
-                                // 检查整体表单有效性
-                                checkFormValidity($state);
+                                checkFormValidity($stateManager);
                             })
                     ],
                     [
@@ -103,16 +124,15 @@ $app = Builder::window()
                         'control' => Builder::entry()
                             ->id('emailInput')
                             ->placeholder('请输入邮箱地址')
-                            ->onChange(function($value, $component) use ($state) {
-                                $state->set('formData.email', $value);
-                                
+                            ->bind('formData.email')
+                            ->onChange(function($value, $component, $stateManager) use ($state) {
                                 $error = validateEmail($value);
-                                $errorLabel = StateManager::instance()->getComponent('emailError');
+                                $errorLabel = $stateManager->getComponent('emailError');
                                 if ($errorLabel) {
                                     $errorLabel->setValue($error);
                                 }
                                 
-                                checkFormValidity($state);
+                                checkFormValidity($stateManager);
                             })
                     ],
                     [
@@ -126,28 +146,25 @@ $app = Builder::window()
                         'control' => Builder::entry()
                             ->id('passwordInput')
                             ->password()
+                            ->bind('formData.password')
                             ->placeholder('请输入密码')
-                            ->onChange(function($value, $component) use ($state) {
-                                $state->set('formData.password', $value);
-                                
-                                // 更新密码强度
-                                $strength = calculateStrength($value);
-                                $strengthLabel = StateManager::instance()->getComponent('passwordStrength');
+                            ->onChange(function($value, $component, $stateManager) use ($state) {
+                                $strength = getPasswordStrength($value);
+                                $strengthLabel = $stateManager->getComponent('passwordStrength');
                                 if ($strengthLabel) {
-                                    $strengthLabel->setValue("密码强度: {$strength}");
+                                    $strengthLabel->setValue($strength);
                                 }
                                 
-                                // 验证确认密码
-                                $confirmPassword = $state->get('formData.confirmPassword');
+                                $confirmPassword = $stateManager->get('formData.confirmPassword');
                                 if (!empty($confirmPassword)) {
                                     $confirmError = ($value === $confirmPassword) ? '' : '两次输入的密码不一致';
-                                    $confirmErrorLabel = StateManager::instance()->getComponent('confirmPasswordError');
+                                    $confirmErrorLabel = $stateManager->getComponent('confirmPasswordError');
                                     if ($confirmErrorLabel) {
                                         $confirmErrorLabel->setValue($confirmError);
                                     }
                                 }
                                 
-                                checkFormValidity($state);
+                                checkFormValidity($stateManager);
                             })
                     ],
                     [
@@ -162,18 +179,17 @@ $app = Builder::window()
                             ->id('confirmPasswordInput')
                             ->password()
                             ->placeholder('请再次输入密码')
-                            ->onChange(function($value, $component) use ($state) {
-                                $state->set('formData.confirmPassword', $value);
-                                
-                                $password = $state->get('formData.password');
+                            ->bind('formData.confirmPassword')
+                            ->onChange(function($value, $component, $stateManager) use ($state) {
+
+                                $password = $stateManager->get('formData.password');
                                 $error = ($value === $password) ? '' : '两次输入的密码不一致';
-                                
-                                $errorLabel = StateManager::instance()->getComponent('confirmPasswordError');
-                                if ($errorLabel) {
-                                    $errorLabel->setValue($error);
+                                $confirmErrorLabel = $stateManager->getComponent('confirmPasswordError');
+                                if ($confirmErrorLabel) {
+                                    $confirmErrorLabel->setValue($error);
                                 }
                                 
-                                checkFormValidity($state);
+                                checkFormValidity($stateManager);
                             })
                     ],
                     [
@@ -188,16 +204,16 @@ $app = Builder::window()
                             ->id('ageInput')
                             ->range(18, 100)
                             ->value(25)
-                            ->onChange(function($value, $component) use ($state) {
-                                $state->set('formData.age', $value);
-                                
+                            ->bind('formData.age')
+                            ->onChange(function($value, $component, $stateManager) use ($state) {
+
                                 $error = validateAge($value);
-                                $errorLabel = StateManager::instance()->getComponent('ageError');
+                                $errorLabel = $stateManager->getComponent('ageError');
                                 if ($errorLabel) {
                                     $errorLabel->setValue($error);
                                 }
                                 
-                                checkFormValidity($state);
+                                checkFormValidity($stateManager);
                             })
                     ],
                     [
@@ -220,9 +236,11 @@ $app = Builder::window()
                 Builder::button()
                     ->text('提交注册')
                     ->id('submitBtn')
-                    ->onClick(function($button, $state) {
-                        $formData = $state->get('formData');
-                        
+                    ->onClick(function($button) {
+                        $stateManager = $button->getStateManager();
+                        $formData = $stateManager->get('formData');
+                        var_dump($formData);
+
                         // 最终验证
                         $errors = [
                             'username' => validateUsername($formData['username']),
@@ -258,9 +276,11 @@ $app = Builder::window()
                 // 重置按钮
                 Builder::button()
                     ->text('重置表单')
-                    ->onClick(function($button, $state) {
+                    ->onClick(function($button) {
+                        $stateManager = $button->getStateManager();
+                        
                         // 重置所有字段
-                        $state->set('formData', [
+                        $stateManager->set('formData', [
                             'username' => '',
                             'email' => '',
                             'password' => '',
@@ -270,17 +290,17 @@ $app = Builder::window()
                         ]);
                         
                         // 清空UI组件
-                        StateManager::instance()->getComponent('usernameInput')?->setValue('');
-                        StateManager::instance()->getComponent('emailInput')?->setValue('');
-                        StateManager::instance()->getComponent('passwordInput')?->setValue('');
-                        StateManager::instance()->getComponent('confirmPasswordInput')?->setValue('');
-                        StateManager::instance()->getComponent('ageInput')?->setValue(25);
-                        StateManager::instance()->getComponent('agreeCheckbox')?->setValue(false);
+                        $stateManager->getComponent('usernameInput')?->setValue('');
+                        $stateManager->getComponent('emailInput')?->setValue('');
+                        $stateManager->getComponent('passwordInput')?->setValue('');
+                        $stateManager->getComponent('confirmPasswordInput')?->setValue('');
+                        $stateManager->getComponent('ageInput')?->setValue(25);
+                        $stateManager->getComponent('agreeCheckbox')?->setValue(false);
                         
                         // 清空错误信息
                         $errorLabels = ['usernameError', 'emailError', 'passwordStrength', 'confirmPasswordError', 'ageError'];
                         foreach ($errorLabels as $labelId) {
-                            $label = StateManager::instance()->getComponent($labelId);
+                            $label = $stateManager->getComponent($labelId);
                             if ($label) {
                                 $label->setValue('');
                             }
@@ -307,7 +327,7 @@ function checkFormValidity($state) {
         && validateAge($formData['age']) === ''
         && $formData['agreed'] === true;
     
-    $submitBtn = StateManager::instance()->getComponent('submitBtn');
+    $submitBtn = $state->getComponent('submitBtn');
     if ($submitBtn) {
         // 这里应该调用 setEnabled 方法，但 Builder 模式可能需要不同的API
         // $submitBtn->setEnabled($isValid);
@@ -316,3 +336,4 @@ function checkFormValidity($state) {
 }
 
 $app->show();
+App::main();

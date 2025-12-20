@@ -149,7 +149,10 @@ class EntryBuilder extends ComponentBuilder
                 
                 // 更新状态
                 if ($stateKey && $stateManager) {
+                    echo "[ENTRY_DEBUG] StateManager实例ID: " . spl_object_hash($stateManager) . "\n";
+                    echo "[ENTRY_DEBUG] 更新状态: {$stateKey} = '{$value}'\n";
                     $stateManager->set($stateKey, $value);
+                    echo "[ENTRY_DEBUG] 状态更新完成\n";
                 }
                 
                 // 调用传统回调

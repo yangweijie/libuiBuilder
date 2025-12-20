@@ -22,6 +22,9 @@ $state->set('progress', 0);
 $state->set('isRunning', false);
 $state->set('taskName', '');
 
+// 设置全局StateManager到Builder类
+Builder::setStateManager($state);
+
 // 模拟长时间任务
 function simulateLongTask($state, $duration = 5000) {
     if ($state->get('isRunning')) {
@@ -111,9 +114,9 @@ $app = Builder::window()
                     ->id('taskSelector')
                     ->items(['文件下载', '数据处理', '图像渲染', '计算任务', '网络请求'])
                     ->selected(0)
-                    ->onChange(function($index, $value) {
-                        $state->set('taskName', $item);
-                        echo "选择了任务: {$item}\n";
+                    ->onChange(function($index, $value, $component, $stateManager) {
+                        $stateManager->set('taskName', $value);
+                        echo "选择了任务: {$value}\n";
                     }),
                 
                 Builder::separator(),
@@ -138,18 +141,19 @@ $app = Builder::window()
                                 Builder::button()
                                     ->text('开始任务')
                                     ->id('startBtn')
-                                    ->onClick(function($button, $state) {
+                                    ->onClick(function($button) {
+                                        $state = $button->getStateManager();
                                         if ($state->get('isRunning')) {
                                             echo "任务正在运行中\n";
                                             return;
                                         }
                                         
                                         $taskName = $state->get('taskName');
-                                        $duration = StateManager::instance()->getComponent('durationInput')?->getValue() ?? 5000;
+                                        $duration = $state->getComponent('durationInput')?->getValue() ?? 5000;
                                         
                                         // 更新UI状态
-                                        $taskLabel = StateManager::instance()->getComponent('taskLabel');
-                                        $statusLabel = StateManager::instance()->getComponent('statusLabel');
+                                        $taskLabel = $state->getComponent('taskLabel');
+                                        $statusLabel = $state->getComponent('statusLabel');
                                         
                                         if ($taskLabel) {
                                             $taskLabel->setValue("当前任务: {$taskName}");
@@ -165,16 +169,17 @@ $app = Builder::window()
                                 
                                 Builder::button()
                                     ->text('重置')
-                                    ->onClick(function($button, $state) {
+                                    ->onClick(function($button) {
+                                        $state = $button->getStateManager();
                                         $state->set('progress', 0);
                                         $state->set('isRunning', false);
                                         $state->set('taskName', '');
                                         
                                         // 重置UI
-                                        $progressBar = StateManager::instance()->getComponent('progressBar');
-                                        $progressLabel = StateManager::instance()->getComponent('progressLabel');
-                                        $taskLabel = StateManager::instance()->getComponent('taskLabel');
-                                        $statusLabel = StateManager::instance()->getComponent('statusLabel');
+                                        $progressBar = $state->getComponent('progressBar');
+                                        $progressLabel = $state->getComponent('progressLabel');
+                                        $taskLabel = $state->getComponent('taskLabel');
+                                        $statusLabel = $state->getComponent('statusLabel');
                                         
                                         if ($progressBar) {
                                             $progressBar->setValue(0);
@@ -209,7 +214,8 @@ $app = Builder::window()
                 Builder::label()->text('批量任务:'),
                 Builder::button()
                     ->text('连续执行3个任务')
-                    ->onClick(function($button, $state) {
+                    ->onClick(function($button) {
+                        $state = $button->getStateManager();
                         if ($state->get('isRunning')) {
                             echo "请等待当前任务完成\n";
                             return;
@@ -218,8 +224,8 @@ $app = Builder::window()
                         echo "开始批量任务\n";
                         
                         $tasks = ['任务A', '任务B', '任务C'];
-                        $taskLabel = StateManager::instance()->getComponent('taskLabel');
-                        $statusLabel = StateManager::instance()->getComponent('statusLabel');
+                        $taskLabel = $state->getComponent('taskLabel');
+                        $statusLabel = $state->getComponent('statusLabel');
                         
                         foreach ($tasks as $index => $taskName) {
                             $state->set('taskName', $taskName);
@@ -248,3 +254,4 @@ $app = Builder::window()
     ]);
 
 $app->show();
+App::main();

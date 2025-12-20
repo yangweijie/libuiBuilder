@@ -220,6 +220,16 @@ class Builder
     }
 
     /**
+     * 创建单选按钮构建器
+     *
+     * @return RadioBuilder
+     */
+    public static function radio(): RadioBuilder
+    {
+        return self::applyDependencies(new RadioBuilder());
+    }
+
+    /**
      * 创建组合框构建器
      *
      * @return ComboboxBuilder

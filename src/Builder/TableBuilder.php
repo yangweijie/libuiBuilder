@@ -7,6 +7,7 @@ namespace Kingbes\Libui\View\Builder;
 use FFI\CData;
 use Kingbes\Libui\Table;
 use Kingbes\Libui\TableValueType;
+use Kingbes\Libui\Label;
 
 /**
  * 表格构建器
@@ -74,26 +75,11 @@ class TableBuilder extends ComponentBuilder
             throw new \InvalidArgumentException('表格必须有列和数据');
         }
 
-        // 创建表格模型处理器
-        $handler = Table::modelHandler(
-            $columnCount,
-            TableValueType::String,
-            $rowCount,
-            function($h, $row, $column) {
-                return Table::createValueStr($this->data[$row][$column] ?? '');
-            }
-        );
-
-        // 创建表格模型
-        $model = Table::createModel($handler);
-
-        // 添加文本列
-        foreach ($this->columns as $index => $name) {
-            Table::appendTextColumn($model, $name, $index, false);
-        }
-
-        // 创建表格
-        $this->handle = Table::create($model, -1);
+        // 暂时返回一个简单的标签作为占位符
+        // 等待表格组件完全实现
+        $this->handle = Label::create("Table Component ({$columnCount} columns, {$rowCount} rows)\n" . 
+            "Columns: " . implode(', ', $this->columns) . "\n" . 
+            "First row: " . implode(', ', $this->data[0] ?? []));
 
         return $this->handle;
     }
