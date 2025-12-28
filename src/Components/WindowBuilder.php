@@ -5,14 +5,13 @@ namespace Kingbes\Libui\View\Components;
 use FFI\CData;
 use Kingbes\Libui\App;
 use Kingbes\Libui\Control;
-use Kingbes\Libui\View\ComponentBuilder;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 use Kingbes\Libui\Window;
 
 class WindowBuilder extends ComponentBuilder
 {
     public function __construct(array $config = [])
     {
-        echo "WindowBuilder::__construct called\n";
         parent::__construct($config);
     }
 

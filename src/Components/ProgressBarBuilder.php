@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\ProgressBar;
 use FFI\CData;
+use Kingbes\Libui\ProgressBar;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class ProgressBarBuilder extends ComponentBuilder
 {

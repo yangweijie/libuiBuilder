@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\Radio;
 use FFI\CData;
+use Kingbes\Libui\Radio;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class RadioBuilder extends ComponentBuilder
 {

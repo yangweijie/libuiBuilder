@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\Entry;
 use FFI\CData;
+use Kingbes\Libui\Entry;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class EntryBuilder extends ComponentBuilder
 {

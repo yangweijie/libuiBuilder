@@ -6,7 +6,7 @@ use FFI\CData;
 use Kingbes\Libui\Box;
 use Kingbes\Libui\SortIndicator;
 use Kingbes\Libui\View\Builder;
-use Kingbes\Libui\View\ComponentBuilder;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 /**
  * DataGridBuilder - 提供完整的数据网格功能，包括CRUD操作、分页、搜索和排序

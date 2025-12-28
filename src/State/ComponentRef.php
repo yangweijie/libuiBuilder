@@ -2,8 +2,8 @@
 
 namespace Kingbes\Libui\View\State;
 
-use Kingbes\Libui\View\ComponentBuilder;
 use FFI\CData;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 /**
  * 组件引用 - 提供访问其他组件数据的能力

@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\MultilineEntry;
 use FFI\CData;
+use Kingbes\Libui\MultilineEntry;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class MultilineEntryBuilder extends ComponentBuilder
 {

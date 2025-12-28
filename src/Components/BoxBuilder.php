@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\Box;
 use FFI\CData;
+use Kingbes\Libui\Box;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class BoxBuilder extends ComponentBuilder
 {

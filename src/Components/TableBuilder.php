@@ -7,8 +7,8 @@ use Kingbes\Libui\SortIndicator;
 use Kingbes\Libui\Table as LibuiTable;
 use Kingbes\Libui\TableSelectionMode;
 use Kingbes\Libui\TableValueType;
-use Kingbes\Libui\View\ComponentBuilder;
 use Kingbes\Libui\View\State\StateManager;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class TableBuilder extends ComponentBuilder
 {

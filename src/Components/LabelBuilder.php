@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\Label;
 use FFI\CData;
+use Kingbes\Libui\Label;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class LabelBuilder extends ComponentBuilder
 {

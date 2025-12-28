@@ -3,7 +3,7 @@
 namespace Kingbes\Libui\View\Components;
 
 use Kingbes\Libui\Align;
-use Kingbes\Libui\View\ComponentBuilder;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class GridItemBuilder
 {

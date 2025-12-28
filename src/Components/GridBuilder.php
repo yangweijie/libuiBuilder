@@ -6,7 +6,7 @@ use Exception;
 use FFI\CData;
 use Kingbes\Libui\Align;
 use Kingbes\Libui\Grid;
-use Kingbes\Libui\View\ComponentBuilder;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class GridBuilder extends ComponentBuilder
 {

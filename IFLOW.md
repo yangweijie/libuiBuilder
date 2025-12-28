@@ -53,7 +53,7 @@ libuiBuilder/
 ├── src/                   # 核心源代码
 │   ├── Builder.php        # 视图构建器入口
 │   ├── HtmlRenderer.php   # HTML 模板渲染器
-│   ├── ComponentBuilder.php # 组件构建器基类
+│   ├── ComponentBuilder.php # 组件构建器基类 (移至 Validation)
 │   ├── ResponsiveGridBuilder.php # 响应式网格布局
 │   ├── helper.php         # 便捷函数库
 │   ├── Builder/           # 构建器扩展
@@ -89,6 +89,7 @@ libuiBuilder/
 │   │   ├── FormTemplate.php
 │   │   └── ResponsiveGrid.php
 │   └── Validation/        # 表单验证
+│       └── ComponentBuilder.php # 组件构建器基类
 ├── example/               # 示例代码（按复杂度分类）
 │   ├── README.md          # 示例说明文档
 │   ├── libui.png          # 示例截图
@@ -382,6 +383,7 @@ select('角色', 'role', ['管理员', '用户'], 'combobox');
 - `GridBuilder` - 网格布局
 - `TabBuilder` - 标签页
 - `ResponsiveGridBuilder` - 响应式网格布局
+- `GroupBuilder` - 分组容器（带标题）
 
 ### 基础控件
 - `LabelBuilder` - 文本标签
@@ -399,6 +401,7 @@ select('角色', 'role', ['管理员', '用户'], 'combobox');
 
 ### 高级组件
 - `TableBuilder` - 表格（支持多种列类型）
+- `DataGridBuilder` - 数据网格
 - `CanvasBuilder` - 画布
 - `MenuBuilder` - 菜单
 - `SeparatorBuilder` - 分隔符
@@ -444,7 +447,7 @@ select('角色', 'role', ['管理员', '用户'], 'combobox');
 - 私有属性使用下划线前缀
 
 ### 组件开发规范
-1. 继承自 `ComponentBuilder` 基类
+1. 继承自 `ComponentBuilder` 基类（在 `Validation` 命名空间）
 2. 实现链式调用方法
 3. 提供便捷的工厂方法
 4. 支持事件绑定和数据绑定

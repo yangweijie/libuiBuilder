@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\Checkbox;
 use FFI\CData;
+use Kingbes\Libui\Checkbox;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class CheckboxBuilder extends ComponentBuilder
 {

@@ -4,7 +4,7 @@ namespace Kingbes\Libui\View\Templates;
 
 use InvalidArgumentException;
 use Kingbes\Libui\View\Builder;
-use Kingbes\Libui\View\ComponentBuilder;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class FormTemplate
 {

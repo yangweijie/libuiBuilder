@@ -3,9 +3,9 @@
 namespace Kingbes\Libui\View\Components;
 
 use Exception;
-use Kingbes\Libui\Group;
-use Kingbes\Libui\View\ComponentBuilder;
 use FFI\CData;
+use Kingbes\Libui\Group;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 /**
  * GroupBuilder - 分组控件构建器

@@ -1,6 +1,6 @@
 <?php
 
-namespace Kingbes\Libui\View;
+namespace Kingbes\Libui\View\Validation;
 
 use FFI\CData;
 use InvalidArgumentException;
@@ -307,4 +307,9 @@ abstract class ComponentBuilder
     }
 
     // ... 其他现有方法保持不变
+
+    public function getHandle(): ?CData
+    {
+        return $this->handle;
+    }
 }

@@ -1,8 +1,8 @@
 <?php
 
-use Kingbes\Libui\View\State\StateManager;
 use Kingbes\Libui\View\State\ComponentRef;
-use Kingbes\Libui\View\ComponentBuilder;
+use Kingbes\Libui\View\State\StateManager;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 // 创建一个简单的 Mock ComponentBuilder
 class ComponentRefTest extends ComponentBuilder

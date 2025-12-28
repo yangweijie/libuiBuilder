@@ -2,10 +2,10 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\EditableCombobox;
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\Combobox;
 use FFI\CData;
+use Kingbes\Libui\Combobox;
+use Kingbes\Libui\EditableCombobox;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class ComboboxBuilder extends ComponentBuilder
 {

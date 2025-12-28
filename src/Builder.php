@@ -3,10 +3,16 @@
 namespace Kingbes\Libui\View;
 
 use Kingbes\Libui\View\Builder\TabBuilder;
+use Kingbes\Libui\View\Components\BoxBuilder;
+use Kingbes\Libui\View\Components\ButtonBuilder;
 use Kingbes\Libui\View\Components\CanvasBuilder;
 use Kingbes\Libui\View\Components\CheckboxBuilder;
 use Kingbes\Libui\View\Components\ComboboxBuilder;
+use Kingbes\Libui\View\Components\DataGridBuilder;
+use Kingbes\Libui\View\Components\EntryBuilder;
 use Kingbes\Libui\View\Components\GridBuilder;
+use Kingbes\Libui\View\Components\GroupBuilder;
+use Kingbes\Libui\View\Components\LabelBuilder;
 use Kingbes\Libui\View\Components\MenuBuilder;
 use Kingbes\Libui\View\Components\MultilineEntryBuilder;
 use Kingbes\Libui\View\Components\ProgressBarBuilder;
@@ -15,13 +21,8 @@ use Kingbes\Libui\View\Components\SeparatorBuilder;
 use Kingbes\Libui\View\Components\SliderBuilder;
 use Kingbes\Libui\View\Components\SpinboxBuilder;
 use Kingbes\Libui\View\Components\TableBuilder;
-use Kingbes\Libui\View\Components\DataGridBuilder;
 use Kingbes\Libui\View\Components\WindowBuilder;
-use Kingbes\Libui\View\Components\BoxBuilder;
-use Kingbes\Libui\View\Components\ButtonBuilder;
-use Kingbes\Libui\View\Components\LabelBuilder;
-use Kingbes\Libui\View\Components\EntryBuilder;
-use Kingbes\Libui\View\Components\GroupBuilder;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 /**
  * 视图构建器 - 所有组件的入口

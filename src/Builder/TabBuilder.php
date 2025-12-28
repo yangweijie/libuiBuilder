@@ -2,10 +2,10 @@
 
 namespace Kingbes\Libui\View\Builder;
 
+use FFI\CData;
 use Kingbes\Libui\Tab;
 use Kingbes\Libui\View\Builder;
-use Kingbes\Libui\View\ComponentBuilder;
-use FFI\CData;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class TabBuilder extends ComponentBuilder
 {

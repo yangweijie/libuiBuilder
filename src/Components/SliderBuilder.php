@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\Slider;
 use FFI\CData;
+use Kingbes\Libui\Slider;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class SliderBuilder extends ComponentBuilder
 {

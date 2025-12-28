@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\Separator;
 use FFI\CData;
+use Kingbes\Libui\Separator;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class SeparatorBuilder extends ComponentBuilder
 {

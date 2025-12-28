@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\Button;
 use FFI\CData;
+use Kingbes\Libui\Button;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class ButtonBuilder extends ComponentBuilder
 {

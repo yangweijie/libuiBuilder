@@ -22,6 +22,7 @@ use Kingbes\Libui\View\Components\SliderBuilder;
 use Kingbes\Libui\View\Components\SpinboxBuilder;
 use Kingbes\Libui\View\Components\TableBuilder;
 use Kingbes\Libui\View\Components\WindowBuilder;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 /**
  * HTML 模板渲染器
@@ -107,14 +108,15 @@ class HtmlRenderer
      */
     private function replaceTemplateVariables(string $content): string
     {
-        return preg_replace_callback(
-            '/\{\{(\w+)\}\}/',
-            function ($matches) {
-                $varName = $matches[1];
-                return $this->variables[$varName] ?? '';
-            },
-            $content,
-        );
+        // 使用 preg_match_all 提取所有 {{var}} 并逐个替换，避免工具对某些转义警告
+        if (preg_match_all('/\{\{([A-Za-z0-9_]+)\}\}/', $content, $matches)) {
+            foreach ($matches[1] as $i => $varName) {
+                $value = $this->variables[$varName] ?? '';
+                // 使用 str_replace 替换具体出现的占位符
+                $content = str_replace($matches[0][$i], (string)$value, $content);
+            }
+        }
+        return $content;
     }
 
     /**
@@ -866,7 +868,37 @@ class HtmlRenderer
      */
     private function renderCanvas(DOMElement $element): CanvasBuilder
     {
-        return Builder::canvas();
+        $builder = Builder::canvas();
+
+        // 尺寸
+        if ($size = $element->getAttribute('size')) {
+            [$w, $h] = array_map('intval', explode(',', $size));
+            $builder->size($w, $h);
+        } else {
+            if ($w = $element->getAttribute('width')) {
+                $h = (int) ($element->getAttribute('height') ?: 300);
+                $builder->size((int)$w, $h);
+            }
+        }
+
+        // 滚动区域
+        if ($element->getAttribute('scroll') === 'true') {
+            $sw = (int) ($element->getAttribute('scrollwidth') ?: 400);
+            $sh = (int) ($element->getAttribute('scrollheight') ?: 300);
+            $builder->scrollable($sw, $sh);
+        }
+
+        // ondraw 事件 - 支持通过 handlers 映射传入可调用
+        if ($handlerName = $element->getAttribute('ondraw')) {
+            if (isset($this->handlers[$handlerName]) && is_callable($this->handlers[$handlerName])) {
+                $builder->onDraw($this->handlers[$handlerName]);
+            }
+        }
+
+        // 应用通用属性（包括数据绑定）
+        $this->applyCommonAttributes($element, $builder);
+
+        return $builder;
     }
 
     /**

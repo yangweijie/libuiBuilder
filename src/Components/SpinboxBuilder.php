@@ -2,9 +2,9 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\Spinbox;
 use FFI\CData;
+use Kingbes\Libui\Spinbox;
+use Kingbes\Libui\View\Validation\ComponentBuilder;
 
 class SpinboxBuilder extends ComponentBuilder
 {
