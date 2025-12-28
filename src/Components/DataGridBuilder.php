@@ -2,14 +2,11 @@
 
 namespace Kingbes\Libui\View\Components;
 
-use Kingbes\Libui\Box;
-use Kingbes\Libui\View\ComponentBuilder;
-use Kingbes\Libui\View\Builder;
-use Kingbes\Libui\Control;
-use Kingbes\Libui\Window;
-use Kingbes\Libui\Table as LibuiTable;
-use Kingbes\Libui\SortIndicator;
 use FFI\CData;
+use Kingbes\Libui\Box;
+use Kingbes\Libui\SortIndicator;
+use Kingbes\Libui\View\Builder;
+use Kingbes\Libui\View\ComponentBuilder;
 
 /**
  * DataGridBuilder - 提供完整的数据网格功能，包括CRUD操作、分页、搜索和排序
@@ -20,16 +17,16 @@ class DataGridBuilder extends ComponentBuilder
     private array $originalData = [];
     private array $filteredData = [];
     private array $pageData = [];
-    
+
     // 分页控制
     private int $currentPage = 1;
     private int $pageSize = 10;
     private int $totalPages = 1;
-    
+
     // 排序控制
     private ?int $sortColumn = null;
     private ?string $sortDirection = null;
-    
+
     // 组件引用
     private ?TableBuilder $tableBuilder = null;
     private ?EntryBuilder $filterEntry = null;
@@ -41,7 +38,7 @@ class DataGridBuilder extends ComponentBuilder
     private ?ButtonBuilder $deleteButton = null;
     private ?ButtonBuilder $clearSortButton = null;
     private ?int $selectedRow = -1;
-    
+
     // 事件处理器
     private array $crudHandlers = [];
 
@@ -65,7 +62,7 @@ class DataGridBuilder extends ComponentBuilder
                 'showCrudButtons' => true,
                 'showPagination' => true,
                 'multiSelect' => false,
-                'columnWidths' => []
+                'columnWidths' => [],
             ],
             'labels' => [
                 'filter' => 'Filter:',
@@ -77,9 +74,9 @@ class DataGridBuilder extends ComponentBuilder
                 'clearSort' => 'Clear Sort',
                 'previous' => 'Previous',
                 'next' => 'Next',
-                'pageInfo' => 'Page {current} of {total}'
+                'pageInfo' => 'Page {current} of {total}',
             ],
-            'eventHandlers' => []
+            'eventHandlers' => [],
         ];
     }
 
@@ -89,34 +86,34 @@ class DataGridBuilder extends ComponentBuilder
         $this->originalData = $this->getConfig('data', []);
         $this->filteredData = $this->originalData;
         $this->pageSize = $this->getConfig('pageSize', 10);
-        
+
         // 应用初始排序
         if ($this->getConfig('options')['sortable'] && $this->sortColumn !== null) {
             $this->applySorting();
         }
-        
+
         // 计算分页
         $this->calculatePagination();
-        
+
         // 创建主容器
         $mainBox = Builder::vbox();
-        
+
         // 创建工具栏
         if ($this->getConfig('options')['searchable'] || $this->getConfig('options')['showCrudButtons']) {
             $toolbarBox = $this->createToolbar();
             $this->addChild($toolbarBox);
         }
-        
+
         // 创建表格
         $this->tableBuilder = $this->createTable();
         $this->addChild($this->tableBuilder);
-        
+
         // 创建分页控件
         if ($this->getConfig('options')['showPagination']) {
             $paginationBox = $this->createPagination();
             $this->addChild($paginationBox);
         }
-        
+
         return $mainBox->build();
     }
 
@@ -124,7 +121,7 @@ class DataGridBuilder extends ComponentBuilder
     {
         // 应用配置到各个子组件
         $this->applyCrudHandlers();
-        
+
         // 确保表格数据正确设置和刷新
         if ($this->tableBuilder) {
             $this->refreshTable();
@@ -138,7 +135,7 @@ class DataGridBuilder extends ComponentBuilder
             foreach ($this->children as $child) {
                 $childHandle = $child->build();
                 $stretchy = $child->getConfig('stretchy', false);
-                
+
                 // 根据子组件类型设置合适的 stretchy 值
                 if ($child instanceof TableBuilder) {
                     $stretchy = true; // 表格应该拉伸
@@ -146,7 +143,7 @@ class DataGridBuilder extends ComponentBuilder
                     // 工具栏和分页栏不拉伸
                     $stretchy = false;
                 }
-                
+
                 Box::append($this->handle, $childHandle, $stretchy);
             }
         }
@@ -159,41 +156,41 @@ class DataGridBuilder extends ComponentBuilder
     {
         $toolbar = Builder::hbox();
         $labels = $this->getConfig('labels');
-        
+
         // 搜索控件
         if ($this->getConfig('options')['searchable']) {
             $toolbar->addChild(Builder::label(['text' => $labels['filter']]));
             $this->filterEntry = Builder::entry();
             $toolbar->addChild($this->filterEntry);
-            
+
             $searchBtn = Builder::button(['text' => $labels['search']]);
             $searchBtn->onClick(fn() => $this->handleSearch());
             $toolbar->addChild($searchBtn);
-            
+
             $clearBtn = Builder::button(['text' => $labels['clear']]);
             $clearBtn->onClick(fn() => $this->handleClearFilter());
             $toolbar->addChild($clearBtn);
         }
-        
+
         // CRUD 按钮
         if ($this->getConfig('options')['showCrudButtons']) {
             $this->newButton = Builder::button(['text' => $labels['new']]);
             $this->newButton->onClick(fn() => $this->handleNew());
             $toolbar->addChild($this->newButton);
-            
+
             $this->editButton = Builder::button(['text' => $labels['edit']]);
             $this->editButton->onClick(fn() => $this->handleEdit());
             $toolbar->addChild($this->editButton);
-            
+
             $this->deleteButton = Builder::button(['text' => $labels['delete']]);
             $this->deleteButton->onClick(fn() => $this->handleDelete());
             $toolbar->addChild($this->deleteButton);
-            
+
             $this->clearSortButton = Builder::button(['text' => $labels['clearSort']]);
             $this->clearSortButton->onClick(fn() => $this->handleClearSort());
             $toolbar->addChild($this->clearSortButton);
         }
-        
+
         return $toolbar;
     }
 
@@ -210,15 +207,15 @@ class DataGridBuilder extends ComponentBuilder
                 'multiSelect' => $this->getConfig('options')['multiSelect'],
                 'columnWidths' => $this->getConfig('options')['columnWidths'],
             ]);
-        
+
         // 添加表格事件处理
-        $table->onEvent('onRowClicked', function($tableBuilder, $row) {
+        $table->onEvent('onRowClicked', function ($tableBuilder, $row) {
             $this->selectedRow = $row;
             $this->emit('rowSelected', $row, $this->getCurrentPageData($row));
             $this->updateButtonStates();
         });
-        
-        $table->onEvent('onHeaderClicked', function($tableBuilder, $column, $sortColumn, $sortDirection) {
+
+        $table->onEvent('onHeaderClicked', function ($tableBuilder, $column, $sortColumn, $sortDirection) {
             if ($this->getConfig('options')['sortable']) {
                 $this->sortColumn = $column;
                 $this->sortDirection = $sortDirection;
@@ -226,7 +223,7 @@ class DataGridBuilder extends ComponentBuilder
                 $this->emit('headerClicked', $column, $sortDirection);
             }
         });
-        
+
         return $table;
     }
 
@@ -237,19 +234,19 @@ class DataGridBuilder extends ComponentBuilder
     {
         $pagination = Builder::hbox();
         $labels = $this->getConfig('labels');
-        
+
         $this->prevButton = Builder::button(['text' => $labels['previous']]);
         $this->prevButton->onClick(fn() => $this->handlePreviousPage());
         $pagination->addChild($this->prevButton);
-        
+
         $this->pageLabel = Builder::label();
         $this->updatePageLabel();
         $pagination->addChild($this->pageLabel);
-        
+
         $this->nextButton = Builder::button(['text' => $labels['next']]);
         $this->nextButton->onClick(fn() => $this->handleNextPage());
         $pagination->addChild($this->nextButton);
-        
+
         return $pagination;
     }
 
@@ -288,22 +285,24 @@ class DataGridBuilder extends ComponentBuilder
     private function handleSearch(): void
     {
         $filterText = $this->filterEntry ? $this->filterEntry->getValue() : '';
-        
+
         if (empty($filterText)) {
             $this->filteredData = $this->originalData;
         } else {
             $filterText = strtolower($filterText);
-            $this->filteredData = array_filter($this->originalData, function($item) use ($filterText) {
+            $this->filteredData = array_filter($this->originalData, static function ($item) use ($filterText) {
                 foreach ($item as $value) {
-                    if (stripos((string)$value, $filterText) !== false) {
-                        return true;
+                    if (stripos((string) $value, $filterText) === false) {
+                        continue;
                     }
+
+                    return true;
                 }
                 return false;
             });
             $this->filteredData = array_values($this->filteredData);
         }
-        
+
         $this->currentPage = 1;
         $this->applySortingAndRefresh();
         $this->emit('search', $filterText, count($this->filteredData));
@@ -345,13 +344,13 @@ class DataGridBuilder extends ComponentBuilder
             $this->emit('noSelection', 'edit');
             return;
         }
-        
+
         $currentData = $this->getCurrentPageData($this->selectedRow);
         if (!$currentData) {
             $this->emit('dataNotFound', 'edit');
             return;
         }
-        
+
         if (isset($this->crudHandlers['edit'])) {
             $handler = $this->crudHandlers['edit'];
             $handler($this, $currentData, $this->selectedRow);
@@ -369,13 +368,13 @@ class DataGridBuilder extends ComponentBuilder
             $this->emit('noSelection', 'delete');
             return;
         }
-        
+
         $currentData = $this->getCurrentPageData($this->selectedRow);
         if (!$currentData) {
             $this->emit('dataNotFound', 'delete');
             return;
         }
-        
+
         if (isset($this->crudHandlers['delete'])) {
             $handler = $this->crudHandlers['delete'];
             $handler($this, $currentData, $this->selectedRow);
@@ -391,14 +390,14 @@ class DataGridBuilder extends ComponentBuilder
     {
         $this->sortColumn = null;
         $this->sortDirection = null;
-        
+
         if ($this->tableBuilder && $this->tableBuilder->handle) {
             $headers = $this->getConfig('headers');
             for ($i = 0; $i < count($headers); $i++) {
                 $this->tableBuilder->setHeaderSortIndicator($i, SortIndicator::None);
             }
         }
-        
+
         $this->applySortingAndRefresh();
         $this->emit('sortCleared');
     }
@@ -435,27 +434,27 @@ class DataGridBuilder extends ComponentBuilder
         if ($this->sortColumn === null || $this->sortDirection === null) {
             return;
         }
-        
+
         $headers = $this->getConfig('headers');
         if (!isset($headers[$this->sortColumn])) {
             return;
         }
-        
+
         $headerKey = $headers[$this->sortColumn];
-        
-        usort($this->filteredData, function($a, $b) use ($headerKey) {
+
+        usort($this->filteredData, function ($a, $b) use ($headerKey) {
             // 尝试多种键名匹配方式
             $valA = $a[$headerKey] ?? $a[strtolower($headerKey)] ?? $a[strtoupper($headerKey)] ?? '';
             $valB = $b[$headerKey] ?? $b[strtolower($headerKey)] ?? $b[strtoupper($headerKey)] ?? '';
-            
+
             // 尝试数字比较
             if (is_numeric($valA) && is_numeric($valB)) {
                 $result = floatval($valA) <=> floatval($valB);
             } else {
                 // 字符串比较
-                $result = strcasecmp((string)$valA, (string)$valB);
+                $result = strcasecmp((string) $valA, (string) $valB);
             }
-            
+
             return $this->sortDirection === 'desc' ? -$result : $result;
         });
     }
@@ -477,14 +476,14 @@ class DataGridBuilder extends ComponentBuilder
     {
         $this->totalPages = max(1, ceil(count($this->filteredData) / $this->pageSize));
         $this->currentPage = max(1, min($this->currentPage, $this->totalPages));
-        
+
         $start = ($this->currentPage - 1) * $this->pageSize;
         $pageItems = array_slice($this->filteredData, $start, $this->pageSize);
-        
+
         // 将关联数组转换为索引数组，TableBuilder 需要索引数组格式
         $headers = $this->getConfig('headers', []);
         $this->pageData = [];
-        
+
         foreach ($pageItems as $item) {
             $row = [];
             foreach ($headers as $header) {
@@ -503,12 +502,12 @@ class DataGridBuilder extends ComponentBuilder
     {
         $this->calculatePagination();
         $this->updatePageLabel();
-        
+
         if ($this->tableBuilder) {
             $this->tableBuilder->data($this->pageData);
             $this->tableBuilder->refreshTable($this->pageSize);
         }
-        
+
         $this->updateButtonStates();
     }
 
@@ -520,11 +519,11 @@ class DataGridBuilder extends ComponentBuilder
         // 重新计算当前页的数据
         $start = ($this->currentPage - 1) * $this->pageSize;
         $pageItems = array_slice($this->filteredData, $start, $this->pageSize);
-        
+
         // 将关联数组转换为索引数组
         $headers = $this->getConfig('headers', []);
         $this->pageData = [];
-        
+
         foreach ($pageItems as $item) {
             $row = [];
             foreach ($headers as $header) {
@@ -533,14 +532,14 @@ class DataGridBuilder extends ComponentBuilder
             }
             $this->pageData[] = $row;
         }
-        
+
         $this->updatePageLabel();
-        
+
         if ($this->tableBuilder) {
             $this->tableBuilder->data($this->pageData);
             $this->tableBuilder->refreshTable($this->pageSize);
         }
-        
+
         $this->updateButtonStates();
     }
 
@@ -566,19 +565,19 @@ class DataGridBuilder extends ComponentBuilder
         if ($this->prevButton) {
             $this->prevButton->setConfig('enabled', $this->currentPage > 1);
         }
-        
+
         if ($this->nextButton) {
             $this->nextButton->setConfig('enabled', $this->currentPage < $this->totalPages);
         }
-        
+
         if ($this->editButton) {
             $this->editButton->setConfig('enabled', $this->selectedRow >= 0);
         }
-        
+
         if ($this->deleteButton) {
             $this->deleteButton->setConfig('enabled', $this->selectedRow >= 0);
         }
-        
+
         if ($this->clearSortButton) {
             $this->clearSortButton->setConfig('enabled', $this->sortColumn !== null);
         }
@@ -592,26 +591,26 @@ class DataGridBuilder extends ComponentBuilder
         if (!isset($this->pageData[$row])) {
             return null;
         }
-        
+
         // 计算当前页在过滤数据中的起始位置
         $start = ($this->currentPage - 1) * $this->pageSize;
-        
+
         // 尝试直接通过索引获取数据
         if (isset($this->filteredData[$start + $row])) {
             return $this->filteredData[$start + $row];
         }
-        
+
         // 如果直接索引失败，尝试通过匹配表格数据来找到对应的原始数据
         $headers = $this->getConfig('headers', []);
         $rowData = $this->pageData[$row];
-        
+
         // 在过滤数据中搜索匹配的记录
         foreach ($this->filteredData as $item) {
             $match = true;
             foreach ($headers as $index => $header) {
                 $tableValue = $rowData[$index] ?? '';
                 $itemValue = $item[$header] ?? $item[strtolower($header)] ?? $item[strtoupper($header)] ?? '';
-                if ((string)$tableValue !== (string)$itemValue) {
+                if ((string) $tableValue !== (string) $itemValue) {
                     $match = false;
                     break;
                 }
@@ -620,7 +619,7 @@ class DataGridBuilder extends ComponentBuilder
                 return $item;
             }
         }
-        
+
         return null;
     }
 
@@ -653,19 +652,19 @@ class DataGridBuilder extends ComponentBuilder
         if ($id === null) {
             return;
         }
-        
+
         // 从原始数据中删除
-        $this->originalData = array_filter($this->originalData, function($item) use ($id) {
+        $this->originalData = array_filter($this->originalData, static function ($item) use ($id) {
             return $item['id'] !== $id;
         });
         $this->originalData = array_values($this->originalData);
-        
+
         // 从过滤数据中删除
-        $this->filteredData = array_filter($this->filteredData, function($item) use ($id) {
+        $this->filteredData = array_filter($this->filteredData, static function ($item) use ($id) {
             return $item['id'] !== $id;
         });
         $this->filteredData = array_values($this->filteredData);
-        
+
         $this->selectedRow = -1;
         $this->applySortingAndRefresh();
         $this->emit('deleted', $data);
@@ -692,25 +691,25 @@ class DataGridBuilder extends ComponentBuilder
     {
         // 记录添加前的总页数
         $oldTotalPages = $this->totalPages;
-        $wasOnLastPage = ($this->currentPage == $oldTotalPages);
-        
+        $wasOnLastPage = $this->currentPage == $oldTotalPages;
+
         $this->originalData[] = $item;
         $this->filteredData[] = $item;
-        
+
         // 应用排序（如果有的话）
         $this->applySorting();
-        
+
         // 重新计算分页
         $this->totalPages = max(1, ceil(count($this->filteredData) / $this->pageSize));
-        
+
         // 如果新增数据导致页数增加，且原来在最后一页，则跳转到新页
         if ($this->totalPages > $oldTotalPages && $wasOnLastPage) {
             $this->currentPage = $this->totalPages;
         }
-        
+
         // 刷新表格显示
         $this->refreshTableDisplay();
-        
+
         $this->emit('dataAdded', $item);
     }
 
@@ -720,19 +719,23 @@ class DataGridBuilder extends ComponentBuilder
     public function updateItem($id, array $newData): void
     {
         foreach ($this->originalData as &$item) {
-            if ($item['id'] === $id) {
-                $item = array_merge($item, $newData);
-                break;
+            if ($item['id'] !== $id) {
+                continue;
             }
+
+            $item = array_merge($item, $newData);
+            break;
         }
-        
+
         foreach ($this->filteredData as &$item) {
-            if ($item['id'] === $id) {
-                $item = array_merge($item, $newData);
-                break;
+            if ($item['id'] !== $id) {
+                continue;
             }
+
+            $item = array_merge($item, $newData);
+            break;
         }
-        
+
         $this->applySortingAndRefresh();
         $this->emit('dataUpdated', $id, $newData);
     }
@@ -742,22 +745,22 @@ class DataGridBuilder extends ComponentBuilder
      */
     public function deleteItem($id): void
     {
-        $this->originalData = array_filter($this->originalData, function($item) use ($id) {
+        $this->originalData = array_filter($this->originalData, static function ($item) use ($id) {
             return $item['id'] !== $id;
         });
         $this->originalData = array_values($this->originalData);
-        
-        $this->filteredData = array_filter($this->filteredData, function($item) use ($id) {
+
+        $this->filteredData = array_filter($this->filteredData, static function ($item) use ($id) {
             return $item['id'] !== $id;
         });
         $this->filteredData = array_values($this->filteredData);
-        
+
         // 应用排序
         $this->applySorting();
-        
+
         // 计算删除后的总页数
         $totalPagesAfterDelete = max(1, ceil(count($this->filteredData) / $this->pageSize));
-        
+
         // 如果当前页超过新的总页数，则返回到最后一页
         if ($this->currentPage > $totalPagesAfterDelete && $totalPagesAfterDelete >= 1) {
             $this->currentPage = $totalPagesAfterDelete;
@@ -765,16 +768,16 @@ class DataGridBuilder extends ComponentBuilder
             // 如果删除后没有数据了，回到第一页
             $this->currentPage = 1;
         }
-        
+
         // 更新总页数
         $this->totalPages = $totalPagesAfterDelete;
-        
+
         // 重置选中行
         $this->selectedRow = -1;
-        
+
         // 刷新显示
         $this->refreshTableDisplay();
-        
+
         $this->emit('dataDeleted', $id);
     }
 

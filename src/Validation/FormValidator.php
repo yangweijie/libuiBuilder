@@ -1,5 +1,7 @@
 <?php
+
 namespace Kingbes\Libui\View\Validation;
+
 class FormValidator
 {
     private array $rules = [];
@@ -19,9 +21,11 @@ class FormValidator
             $value = $data[$field] ?? null;
 
             foreach ($rules as $rule => $params) {
-                if (!$this->checkRule($field, $value, $rule, $params)) {
-                    break; // 一个字段出错就停止验证该字段
+                if ($this->checkRule($field, $value, $rule, $params)) {
+                    continue;
                 }
+
+                break;
             }
         }
 

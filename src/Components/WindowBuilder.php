@@ -2,11 +2,11 @@
 
 namespace Kingbes\Libui\View\Components;
 
+use FFI\CData;
+use Kingbes\Libui\App;
+use Kingbes\Libui\Control;
 use Kingbes\Libui\View\ComponentBuilder;
 use Kingbes\Libui\Window;
-use Kingbes\Libui\Control;
-use Kingbes\Libui\App;
-use FFI\CData;
 
 class WindowBuilder extends ComponentBuilder
 {
@@ -15,6 +15,7 @@ class WindowBuilder extends ComponentBuilder
         echo "WindowBuilder::__construct called\n";
         parent::__construct($config);
     }
+
     public function getDefaultConfig(): array
     {
         return [
@@ -34,7 +35,7 @@ class WindowBuilder extends ComponentBuilder
             $this->getConfig('title'),
             $this->getConfig('width'),
             $this->getConfig('height'),
-            $this->getConfig('hasMenubar') ? 1 : 0
+            $this->getConfig('hasMenubar') ? 1 : 0,
         );
     }
 
@@ -46,7 +47,7 @@ class WindowBuilder extends ComponentBuilder
         $onClosing = $this->getConfig('onClosing');
         if ($onClosing === null) {
             // 默认关闭行为
-            Window::onClosing($this->handle, function() {
+            Window::onClosing($this->handle, static function () {
                 App::quit();
                 return 1;
             });
@@ -96,8 +97,7 @@ class WindowBuilder extends ComponentBuilder
 
     public function size(int $width, int $height): static
     {
-        return $this->setConfig('width', $width)
-            ->setConfig('height', $height);
+        return $this->setConfig('width', $width)->setConfig('height', $height);
     }
 
     public function onClosing(callable $callback): static

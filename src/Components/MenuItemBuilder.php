@@ -2,14 +2,12 @@
 
 namespace Kingbes\Libui\View\Components;
 
-
-use Kingbes\Libui\View\ComponentBuilder;
+use FFI\CData;
 use Kingbes\Libui\Menu;
 use Kingbes\Libui\MenuItem;
-use FFI\CData;
+
 class MenuItemBuilder
 {
-
     private string $title;
     private array $items = [];
     private ?CData $handle = null;
@@ -24,7 +22,7 @@ class MenuItemBuilder
         $this->items[] = [
             'type' => 'item',
             'text' => $text,
-            'onClick' => $onClick
+            'onClick' => $onClick,
         ];
         return $this;
     }
@@ -35,7 +33,7 @@ class MenuItemBuilder
             'type' => 'check',
             'text' => $text,
             'checked' => $checked,
-            'onToggle' => $onToggle
+            'onToggle' => $onToggle,
         ];
         return $this;
     }
@@ -69,7 +67,7 @@ class MenuItemBuilder
         $submenu = new SubMenuBuilder($text);
         $this->items[] = [
             'type' => 'submenu',
-            'submenu' => $submenu
+            'submenu' => $submenu,
         ];
         return $submenu;
     }
