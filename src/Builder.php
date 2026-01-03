@@ -32,6 +32,7 @@ use Throwable;
 class Builder
 {
     private ComponentBuilder $currentComponent;
+    private static array $extensions = [];
 
     /**
      * 创建新的 Builder 实例用于链式调用
@@ -624,5 +625,121 @@ class Builder
     public static function commandExists(string $command): bool {
         $testCommand = PHP_OS_FAMILY === 'Windows' ? "where $command" : "which $command";
         return shell_exec($testCommand) !== null;
+    }
+
+    // ========== 动态方法调用 ==========
+
+    /**
+     * 拦截未定义的静态方法调用，尝试调用扩展方法
+     */
+    public static function __callStatic(string $method, array $arguments)
+    {
+        // 检查是否有扩展方法
+        if (isset(self::$extensions[$method])) {
+            return call_user_func_array(self::$extensions[$method], $arguments);
+        }
+        
+        // 对于已知的组件方法，抛出未实现的错误
+        $knownComponents = [
+            'window', 'vbox', 'hbox', 'grid', 'tab', 'button', 'label', 'entry',
+            'checkbox', 'combobox', 'table', 'dataGrid', 'menu', 'canvas',
+            'separator', 'multilineEntry', 'spinbox', 'slider', 'progressBar',
+            'radio', 'group', 'passwordEntry', 'editableCombobox', 'textarea',
+            'hSeparator', 'vSeparator'
+        ];
+        
+        if (in_array($method, $knownComponents)) {
+            throw new BadMethodCallException(sprintf(
+                'Method %s::%s() is not implemented yet',
+                __CLASS__,
+                $method
+            ));
+        }
+        
+        throw new BadMethodCallException(sprintf(
+            'Call to undefined method %s::%s()',
+            __CLASS__,
+            $method
+        ));
+    }
+
+    // ========== 插件扩展方法 ==========
+
+    /**
+     * 扩展 Builder 类，添加新的组件创建方法
+     * 
+     * @param string $name 扩展方法名
+     * @param callable $callback 回调函数，返回 ComponentBuilder 实例
+     * @return void
+     */
+    public static function extend(string $name, callable $callback): void
+    {
+        self::$extensions[$name] = $callback;
+    }
+
+    /**
+     * 检查是否存在扩展方法
+     */
+    public static function hasExtension(string $name): bool
+    {
+        return isset(self::$extensions[$name]);
+    }
+
+    /**
+     * 获取所有扩展方法名
+     */
+    public static function getExtensions(): array
+    {
+        return array_keys(self::$extensions);
+    }
+
+    /**
+     * 加载插件文件
+     */
+    public static function loadPlugin(string $pluginPath): bool
+    {
+        if (!file_exists($pluginPath)) {
+            return false;
+        }
+
+        try {
+            require_once $pluginPath;
+            
+            // 尝试自动注册
+            $className = basename($pluginPath, '.php');
+            if (class_exists($className)) {
+                if (method_exists($className, 'register')) {
+                    $className::register();
+                }
+            }
+            
+            return true;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * 批量加载插件目录
+     */
+    public static function loadPlugins(string $pluginsDir): array
+    {
+        $loaded = [];
+        $failed = [];
+        
+        if (!is_dir($pluginsDir)) {
+            return ['loaded' => [], 'failed' => []];
+        }
+        
+        foreach (glob($pluginsDir . '/*.php') as $pluginFile) {
+            $pluginName = basename($pluginFile, '.php');
+            if (self::loadPlugin($pluginFile)) {
+                $loaded[] = $pluginName;
+            } else {
+                $failed[] = $pluginName;
+            }
+        }
+        
+        return ['loaded' => $loaded, 'failed' => $failed];
     }
 }
