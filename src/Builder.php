@@ -23,6 +23,8 @@ use Kingbes\Libui\View\Components\SpinboxBuilder;
 use Kingbes\Libui\View\Components\TableBuilder;
 use Kingbes\Libui\View\Components\WindowBuilder;
 use Kingbes\Libui\View\Validation\ComponentBuilder;
+use RuntimeException;
+use Throwable;
 
 /**
  * 视图构建器 - 所有组件的入口
@@ -330,8 +332,8 @@ class Builder
     public function newCombobox(array $config = []): static
     {
         return $this->setCurrent(new ComboboxBuilder($config));
-    }
 
+    }
     /**
      * 创建多行输入框并设为当前组件
      */
@@ -450,5 +452,177 @@ class Builder
     public function newGroup(array $config = []): static
     {
         return $this->setCurrent(new GroupBuilder($config));
+    }
+
+    // ========== 屏幕信息 ==========
+
+    /**
+     * 获取屏幕宽度
+     */
+    public static function screenWidth(): int
+    {
+        return self::screenInfo()['width'];
+    }
+
+    /**
+     * 获取屏幕高度
+     */
+    public static function screenHeight(): int
+    {
+        return self::screenInfo()['height'];
+    }
+
+    /**
+     * 获取屏幕信息
+     */
+    public static function screenInfo(): array
+    {
+        $default = ['width' => 1920, 'height' => 1080];
+
+        try {
+            if (PHP_OS_FAMILY === 'Windows') {
+                $output = shell_exec('wmic path Win32_VideoController get CurrentHorizontalResolution,CurrentVerticalResolution /format:value');
+                if (preg_match('/CurrentHorizontalResolution=(\d+)/', $output, $matches)) {
+                    $default['width'] = (int)$matches[1];
+                }
+                if (preg_match('/CurrentVerticalResolution=(\d+)/', $output, $matches)) {
+                    $default['height'] = (int)$matches[1];
+                }
+            } elseif (PHP_OS_FAMILY === 'Linux') {
+                $xrandr = shell_exec('which xrandr && xrandr 2>/dev/null');
+                if ($xrandr && preg_match('/(\d+)x(\d+).*\*/', $xrandr, $matches)) {
+                    $default['width'] = (int)$matches[1];
+                    $default['height'] = (int)$matches[2];
+                }
+            } elseif (PHP_OS_FAMILY === 'Darwin') {
+                $output = shell_exec('system_profiler SPDisplaysDataType 2>/dev/null');
+                if (preg_match('/Resolution: (\d+) x (\d+)/', $output, $matches)) {
+                    $default['width'] = (int)$matches[1];
+                    $default['height'] = (int)$matches[2];
+                }
+            }
+        } catch (Throwable $e) {
+            // 返回默认值
+        }
+
+        return $default;
+    }
+
+    /**
+     * 获取系统类型详细信息
+     */
+    public static function getSystemInfo(): array {
+        return [
+            'os_family' => PHP_OS_FAMILY,
+            'os' => PHP_OS,
+            'php_version' => PHP_VERSION,
+            'architecture' => php_uname('m'),
+            'hostname' => php_uname('n'),
+            'sapi' => PHP_SAPI,
+            'is_windows' => PHP_OS_FAMILY === 'Windows',
+            'is_linux' => PHP_OS_FAMILY === 'Linux',
+            'is_macos' => PHP_OS_FAMILY === 'Darwin',
+        ];
+    }
+
+    /**
+     * 复制到剪切板
+     */
+    public static function copyToClipboard(string $text): bool {
+        try {
+            if (PHP_OS_FAMILY === 'Windows') {
+                self::executeCommand(['clip'], $text);
+            } elseif (PHP_OS_FAMILY === 'Linux') {
+                // 尝试xclip或xsel
+                if (self::commandExists('xclip')) {
+                    self::executeCommand(['xclip', '-selection', 'clipboard'], $text);
+                } elseif (self::commandExists('xsel')) {
+                    self::executeCommand(['xsel', '--clipboard', '--input'], $text);
+                } else {
+                    throw new RuntimeException('No clipboard utility found (xclip or xsel required)');
+                }
+            } elseif (PHP_OS_FAMILY === 'Darwin') {
+                self::executeCommand(['pbcopy'], $text);
+            } else {
+                throw new RuntimeException('Unsupported operating system for clipboard operations');
+            }
+
+            var_dump("Text copied to clipboard", ['length' => strlen($text)]);
+            return true;
+        } catch (Throwable $e) {
+            var_dump("Failed to copy to clipboard", ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
+     * 从剪切板获取内容
+     */
+    public function getFromClipboard(): ?string {
+        try {
+            if (PHP_OS_FAMILY === 'Windows') {
+                return self::executeCommand(['powershell', '-command', 'Get-Clipboard']);
+            } elseif (PHP_OS_FAMILY === 'Linux') {
+                if (self::commandExists('xclip')) {
+                    return self::executeCommand(['xclip', '-selection', 'clipboard', '-out']);
+                } elseif (self::commandExists('xsel')) {
+                    return self::executeCommand(['xsel', '--clipboard', '--output']);
+                }
+            } elseif (PHP_OS_FAMILY === 'Darwin') {
+                return self::executeCommand(['pbpaste']);
+            }
+
+            throw new RuntimeException('Unsupported operating system for clipboard operations');
+        } catch (Throwable $e) {
+            var_dump("Failed to read from clipboard", ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * 清空剪切板
+     */
+    public static function clearClipboard(): bool {
+        return self::copyToClipboard('');
+    }
+
+    public static function executeCommand(array $command, string $input = null): string {
+        $process = proc_open(
+            $command,
+            [
+                0 => ['pipe', 'r'],  // stdin
+                1 => ['pipe', 'w'],  // stdout
+                2 => ['pipe', 'w']   // stderr
+            ],
+            $pipes
+        );
+
+        if (!is_resource($process)) {
+            throw new RuntimeException('Failed to create process');
+        }
+
+        if ($input !== null) {
+            fwrite($pipes[0], $input);
+        }
+        fclose($pipes[0]);
+
+        $output = stream_get_contents($pipes[1]);
+        $error = stream_get_contents($pipes[2]);
+
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+
+        $exitCode = proc_close($process);
+
+        if ($exitCode !== 0) {
+            throw new RuntimeException("Command failed with exit code $exitCode: $error");
+        }
+
+        return trim($output);
+    }
+
+    public static function commandExists(string $command): bool {
+        $testCommand = PHP_OS_FAMILY === 'Windows' ? "where $command" : "which $command";
+        return shell_exec($testCommand) !== null;
     }
 }

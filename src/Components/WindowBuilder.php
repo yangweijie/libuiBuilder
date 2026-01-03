@@ -5,6 +5,8 @@ namespace Kingbes\Libui\View\Components;
 use FFI\CData;
 use Kingbes\Libui\App;
 use Kingbes\Libui\Control;
+use Kingbes\Libui\View\Builder;
+use Kingbes\Libui\View\Enums\WindowPosition;
 use Kingbes\Libui\View\Validation\ComponentBuilder;
 use Kingbes\Libui\Window;
 
@@ -102,5 +104,121 @@ class WindowBuilder extends ComponentBuilder
     public function onClosing(callable $callback): static
     {
         return $this->setConfig('onClosing', $callback);
+    }
+
+    /**
+     * 设置窗口位置（绝对坐标）
+     */
+    public function position(int $x, int $y): static
+    {
+        $this->build();
+        Window::setPosition($this->handle, $x, $y);
+        return $this;
+    }
+
+    /**
+     * 设置窗口位置到屏幕特定位置
+     */
+    public function positionOnScreen(WindowPosition $position): static
+    {
+        $this->build();
+        $screenWidth = Builder::screenWidth();
+        $screenHeight = Builder::screenHeight();
+        $width = $this->getConfig('width');
+        $height = $this->getConfig('height');
+
+        [$x, $y] = $this->calculatePosition($position, $screenWidth, $screenHeight, $width, $height);
+        Window::setPosition($this->handle, $x, $y);
+        return $this;
+    }
+
+    /**
+     * 快捷方法：居中显示
+     */
+    public function center(): static
+    {
+        return $this->positionOnScreen(WindowPosition::CENTER);
+    }
+
+    /**
+     * 快捷方法：左上角
+     */
+    public function topLeft(): static
+    {
+        return $this->positionOnScreen(WindowPosition::TOP_LEFT);
+    }
+
+    /**
+     * 快捷方法：上居中
+     */
+    public function topCenter(): static
+    {
+        return $this->positionOnScreen(WindowPosition::TOP_CENTER);
+    }
+
+    /**
+     * 快捷方法：右上角
+     */
+    public function topRight(): static
+    {
+        return $this->positionOnScreen(WindowPosition::TOP_RIGHT);
+    }
+
+    /**
+     * 快捷方法：左中
+     */
+    public function centerLeft(): static
+    {
+        return $this->positionOnScreen(WindowPosition::CENTER_LEFT);
+    }
+
+    /**
+     * 快捷方法：右中
+     */
+    public function centerRight(): static
+    {
+        return $this->positionOnScreen(WindowPosition::CENTER_RIGHT);
+    }
+
+    /**
+     * 快捷方法：左下角
+     */
+    public function bottomLeft(): static
+    {
+        return $this->positionOnScreen(WindowPosition::BOTTOM_LEFT);
+    }
+
+    /**
+     * 快捷方法：下居中
+     */
+    public function bottomCenter(): static
+    {
+        return $this->positionOnScreen(WindowPosition::BOTTOM_CENTER);
+    }
+
+    /**
+     * 快捷方法：右下角
+     */
+    public function bottomRight(): static
+    {
+        return $this->positionOnScreen(WindowPosition::BOTTOM_RIGHT);
+    }
+
+    /**
+     * 计算位置
+     */
+    private function calculatePosition(WindowPosition $position, int $containerWidth, int $containerHeight, int $windowWidth, int $windowHeight): array
+    {
+        return match($position) {
+            WindowPosition::TOP_LEFT => [0, 0],
+            WindowPosition::TOP_CENTER => [($containerWidth - $windowWidth) / 2, 0],
+            WindowPosition::TOP_RIGHT => [$containerWidth - $windowWidth, 0],
+            WindowPosition::CENTER_LEFT => [0, ($containerHeight - $windowHeight) / 2],
+            WindowPosition::CENTER => [($containerWidth - $windowWidth) / 2, ($containerHeight - $windowHeight) / 2],
+            WindowPosition::CENTER_RIGHT => [$containerWidth - $windowWidth, ($containerHeight - $windowHeight) / 2],
+            WindowPosition::BOTTOM_LEFT => [0, $containerHeight - $windowHeight],
+            WindowPosition::BOTTOM_CENTER => [($containerWidth - $windowWidth) / 2, $containerHeight - $windowHeight],
+            WindowPosition::BOTTOM_RIGHT => [$containerWidth - $windowWidth, $containerHeight - $windowHeight],
+        };
     }
 }
